@@ -1,0 +1,7 @@
+*.o
+htmlc
+htmlc.exe
+lex.yy.c
+y.tab.h
+y.tab.c
+y.output
