@@ -17,6 +17,7 @@ letter [a-zA-Z]
 (?i:head)    return HEAD;
 (?i:title)   return TITLE;
 (?i:body)    return BODY;
+(?i:main)    return MAIN;
 (?i:var)     return VAR;
 (?i:class)   return CLASS;
 (?i:integer) return INTEGER;

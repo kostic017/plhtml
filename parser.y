@@ -13,6 +13,7 @@ void yyerror(char const *s);
 %token HEAD
 %token TITLE
 %token BODY
+%token MAIN
 %token VAR
 %token CLASS
 %token INTEGER
