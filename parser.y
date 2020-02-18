@@ -6,7 +6,6 @@
 
 int yylex();
 void yyerror(char const *s);
-
 %}
 
 %token DOCTYPE
@@ -28,31 +27,42 @@ void yyerror(char const *s);
 %token T_REAL
 %token T_BOOL
 
-%token C_INT
-%token C_REAL
-%token C_BOOL
+%token <intVal> C_INT
+%token <realVal> C_REAL
+%token <boolVal> C_BOOL
 
 %token ADD
 %token SUB
 %token MUL
 %token DIV
 
-%token IDENTIFIER
+%token <stringVal> IDENTIFIER
+
+%union
+{
+    int intVal;
+    float realVal;
+    bool boolVal;
+    char* stringVal;
+    Node* nodeVal;
+};
+
+%type <nodeVal> expr
+
+%left ADD SUB
+%left MUL DIV
 
 %%
-
-stmt:
-    
 
 expr:
     C_INT { $$ = new IntConst($1); }
     | C_REAL { $$ = new RealConst($1); }
     | C_BOOL { $$ = new BoolConst($1); }
     | IDENTIFIER { $$ = new Identifier($1); }
-    | expr ADD expr { $$ = new ArithmeticExpr($1, PLUS, $3);  }
-    | expr SUB expr { $$ = new ArithmeticExpr($1, MINUS, $3); }
-    | expr MUL expr { $$ = new ArithmeticExpr($1, TIMES, $3); }
-    | expr DIV expr { $$ = new ArithmeticExpr($1, DIVIDE, $3); }
+    | expr ADD expr { $$ = new ArithmeticExpr((Expr*) $1, PLUS, (Expr*) $3); }
+    | expr SUB expr { $$ = new ArithmeticExpr((Expr*) $1, MINUS, (Expr*) $3); }
+    | expr MUL expr { $$ = new ArithmeticExpr((Expr*) $1, TIMES, (Expr*) $3); }
+    | expr DIV expr { $$ = new ArithmeticExpr((Expr*) $1, DIVIDE, (Expr*) $3); }
     | '(' expr ')' { $$ = $2;  }
     ;
 

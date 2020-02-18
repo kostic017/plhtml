@@ -3,25 +3,29 @@
 
 #include "ast.h"
 
-template<class T>
 class Expr : public Node
 {
-protected:
-    T value;
+};
+
+class IntConst : public Expr
+{
+    int value;
 public:
-    Expr(T val) : value(val) {}
+    IntConst(int val) : value(val) {}
 };
 
-class IntConst : public Expr<int>
+class RealConst : public Expr
 {
+    float value;
+public:
+    RealConst(float val) : value(val) {}
 };
 
-class RealConst : public Expr<float>
+class BoolConst : public Expr
 {
-};
-
-class BoolConst : public Expr<bool>
-{
+    bool value;
+public:
+    BoolConst(bool val) : value(val) {}
 };
 
 class CompoundExpr : public Expr
@@ -29,10 +33,10 @@ class CompoundExpr : public Expr
 protected:
     Expr *left;
     Expr *right;
-    Operator op;
+    Operator oper;
 public:
-    CompoundExpr(Operator op, Expr *rhs);
-    CompoundExpr(Expr *lhs, Operator op, Expr *rhs);
+    CompoundExpr(Operator op, Expr *rhs) : oper(op), right(rhs)  {}
+    CompoundExpr(Expr *lhs, Operator op, Expr *rhs) : left(lhs), oper(op), right(rhs) {}
 };
 
 class ArithmeticExpr : public CompoundExpr

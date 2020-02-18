@@ -1,6 +1,8 @@
 %{
 
+#include "ast.h"
 #include "y.tab.h"
+#include <string>
 
 void yyerror(char const *s);
 
@@ -30,16 +32,16 @@ letter [a-zA-Z]
 (?i:real)                         return T_REAL;
 (?i:bool)                         return T_BOOL;
 
-{digit}+                          return C_INT;
-(true|false)                      return C_BOOL;
-{digit}+\.{digit}+                return C_REAL;
+{digit}+                          { yylval.intVal = std::stoi(yytext); return C_INT; }
+(true|false)                      { yylval.boolVal = yytext == "true"; return C_BOOL; }
+{digit}+\.{digit}+                { yylval.realVal = std::stof(yytext); return C_REAL; }
 
 &plus;                            return ADD;
 &minus;                           return SUB;
 &times;                           return MUL;
 &divide;                          return DIV;
 
-(_|{letter})(_|{letter}|{digit})* return IDENTIFIER;
+(_|{letter})(_|{letter}|{digit})* { yylval.stringVal = yytext; return IDENTIFIER; }
 
 [!"/=<>()]                        return yytext[0];
 

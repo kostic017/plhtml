@@ -15,7 +15,7 @@ class Node
 
 class Identifier : public Node
 {
-    char* name;
+    const char* name;
 public:
     Identifier(const char* n) : name(n) {}
 };
