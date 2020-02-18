@@ -20,25 +20,28 @@ letter [a-zA-Z]
 (?i:main)                         return MAIN;
 (?i:var)                          return VAR;
 (?i:class)                        return CLASS;
-(?i:integer)                      return INTEGER;
 (?i:output)                       return OUTPUT;
 (?i:input)                        return INPUT;
 (?i:name)                         return NAME;
 (?i:data)                         return DATA;
 (?i:value)                        return VALUE;
 
+(?i:int)                          return T_INT;
+(?i:real)                         return T_REAL;
+(?i:bool)                         return T_BOOL;
+
+{digit}+                          return C_INT;
+(true|false)                      return C_BOOL;
+{digit}+\.{digit}+                return C_REAL;
+
 &plus;                            return ADD;
 &minus;                           return SUB;
 &times;                           return MUL;
 &divide;                          return DIV;
 
-{digit}+                          return INTEGER_CONST;
-(true|false)                      return BOOL_CONST;
-{digit}+\.{digit}+                return REAL_CONST;
-
 (_|{letter})(_|{letter}|{digit})* return IDENTIFIER;
 
-[!"/=<>]                          return yytext[0];
+[!"/=<>()]                        return yytext[0];
 
 "<!--".*"-->"                     ;
 [ \t\n]                           ;
