@@ -22,9 +22,16 @@ void yyerror(char const *s);
 %token NAME
 %token DATA
 %token VALUE
+
 %token ADD
-%token STR_DELIM
+%token SUB
+%token MUL
+%token DIV
+
 %token INTEGER_CONST
+%token REAL_CONST
+%token BOOL_CONST
+
 %token IDENTIFIER
 
 %%

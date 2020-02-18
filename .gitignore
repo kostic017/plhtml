@@ -1,6 +1,6 @@
 *.o
-htmlc
-htmlc.exe
+plhtml
+plhtml.exe
 lex.yy.c
 y.tab.h
 y.tab.c
