@@ -3,12 +3,22 @@
 
 #include "ast.h"
 
+enum Operator
+{
+    PLUS,
+    MINUS,
+    TIMES,
+    DIVIDE,
+    EQUAL
+};
+
 class Expr : public Node
 {
 };
 
 class IntConst : public Expr
 {
+protected:
     int value;
 public:
     IntConst(int val) : value(val) {}
@@ -16,6 +26,7 @@ public:
 
 class RealConst : public Expr
 {
+protected:
     float value;
 public:
     RealConst(float val) : value(val) {}
@@ -23,9 +34,18 @@ public:
 
 class BoolConst : public Expr
 {
+protected:
     bool value;
 public:
     BoolConst(bool val) : value(val) {}
+};
+
+class StringConst : public Expr
+{
+protected:
+    const char* value;
+public:
+    StringConst(const char* val) : value(val) {}
 };
 
 class CompoundExpr : public Expr
@@ -62,7 +82,15 @@ public:
 class AssignExpr : public CompoundExpr
 {
 public:
-    AssignExpr(Expr *lhs, Operator op, Expr *rhs) : CompoundExpr(lhs, op, rhs) {}
+    AssignExpr(Expr *lhs, Expr *rhs) : CompoundExpr(lhs, EQUAL, rhs) {}
+};
+
+class LVal : public Expr
+{
+};
+
+class ReadValueExpr : public Expr
+{
 };
 
 #endif

@@ -31,10 +31,12 @@ letter [a-zA-Z]
 (?i:int)                          return T_INT;
 (?i:real)                         return T_REAL;
 (?i:bool)                         return T_BOOL;
+(?i:string)                       return T_STRING;
 
 {digit}+                          { yylval.intVal = std::stoi(yytext); return C_INT; }
 (true|false)                      { yylval.boolVal = yytext == "true"; return C_BOOL; }
 {digit}+\.{digit}+                { yylval.realVal = std::stof(yytext); return C_REAL; }
+`.*`                              { yylval.stringVal = yytext; return C_STRING; } // TODO
 
 &plus;                            return ADD;
 &minus;                           return SUB;

@@ -1,7 +1,12 @@
 %{
 
 #include "ast.h"
+#include "ast_type.h"
 #include "ast_expr.h"
+#include "ast_decl.h"
+#include "ast_stmt.h"
+
+#include <vector>
 #include <iostream>
 
 int yylex();
@@ -26,10 +31,12 @@ void yyerror(char const *s);
 %token T_INT
 %token T_REAL
 %token T_BOOL
+%token T_STRING
 
 %token <intVal> C_INT
 %token <realVal> C_REAL
 %token <boolVal> C_BOOL
+%token <stringVal> C_STRING;
 
 %token ADD
 %token SUB
@@ -47,24 +54,42 @@ void yyerror(char const *s);
     Node* nodeVal;
 };
 
-%type <nodeVal> expr
+%type <nodeVal> lval args stmt decl expr
 
 %left ADD SUB
 %left MUL DIV
 
 %%
 
-expr:
-    C_INT { $$ = new IntConst($1); }
-    | C_REAL { $$ = new RealConst($1); }
-    | C_BOOL { $$ = new BoolConst($1); }
-    | IDENTIFIER { $$ = new Identifier($1); }
-    | expr ADD expr { $$ = new ArithmeticExpr((Expr*) $1, PLUS, (Expr*) $3); }
-    | expr SUB expr { $$ = new ArithmeticExpr((Expr*) $1, MINUS, (Expr*) $3); }
-    | expr MUL expr { $$ = new ArithmeticExpr((Expr*) $1, TIMES, (Expr*) $3); }
-    | expr DIV expr { $$ = new ArithmeticExpr((Expr*) $1, DIVIDE, (Expr*) $3); }
-    | '(' expr ')' { $$ = $2;  }
-    ;
+lval : IDENTIFIER { $$ = new LVal(); }
+     ;
+
+args : expr { $$ = new std::vector<Expr*>($1); }
+     | args '.' expr { ($$ = $1)->push_back($3); }
+     ;
+     
+stmt : '<' OUTPUT '>' args '<' '/' OUTPUT '>' { $$ = new PrintStmt($4); }
+     ;
+
+decl : '<' VAR CLASS '=' '"' T_INT '"' '>' IDENTIFIER '<' '/' VAR '>' { $$ = new VarDecl(new Identifier($9, Type::intType)); }
+     | '<' VAR CLASS '=' '"' T_REAL '"' '>' IDENTIFIER '<' '/' VAR '>' { $$ = new VarDecl(new Identifier($9, Type::realType)); }
+     | '<' VAR CLASS '=' '"' T_BOOL '"' '>' IDENTIFIER '<' '/' VAR '>' { $$ = new VarDecl(new Identifier($9, Type::boolType)); }
+     | '<' VAR CLASS '=' '"' T_STRING '"' '>' IDENTIFIER '<' '/' VAR '>' { $$ = new VarDecl(new Identifier($9, Type::stringType)); }
+     ;
+
+expr : lval
+     | '(' expr ')' { $$ = $2;  }
+     | C_INT { $$ = new IntConst($1); }
+     | C_REAL { $$ = new RealConst($1); }
+     | C_BOOL { $$ = new BoolConst($1); }
+     | C_STRING { $$ = new StringConst($1); }
+     | expr ADD expr { $$ = new ArithmeticExpr($1, PLUS, $3); }
+     | expr SUB expr { $$ = new ArithmeticExpr($1, MINUS, $3); }
+     | expr MUL expr { $$ = new ArithmeticExpr($1, TIMES, $3); }
+     | expr DIV expr { $$ = new ArithmeticExpr($1, DIVIDE, $3); }
+     | '<' INPUT NAME '=' '"' lval '"' '>' { $$ = new AssignExpr($6, new ReadValueExpr()); }
+     | '<' DATA VALUE '=' '"' expr '"' '>' lval '<' '/' DATA '>' { $$ = new AssignExpr($9, $6); }
+     ;
 
 %%
 
