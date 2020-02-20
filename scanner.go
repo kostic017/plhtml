@@ -1,22 +1,25 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
 )
 
 type scanner struct {
-	index    int
-	source   []rune
-	keywords map[string]token
+	index     int
+	source    []rune
+	keywords  map[string]token
+	operators map[string]token
 }
 
 func (scan *scanner) init(source string) {
 	scan.index = 0
 	scan.source = []rune(source)
-
 	scan.keywords = make(map[string]token)
+	scan.operators = make(map[string]token)
+
 	scan.keywords["doctype"] = tokDoctype
 	scan.keywords["lang"] = tokLang
 	scan.keywords["html"] = tokHTML
@@ -34,6 +37,16 @@ func (scan *scanner) init(source string) {
 	scan.keywords["if"] = tokIf
 	scan.keywords["while"] = tokWhile
 	scan.keywords["for"] = tokFor
+	scan.keywords["integer"] = tokIntType
+	scan.keywords["real"] = tokRealType
+	scan.keywords["boolean"] = tokBoolType
+	scan.keywords["string"] = tokStringType
+
+	// operators
+	scan.operators["&plus;"] = tokAddOp
+	scan.operators["&minus;"] = tokSubOp
+	scan.operators["&times;"] = tokMulOp
+	scan.operators["&divide;"] = tokDivOp
 }
 
 func (scan *scanner) goBack() {
@@ -62,7 +75,7 @@ func (scan *scanner) nextToken() token {
 			return scan.lexNumber(ch)
 		}
 
-		if unicode.IsLetter(ch) {
+		if unicode.IsLetter(ch) || ch == '&' {
 			return scan.lexIdentifier(ch)
 		}
 
@@ -70,7 +83,6 @@ func (scan *scanner) nextToken() token {
 		// case '"': // string
 		case '<':
 			return token('<') // TODO comments
-		// case '&': // operators
 		case '!', '/', '=', '>', '(', ')', '-':
 			return token(ch)
 		}
@@ -103,21 +115,41 @@ func (scan *scanner) lexNumber(ch rune) token {
 }
 
 func (scan *scanner) lexIdentifier(ch rune) token {
-	// [a-zA-Z][a-zA-Z0-9]*
+	// &[a-zA-Z];            operators
+	// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
 
 	identifier := string(ch)
 
+	start := identifier
+	end := identifier
+
 	for {
 		ch = scan.nextChar()
-		if unicode.IsLetter(ch) || unicode.IsNumber(ch) {
-			identifier += string(ch)
+
+		if unicode.IsLetter(ch) || (start == "&" && ch == ';') || (start != "&" && unicode.IsNumber(ch)) {
+			end = string(ch)
+			identifier += end
 		} else {
 			scan.goBack()
 			break
 		}
+
 	}
 
-	if tok, ok := scan.keywords[strings.ToLower(identifier)]; ok {
+	identifier = strings.ToLower(identifier)
+
+	if start == "&" {
+		if end == ";" {
+			if tok, ok := scan.operators[identifier]; ok {
+				return tok
+			}
+			panic(fmt.Sprintf("Operator %s is not valid.", identifier))
+		} else {
+			identifier = strings.TrimPrefix(identifier, "&")
+		}
+	}
+
+	if tok, ok := scan.keywords[identifier]; ok {
 		return tok
 	}
 
