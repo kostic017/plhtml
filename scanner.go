@@ -55,17 +55,24 @@ func (scan *scanner) goBack() {
 	}
 }
 
-func (scan *scanner) nextChar() rune {
+func (scan *scanner) nextChar() (rune, bool) {
 	if scan.index == len(scan.source)-1 {
-		return 0
+		return 0, false
 	}
 	ch := scan.source[scan.index]
 	scan.index++
-	return ch
+	return ch, true
 }
 
 func (scan *scanner) nextToken() token {
-	for ch := scan.nextChar(); ch != 0; ch = scan.nextChar() {
+
+	for {
+
+		ch, ok := scan.nextChar()
+
+		if !ok {
+			break
+		}
 
 		if unicode.IsSpace(ch) {
 			continue
@@ -75,7 +82,9 @@ func (scan *scanner) nextToken() token {
 			return scan.lexNumber(ch)
 		}
 
-		if unicode.IsLetter(ch) || ch == '&' {
+		if ch == '&' || unicode.IsLetter(ch) {
+			// &[a-zA-Z];            operators
+			// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
 			return scan.lexIdentifier(ch)
 		}
 
@@ -88,15 +97,17 @@ func (scan *scanner) nextToken() token {
 		}
 
 	}
+
 	return tokEOF
 }
 
 func (scan *scanner) lexNumber(ch rune) token {
+	var ok bool
 	number := "" + string(ch)
 
 	for {
-		ch = scan.nextChar()
-		if unicode.IsNumber(ch) {
+		ch, ok = scan.nextChar()
+		if ok && unicode.IsNumber(ch) {
 			number += string(ch)
 		} else {
 			scan.goBack()
@@ -115,18 +126,16 @@ func (scan *scanner) lexNumber(ch rune) token {
 }
 
 func (scan *scanner) lexIdentifier(ch rune) token {
-	// &[a-zA-Z];            operators
-	// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
-
+	var ok bool
 	identifier := string(ch)
 
 	start := identifier
 	end := identifier
 
 	for {
-		ch = scan.nextChar()
+		ch, ok = scan.nextChar()
 
-		if unicode.IsLetter(ch) || (start == "&" && ch == ';') || (start != "&" && unicode.IsNumber(ch)) {
+		if ok && (unicode.IsLetter(ch) || (start == "&" && ch == ';') || (start != "&" && unicode.IsNumber(ch))) {
 			end = string(ch)
 			identifier += end
 		} else {
