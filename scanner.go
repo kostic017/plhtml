@@ -54,7 +54,7 @@ func (scan *scanner) nextToken() token {
 		}
 
 	}
-	return 0
+	return tokEOF
 }
 
 func (scan *scanner) lexNumber(ch rune) token {

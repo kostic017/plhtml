@@ -17,7 +17,7 @@ func main() {
 	if err == nil {
 		var scan scanner
 		scan.init(source)
-		for tok := scan.nextToken(); tok != 0; tok = scan.nextToken() {
+		for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
 			if tok == tokIntConst {
 				fmt.Printf("%s %d\n", tok, intVal)
 			} else {
