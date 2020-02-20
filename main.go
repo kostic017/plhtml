@@ -12,7 +12,7 @@ var (
 )
 
 func main() {
-	source, err := readFile("test/test1.html")
+	source, err := readFile("test/ex1.html")
 
 	if err == nil {
 		var scan scanner
@@ -20,6 +20,8 @@ func main() {
 		for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
 			if tok == tokIntConst {
 				fmt.Printf("%s %d\n", tok, intVal)
+			} else if tok == tokIdentifier {
+				fmt.Printf("%s %s\n", tok, strVal)
 			} else {
 				fmt.Printf("%s\n", tok)
 			}
