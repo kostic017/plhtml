@@ -20,7 +20,7 @@ func main() {
 		for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
 			if tok == tokIntConst {
 				fmt.Printf("%d\t\t%s\n", intVal, tok)
-			} else if tok == tokIdentifier {
+			} else if tok == tokIdentifier || tok == tokStringConst {
 				fmt.Printf("%s\t\t%s\n", strVal, tok)
 			} else {
 				fmt.Printf("%s\n", tok)

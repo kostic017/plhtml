@@ -74,6 +74,10 @@ func (scan *scanner) nextToken() token {
 			break
 		}
 
+		if ch == '`' {
+			return scan.lexString(ch)
+		}
+
 		if unicode.IsSpace(ch) {
 			continue
 		}
@@ -89,7 +93,6 @@ func (scan *scanner) nextToken() token {
 		}
 
 		switch ch {
-		// case '"': // string
 		case '<':
 			return token('<') // TODO comments
 		case '!', '/', '=', '>', '(', ')', '-':
@@ -99,6 +102,30 @@ func (scan *scanner) nextToken() token {
 	}
 
 	return tokEOF
+}
+
+func (scan *scanner) lexString(ch rune) token {
+	var ok bool
+	str := string(ch)
+
+	for {
+		ch, ok = scan.nextChar()
+
+		if ok {
+
+			if ch == '`' {
+				break
+			}
+
+			str += string(ch)
+
+		} else {
+			panic("Unterminated string")
+		}
+	}
+
+	strVal = str[1:]
+	return tokStringConst
 }
 
 func (scan *scanner) lexNumber(ch rune) token {
@@ -154,7 +181,7 @@ func (scan *scanner) lexIdentifier(ch rune) token {
 			}
 			panic(fmt.Sprintf("Operator %s is not valid.", identifier))
 		} else {
-			identifier = strings.TrimPrefix(identifier, "&")
+			identifier = identifier[1:]
 		}
 	}
 
