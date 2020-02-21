@@ -50,18 +50,27 @@ func (scan *scanner) init(source string) {
 }
 
 func (scan *scanner) goBack() {
-	if scan.index != len(scan.source)-1 {
+	if scan.index < len(scan.source) {
 		scan.index--
+		scannerLog.Printf("Unread char: %s\n", strconv.Quote(string(scan.source[scan.index])))
 	}
 }
 
 func (scan *scanner) nextChar() (rune, bool) {
-	if scan.index == len(scan.source)-1 {
-		return 0, false
+	if scan.index != len(scan.source)-1 {
+		ch := scan.source[scan.index]
+		scan.index++
+		scannerLog.Printf("Read char: %s\n", strconv.Quote(string(ch)))
+		return ch, true
 	}
-	ch := scan.source[scan.index]
-	scan.index++
-	return ch, true
+	return 0, false
+}
+
+func (scan *scanner) lookahead(i int) (rune, bool) {
+	if scan.index+i < len(scan.source)-1 {
+		return scan.source[scan.index+i], true
+	}
+	return 0, false
 }
 
 func (scan *scanner) nextToken() token {
@@ -82,11 +91,9 @@ func (scan *scanner) nextToken() token {
 			return scan.lexString(ch)
 		}
 
-		if ch == '<' {
-			if scan.lexComment() {
-				// <!--.*-->
-				continue
-			}
+		// dependsOn lexString in case <!-- is in string literal
+		if ch == '<' && scan.lexComment() {
+			continue
 		}
 
 		if unicode.IsDigit(ch) {
@@ -100,9 +107,11 @@ func (scan *scanner) nextToken() token {
 		}
 
 		switch ch {
-		case '!', '/', '=', '>', '(', ')', '-', '<':
+		case '"', '!', '/', '=', '<', '>', '(', ')', '-':
 			return token(ch)
 		}
+
+		panic(fmt.Sprintf("Illegal character %c.", ch))
 
 	}
 
@@ -134,14 +143,26 @@ func (scan *scanner) lexString(ch rune) token {
 }
 
 func (scan *scanner) lexComment() bool {
-	if scan.lookahead("!--") {
+	// <!--.*-->
+
+	ch1, ok1 := scan.lookahead(0)
+	ch2, ok2 := scan.lookahead(1)
+	ch3, ok3 := scan.lookahead(2)
+
+	if ok1 && ok2 && ok3 && ch1 == '!' && ch2 == '-' && ch3 == '-' {
 		for {
 			ch, ok := scan.nextChar()
 			if !ok {
-				panic("Unterminated comment.")
+				panic("End of file inside comment.")
 			}
-			if ch == '-' && scan.lookahead("->") {
-				return true
+			if ch == '-' {
+				ch1, ok1 := scan.lookahead(0)
+				ch2, ok2 := scan.lookahead(1)
+				if ok1 && ok2 && ch1 == '-' && ch2 == '>' {
+					scan.nextChar()
+					scan.nextChar()
+					return true
+				}
 			}
 		}
 	}
@@ -149,30 +170,7 @@ func (scan *scanner) lexComment() bool {
 	return false
 }
 
-func (scan *scanner) lookahead(expected string) bool {
-	got := ""
-	counter := 0
-
-	for i := 0; i < len(expected); i++ {
-		counter++
-		ch, ok := scan.nextChar()
-		if !ok {
-			break
-		}
-		got += string(ch)
-	}
-
-	if got != expected {
-		for i := 1; i <= counter; i++ {
-			scan.goBack()
-		}
-		return false
-	}
-
-	return true
-}
-
-func (scan *scanner) lexNumber(ch rune) token {
+func (scan *scanner) lexNumber(ch rune) token { // TODO floats
 	var ok bool
 	number := "" + string(ch)
 

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
 )
 
 var (
@@ -11,19 +12,27 @@ var (
 	strVal  string
 )
 
+var (
+	scannerLog = log.New(os.Stdout, "SCANNER ", 0)
+)
+
 func main() {
-	source, err := readFile("test/ex1.html")
+	scan()
+}
+
+func scan() {
+	source, err := readFile("test/comments.html")
 
 	if err == nil {
 		var scan scanner
 		scan.init(source)
 		for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
 			if tok == tokIntConst {
-				fmt.Printf("(%s, %d)\n", tok, intVal)
+				scannerLog.Printf("(%s, %d)\n", tok, intVal)
 			} else if tok == tokIdentifier || tok == tokStringConst {
-				fmt.Printf("(%s, %s)\n", tok, strVal)
+				scannerLog.Printf("(%s, %s)\n", tok, strVal)
 			} else {
-				fmt.Printf("%s\n", tok)
+				scannerLog.Printf("%s\n", tok)
 			}
 		}
 	}
