@@ -19,9 +19,9 @@ func main() {
 		scan.init(source)
 		for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
 			if tok == tokIntConst {
-				fmt.Printf("%d\t\t%s\n", intVal, tok)
+				fmt.Printf("(%s, %d)\n", tok, intVal)
 			} else if tok == tokIdentifier || tok == tokStringConst {
-				fmt.Printf("%s\t\t%s\n", strVal, tok)
+				fmt.Printf("(%s, %s)\n", tok, strVal)
 			} else {
 				fmt.Printf("%s\n", tok)
 			}

@@ -74,12 +74,19 @@ func (scan *scanner) nextToken() token {
 			break
 		}
 
+		if unicode.IsSpace(ch) {
+			continue
+		}
+
 		if ch == '`' {
 			return scan.lexString(ch)
 		}
 
-		if unicode.IsSpace(ch) {
-			continue
+		if ch == '<' {
+			if scan.lexComment() {
+				// <!--.*-->
+				continue
+			}
 		}
 
 		if unicode.IsDigit(ch) {
@@ -93,9 +100,7 @@ func (scan *scanner) nextToken() token {
 		}
 
 		switch ch {
-		case '<':
-			return token('<') // TODO comments
-		case '!', '/', '=', '>', '(', ')', '-':
+		case '!', '/', '=', '>', '(', ')', '-', '<':
 			return token(ch)
 		}
 
@@ -120,12 +125,51 @@ func (scan *scanner) lexString(ch rune) token {
 			str += string(ch)
 
 		} else {
-			panic("Unterminated string")
+			panic("Unterminated string.")
 		}
 	}
 
 	strVal = str[1:]
 	return tokStringConst
+}
+
+func (scan *scanner) lexComment() bool {
+	if scan.lookahead("!--") {
+		for {
+			ch, ok := scan.nextChar()
+			if !ok {
+				panic("Unterminated comment.")
+			}
+			if ch == '-' && scan.lookahead("->") {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (scan *scanner) lookahead(expected string) bool {
+	got := ""
+	counter := 0
+
+	for i := 0; i < len(expected); i++ {
+		counter++
+		ch, ok := scan.nextChar()
+		if !ok {
+			break
+		}
+		got += string(ch)
+	}
+
+	if got != expected {
+		for i := 1; i <= counter; i++ {
+			scan.goBack()
+		}
+		return false
+	}
+
+	return true
 }
 
 func (scan *scanner) lexNumber(ch rune) token {
