@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"path/filepath"
 )
 
@@ -21,19 +22,21 @@ func main() {
 }
 
 func scan(file string) {
-	source, err := readFile(file)
+	filebuffer, err := ioutil.ReadFile(file)
 
-	if err == nil {
-		var scan scanner
-		scan.init(source)
-		for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
-			if tok == tokIntConst {
-				scannerLog.info("%s, %d\n", tok, intVal)
-			} else if tok == tokIdentifier || tok == tokStringConst {
-				scannerLog.info("%s, %s\n", tok, strVal)
-			} else {
-				scannerLog.info("%s\n", tok)
-			}
+	if err != nil {
+		panic(err)
+	}
+
+	var scan scanner
+	scan.init(string(filebuffer))
+	for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
+		if tok == tokIntConst {
+			scannerLog.info("%s, %d\n", tok, intVal)
+		} else if tok == tokIdentifier || tok == tokStringConst {
+			scannerLog.info("%s, %s\n", tok, strVal)
+		} else {
+			scannerLog.info("%s\n", tok)
 		}
 	}
 }
