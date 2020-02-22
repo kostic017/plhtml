@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-	"os"
 	"path/filepath"
 )
 
@@ -14,10 +12,11 @@ var (
 )
 
 var (
-	scannerLog = log.New(os.Stdout, "SCANNER ", 0)
+	scannerLog = newLogger("SCANNER")
 )
 
 func main() {
+	scannerLog.setLevel(lvlInfo)
 	scan(filepath.Join("test", "ex1.html"))
 }
 
@@ -29,11 +28,11 @@ func scan(file string) {
 		scan.init(source)
 		for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
 			if tok == tokIntConst {
-				scannerLog.Printf("(%s, %d)\n", tok, intVal)
+				scannerLog.info("(%s, %d)\n", tok, intVal)
 			} else if tok == tokIdentifier || tok == tokStringConst {
-				scannerLog.Printf("(%s, %s)\n", tok, strVal)
+				scannerLog.info("(%s, %s)\n", tok, strVal)
 			} else {
-				scannerLog.Printf("%s\n", tok)
+				scannerLog.info("%s\n", tok)
 			}
 		}
 	}
