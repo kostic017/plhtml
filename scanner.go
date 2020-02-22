@@ -210,18 +210,17 @@ func (scan *scanner) lexNumber(ch rune) token {
 }
 
 func (scan *scanner) lexIdentifier(ch rune) token {
+	// &[a-zA-Z];            operators
+	// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
+
 	var ok bool
+
 	identifier := string(ch)
 
-	start := identifier
-	end := identifier
+	for ch, ok = scan.nextChar(); ok; ch, ok = scan.nextChar() {
 
-	for {
-		ch, ok = scan.nextChar()
-
-		if ok && (unicode.IsLetter(ch) || (start == "&" && ch == ';') || (start != "&" && unicode.IsNumber(ch))) {
-			end = string(ch)
-			identifier += end
+		if unicode.IsLetter(ch) || (identifier[0] == '&' && ch == ';') || (identifier[0] != '&' && unicode.IsNumber(ch)) {
+			identifier += string(ch)
 		} else {
 			scan.goBack()
 			break
@@ -231,15 +230,16 @@ func (scan *scanner) lexIdentifier(ch rune) token {
 
 	identifier = strings.ToLower(identifier)
 
-	if start == "&" {
-		if end == ";" {
-			if tok, ok := scan.operators[identifier]; ok {
-				return tok
-			}
-			panic(fmt.Sprintf("Operator %s is not valid.", identifier))
-		} else {
-			identifier = identifier[1:]
+	if identifier[0] == '&' {
+		if identifier[len(identifier)-1:] != ";" {
+			panic(fmt.Sprintf("Unterminated operator %s.", identifier))
 		}
+
+		if tok, ok := scan.operators[identifier]; ok {
+			return tok
+		}
+
+		panic(fmt.Sprintf("Operator %s is not valid.", identifier))
 	}
 
 	if tok, ok := scan.keywords[identifier]; ok {
