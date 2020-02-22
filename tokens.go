@@ -19,11 +19,9 @@ const (
 	tokName    token = "tokName"
 	tokData    token = "tokData"
 	tokValue   token = "tokValue"
+	tokDiv     token = "tokDiv"
 	tokIf      token = "tokIf"
 	tokWhile   token = "tokWhile"
-	tokFor     token = "tokFor"
-
-	tokIdentifier token = "tokIdentifier"
 
 	tokAddOp token = "tokAddOp"
 	tokSubOp token = "tokSubOp"
@@ -46,4 +44,6 @@ const (
 	tokRealConst   token = "tokRealConst"
 	tokBoolConst   token = "tokBoolConst"
 	tokStringConst token = "tokStringConst"
+
+	tokIdentifier token = "tokIdentifier"
 )

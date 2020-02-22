@@ -34,9 +34,11 @@ func (scan *scanner) init(source string) {
 	scan.keywords["name"] = tokName
 	scan.keywords["data"] = tokData
 	scan.keywords["value"] = tokValue
+	scan.keywords["div"] = tokDiv
 	scan.keywords["if"] = tokIf
 	scan.keywords["while"] = tokWhile
-	scan.keywords["for"] = tokFor
+
+	// types
 	scan.keywords["integer"] = tokIntType
 	scan.keywords["real"] = tokRealType
 	scan.keywords["boolean"] = tokBoolType
