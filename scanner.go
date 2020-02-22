@@ -44,7 +44,7 @@ func (scan *scanner) init(source string) {
 func (scan *scanner) goBack() {
 	if scan.index < len(scan.source) {
 		scan.index--
-		scannerLog.debug("Unread char: %s\n", strconv.Quote(string(scan.source[scan.index])))
+		scannerLog.Debug("Unread char: %s\n", strconv.Quote(string(scan.source[scan.index])))
 	}
 }
 
@@ -52,7 +52,7 @@ func (scan *scanner) nextChar() (rune, bool) {
 	if scan.index != len(scan.source)-1 {
 		ch := scan.source[scan.index]
 		scan.index++
-		scannerLog.debug("Read char: %s\n", strconv.Quote(string(ch)))
+		scannerLog.Debug("Read char: %s\n", strconv.Quote(string(ch)))
 		return ch, true
 	}
 	return 0, false

@@ -3,6 +3,8 @@ package main
 import (
 	"io/ioutil"
 	"path/filepath"
+
+	"./logging"
 )
 
 var (
@@ -13,11 +15,11 @@ var (
 )
 
 var (
-	scannerLog = newLogger("SCANNER")
+	scannerLog = logging.New("SCANNER")
 )
 
 func main() {
-	scannerLog.setLevel(lvlInfo)
+	scannerLog.SetLevel(logging.Info)
 	scan(filepath.Join("test", "ex1.html"))
 }
 
@@ -32,11 +34,11 @@ func scan(file string) {
 	scan.init(string(filebuffer))
 	for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
 		if tok == tokIntConst {
-			scannerLog.info("%s, %d\n", tok, intVal)
+			scannerLog.Info("%s, %d\n", tok, intVal)
 		} else if tok == tokIdentifier || tok == tokStringConst {
-			scannerLog.info("%s, %s\n", tok, strVal)
+			scannerLog.Info("%s, %s\n", tok, strVal)
 		} else {
-			scannerLog.info("%s\n", tok)
+			scannerLog.Info("%s\n", tok)
 		}
 	}
 }
