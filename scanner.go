@@ -8,17 +8,15 @@ import (
 )
 
 type scanner struct {
-	index     int
-	source    []rune
-	keywords  map[string]token
-	operators map[string]token
+	index    int
+	source   []rune
+	keywords map[string]token
 }
 
 func (scan *scanner) init(source string) {
 	scan.index = 0
 	scan.source = []rune(source)
 	scan.keywords = make(map[string]token)
-	scan.operators = make(map[string]token)
 
 	scan.keywords["doctype"] = tokDoctype
 	scan.keywords["lang"] = tokLang
@@ -41,12 +39,6 @@ func (scan *scanner) init(source string) {
 	scan.keywords["real"] = tokRealType
 	scan.keywords["boolean"] = tokBoolType
 	scan.keywords["string"] = tokStringType
-
-	// operators
-	scan.operators["&plus;"] = tokAddOp
-	scan.operators["&minus;"] = tokSubOp
-	scan.operators["&times;"] = tokMulOp
-	scan.operators["&divide;"] = tokDivOp
 }
 
 func (scan *scanner) goBack() {
@@ -100,12 +92,16 @@ func (scan *scanner) nextToken() token {
 			return scan.lexNumber(ch)
 		}
 
-		if ch == '&' || unicode.IsLetter(ch) {
+		if unicode.IsLetter(ch) {
 			return scan.lexIdentifier(ch)
 		}
 
+		if ch == '=' {
+			return scan.lexEqual(ch)
+		}
+
 		switch ch {
-		case '"', '!', '/', '=', '<', '>', '(', ')', '-':
+		case '"', '!', '<', '>', '(', ')', '-', '+', '*', '/':
 			return token(ch)
 		}
 
@@ -114,6 +110,15 @@ func (scan *scanner) nextToken() token {
 	}
 
 	return tokEOF
+}
+
+func (scan *scanner) lexEqual(ch rune) token {
+	ch, ok := scan.nextChar()
+	if ok && ch == '=' {
+		return tokEqual
+	}
+	scan.goBack()
+	return token('=')
 }
 
 func (scan *scanner) lexString(ch rune) token {
@@ -219,7 +224,7 @@ func (scan *scanner) lexIdentifier(ch rune) token {
 
 	for ch, ok = scan.nextChar(); ok; ch, ok = scan.nextChar() {
 
-		if unicode.IsLetter(ch) || (identifier[0] == '&' && ch == ';') || (identifier[0] != '&' && unicode.IsNumber(ch)) {
+		if unicode.IsLetter(ch) || unicode.IsNumber(ch) {
 			identifier += string(ch)
 		} else {
 			scan.goBack()
@@ -228,21 +233,7 @@ func (scan *scanner) lexIdentifier(ch rune) token {
 
 	}
 
-	identifier = strings.ToLower(identifier)
-
-	if identifier[0] == '&' {
-		if identifier[len(identifier)-1:] != ";" {
-			panic(fmt.Sprintf("Unterminated operator %s.", identifier))
-		}
-
-		if tok, ok := scan.operators[identifier]; ok {
-			return tok
-		}
-
-		panic(fmt.Sprintf("Operator %s is not valid.", identifier))
-	}
-
-	if tok, ok := scan.keywords[identifier]; ok {
+	if tok, ok := scan.keywords[strings.ToLower(identifier)]; ok {
 		return tok
 	}
 

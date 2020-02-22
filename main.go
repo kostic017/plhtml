@@ -28,9 +28,9 @@ func scan(file string) {
 		scan.init(source)
 		for tok := scan.nextToken(); tok != tokEOF; tok = scan.nextToken() {
 			if tok == tokIntConst {
-				scannerLog.info("(%s, %d)\n", tok, intVal)
+				scannerLog.info("%s, %d\n", tok, intVal)
 			} else if tok == tokIdentifier || tok == tokStringConst {
-				scannerLog.info("(%s, %s)\n", tok, strVal)
+				scannerLog.info("%s, %s\n", tok, strVal)
 			} else {
 				scannerLog.info("%s\n", tok)
 			}

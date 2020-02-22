@@ -9,7 +9,7 @@ import (
 type logLevel int
 
 const (
-	lOff     logLevel = iota
+	lvlOff   logLevel = iota
 	lvlFine  logLevel = iota
 	lvlDebug logLevel = iota
 	lvlInfo  logLevel = iota
