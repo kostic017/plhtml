@@ -37,8 +37,6 @@ func (scan *scanner) init(source string) {
 	scan.keywords["div"] = tokDiv
 	scan.keywords["if"] = tokIf
 	scan.keywords["while"] = tokWhile
-
-	// types
 	scan.keywords["integer"] = tokIntType
 	scan.keywords["real"] = tokRealType
 	scan.keywords["boolean"] = tokBoolType
@@ -114,7 +112,7 @@ func (scan *scanner) nextToken() token {
 		}
 
 		switch ch {
-		case '"', '!', '/', '=', '<', '>', '(', ')', '-':
+		case '"', '!', '/', '=', '<', '>', '(', ')', '-', '.':
 			return token(ch)
 		}
 

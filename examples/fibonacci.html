@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Program to Display Fibonacci Series -->
+        <title>`Fibonacci numbers`</title>
+    </head>
+    <body>
+
+        <main>
+
+            <var class="integer">t</var>
+            <var class="integer">i</var>
+            <var class="integer">n</var>
+            <var class="integer">t1</var>
+            <var class="integer">t2</var>
+
+            <data value="1">i</data>
+            <data value="0">t1</data>
+            <data value="1">t2</data>
+
+            <output>`n: `</output>
+            <input name="n">
+
+            <div data-while="i &leq; n">
+                <output>t1 . ` `</output>
+                <data value="t1 &plus; t2">t</data>
+                <data value="t1">t2</data>
+                <data value="t2">t</data>
+                <data value="i &plus; 1">i</data>
+            </div>
+
+        </main>
+
+    </body>
+</html>
