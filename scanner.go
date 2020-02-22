@@ -52,7 +52,7 @@ func (scan *scanner) init(source string) {
 func (scan *scanner) goBack() {
 	if scan.index < len(scan.source) {
 		scan.index--
-		scannerLog.Printf("Unread char: %s\n", strconv.Quote(string(scan.source[scan.index])))
+		// scannerLog.Printf("Unread char: %s\n", strconv.Quote(string(scan.source[scan.index])))
 	}
 }
 
@@ -60,7 +60,7 @@ func (scan *scanner) nextChar() (rune, bool) {
 	if scan.index != len(scan.source)-1 {
 		ch := scan.source[scan.index]
 		scan.index++
-		scannerLog.Printf("Read char: %s\n", strconv.Quote(string(ch)))
+		// scannerLog.Printf("Read char: %s\n", strconv.Quote(string(ch)))
 		return ch, true
 	}
 	return 0, false
@@ -91,7 +91,7 @@ func (scan *scanner) nextToken() token {
 			return scan.lexString(ch)
 		}
 
-		// dependsOn lexString in case <!-- is in string literal
+		// after lexString because <!-- could be part of string literal
 		if ch == '<' && scan.lexComment() {
 			continue
 		}
@@ -101,8 +101,6 @@ func (scan *scanner) nextToken() token {
 		}
 
 		if ch == '&' || unicode.IsLetter(ch) {
-			// &[a-zA-Z];            operators
-			// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
 			return scan.lexIdentifier(ch)
 		}
 
@@ -170,18 +168,35 @@ func (scan *scanner) lexComment() bool {
 	return false
 }
 
-func (scan *scanner) lexNumber(ch rune) token { // TODO floats
+func (scan *scanner) lexNumber(ch rune) token {
 	var ok bool
+	real := false
 	number := "" + string(ch)
 
-	for {
-		ch, ok = scan.nextChar()
-		if ok && unicode.IsNumber(ch) {
+	for ch, ok = scan.nextChar(); ok; ch, ok = scan.nextChar() {
+
+		if ch == '.' {
+			real = true
+		}
+
+		if ch == '.' || unicode.IsNumber(ch) {
 			number += string(ch)
 		} else {
 			scan.goBack()
 			break
 		}
+
+	}
+
+	if real {
+		f, err := strconv.ParseFloat(number, 64)
+
+		if err != nil {
+			panic(err)
+		}
+
+		realVal = f
+		return tokRealConst
 	}
 
 	i, err := strconv.Atoi(number)

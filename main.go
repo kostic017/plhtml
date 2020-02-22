@@ -3,12 +3,13 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 )
 
 var (
 	intVal  int
 	boolVal bool
-	realVal float32
+	realVal float64
 	strVal  string
 )
 
@@ -17,11 +18,11 @@ var (
 )
 
 func main() {
-	scan()
+	scan(filepath.Join("test", "ex1.html"))
 }
 
-func scan() {
-	source, err := readFile("test/comments.html")
+func scan(file string) {
+	source, err := readFile(file)
 
 	if err == nil {
 		var scan scanner
