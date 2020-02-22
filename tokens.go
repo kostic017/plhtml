@@ -22,9 +22,20 @@ const (
 	tokIf      token = "tokIf"
 	tokWhile   token = "tokWhile"
 	tokFor     token = "tokFor"
-	tokEqual   token = "tokEqual"
 
 	tokIdentifier token = "tokIdentifier"
+
+	tokAddOp token = "tokAddOp"
+	tokSubOp token = "tokSubOp"
+	tokMulOp token = "tokMulOp"
+	tokDivOp token = "tokDivOp"
+	tokLtOp  token = "tokLtOp"
+	tokGtOp  token = "tokGtOp"
+	tokLeqOp token = "tokLeqOp"
+	tokGeqOp token = "tokGeqOp"
+	tokEqOp  token = "tokEqOp"
+	tokNeqOp token = "tokNeqOp"
+	tokNotOp token = "tokNotOp"
 
 	tokIntType    token = "tokIntType"
 	tokRealType   token = "tokRealType"
