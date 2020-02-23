@@ -108,7 +108,7 @@ func (scan *scanner) nextToken() token {
 		}
 
 		if ch == '&' || unicode.IsLetter(ch) {
-			return scan.lexIdentifier(ch)
+			return scan.lexWord(ch)
 		}
 
 		switch ch {
@@ -197,37 +197,33 @@ func (scan *scanner) lexNumber(ch rune) token {
 
 	if real {
 		f, err := strconv.ParseFloat(number, 64)
-
-		if err != nil {
-			panic(err)
-		}
+		check(err)
 
 		realVal = f
 		return tokRealConst
 	}
 
 	i, err := strconv.Atoi(number)
-
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 
 	intVal = i
 	return tokIntConst
 }
 
-func (scan *scanner) lexIdentifier(ch rune) token {
+func (scan *scanner) lexWord(ch rune) token {
 	// &[a-zA-Z];            operators
 	// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
 
-	var ok bool
+	word := string(ch)
 
-	identifier := string(ch)
+	for ch, ok := scan.nextChar(); ok; ch, ok = scan.nextChar() {
 
-	for ch, ok = scan.nextChar(); ok; ch, ok = scan.nextChar() {
+		valid := unicode.IsLetter(ch) ||
+			(word[0] == '&' && ch == ';') ||
+			(word[0] != '&' && unicode.IsNumber(ch))
 
-		if unicode.IsLetter(ch) || (identifier[0] == '&' && ch == ';') || (identifier[0] != '&' && unicode.IsNumber(ch)) {
-			identifier += string(ch)
+		if valid {
+			word += string(ch)
 		} else {
 			scan.goBack()
 			break
@@ -235,22 +231,35 @@ func (scan *scanner) lexIdentifier(ch rune) token {
 
 	}
 
-	if identifier[0] == '&' {
-		if identifier[len(identifier)-1:] != ";" {
-			panic(fmt.Sprintf("Unterminated operator %s.", identifier))
-		}
-
-		if tok, ok := scan.operators[identifier]; ok {
-			return tok
-		}
-
-		panic(fmt.Sprintf("Operator %s is not valid.", identifier))
-	}
-
-	if tok, ok := scan.keywords[strings.ToLower(identifier)]; ok {
+	if tok, ok := scan.lexOperator(word); ok {
 		return tok
 	}
 
-	strVal = identifier
+	if tok, ok := scan.keywords[strings.ToLower(word)]; ok {
+		return tok
+	}
+
+	strVal = word
 	return tokIdentifier
+}
+
+func (scan *scanner) lexOperator(word string) (token, bool) {
+
+	firstChar := word[0]
+	lastChar := word[len(word)-1:]
+
+	if firstChar != '&' {
+		return tokEOF, false
+	}
+
+	if lastChar != ";" {
+		panic(fmt.Sprintf("Unterminated operator %s.", word))
+	}
+
+	if tok, ok := scan.operators[word]; ok {
+		return tok, ok
+	}
+
+	panic(fmt.Sprintf("Operator %s is not valid.", word))
+
 }
