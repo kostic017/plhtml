@@ -239,7 +239,13 @@ func (scan *Scanner) lexWord(ch rune) Token {
 		return tok
 	}
 
-	if tok, ok := scan.keywords[strings.ToLower(word)]; ok {
+	word = strings.ToLower(word)
+
+	if word == "true" || word == "false" {
+		return Token{Type: BoolConst, Value: word}
+	}
+
+	if tok, ok := scan.keywords[word]; ok {
 		return Token{Type: tok}
 	}
 
