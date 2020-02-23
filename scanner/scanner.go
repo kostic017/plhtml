@@ -1,87 +1,99 @@
-package main
+package scanner
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"../logging"
 )
 
-type scanner struct {
+type Scanner struct {
+	line      int
 	index     int
+	column    int
 	source    []rune
-	keywords  map[string]token
-	operators map[string]token
+	keywords  map[string]TokenType
+	operators map[string]TokenType
 }
 
-func (scan *scanner) init(source string) {
+var (
+	logger = logging.New("SCANNER")
+)
+
+func (scan *Scanner) init(source string) {
+	logger.SetLevel(logging.Info)
+
+	scan.line = 0
 	scan.index = 0
+	scan.column = 0
 	scan.source = []rune(source)
 
-	scan.keywords = map[string]token{
-		"doctype": tokDoctype,
-		"lang":    tokLang,
-		"html":    tokHTML,
-		"head":    tokHead,
-		"title":   tokTitle,
-		"body":    tokBody,
-		"main":    tokMain,
-		"var":     tokVar,
-		"class":   tokClass,
-		"output":  tokOutput,
-		"input":   tokInput,
-		"name":    tokName,
-		"data":    tokData,
-		"value":   tokValue,
-		"div":     tokDiv,
-		"if":      tokIf,
-		"while":   tokWhile,
-		"integer": tokIntType,
-		"real":    tokRealType,
-		"boolean": tokBoolType,
-		"string":  tokStringType,
+	scan.keywords = map[string]TokenType{
+		"doctype": Doctype,
+		"lang":    Lang,
+		"html":    HTML,
+		"head":    Head,
+		"title":   Title,
+		"body":    Body,
+		"main":    Main,
+		"var":     Var,
+		"class":   Class,
+		"output":  Output,
+		"input":   Input,
+		"name":    Name,
+		"data":    Data,
+		"value":   Value,
+		"div":     Div,
+		"if":      If,
+		"while":   While,
+		"integer": IntType,
+		"real":    RealType,
+		"boolean": BoolType,
+		"string":  StringType,
 	}
 
-	scan.operators = map[string]token{
-		"&plus;":   tokAddOp,
-		"&minus;":  tokSubOp,
-		"&times;":  tokMulOp,
-		"&divide;": tokDivOp,
-		"&lt;":     tokLtOp,
-		"&gt;":     tokGtOp,
-		"&leq;":    tokLeqOp,
-		"&geq;":    tokGeqOp,
-		"&Equal;":  tokEqOp,
-		"&ne;":     tokNeqOp,
-		"&Not;":    tokNotOp,
+	scan.operators = map[string]TokenType{
+		"&plus;":   AddOp,
+		"&minus;":  SubOp,
+		"&times;":  MulOp,
+		"&divide;": DivOp,
+		"&lt;":     LtOp,
+		"&gt;":     GtOp,
+		"&leq;":    LeqOp,
+		"&geq;":    GeqOp,
+		"&Equal;":  EqOp,
+		"&ne;":     NeqOp,
+		"&Not;":    NotOp,
 	}
 }
 
-func (scan *scanner) goBack() {
+func (scan *Scanner) goBack() {
 	if scan.index < len(scan.source) {
 		scan.index--
-		scannerLog.Debug("Unread char: %s\n", strconv.Quote(string(scan.source[scan.index])))
+		logger.Debug("Unread char: %s\n", strconv.Quote(string(scan.source[scan.index])))
 	}
 }
 
-func (scan *scanner) nextChar() (rune, bool) {
+func (scan *Scanner) nextChar() (rune, bool) {
 	if scan.index != len(scan.source)-1 {
 		ch := scan.source[scan.index]
 		scan.index++
-		scannerLog.Debug("Read char: %s\n", strconv.Quote(string(ch)))
+		logger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
 		return ch, true
 	}
 	return 0, false
 }
 
-func (scan *scanner) lookahead(i int) (rune, bool) {
+func (scan *Scanner) lookahead(i int) (rune, bool) {
 	if scan.index+i < len(scan.source)-1 {
 		return scan.source[scan.index+i], true
 	}
 	return 0, false
 }
 
-func (scan *scanner) nextToken() token {
+func (scan *Scanner) nextToken() Token {
 
 	for {
 
@@ -114,17 +126,17 @@ func (scan *scanner) nextToken() token {
 
 		switch ch {
 		case '"', '!', '/', '=', '<', '>', '(', ')', '-', '.':
-			return token(ch)
+			return Token{Type: TokenType(ch)}
 		}
 
 		panic(fmt.Sprintf("Illegal character %c.", ch))
 
 	}
 
-	return tokEOF
+	return Token{Type: EOF}
 }
 
-func (scan *scanner) lexString(ch rune) token {
+func (scan *Scanner) lexString(ch rune) Token {
 	var ok bool
 	str := string(ch)
 
@@ -144,11 +156,10 @@ func (scan *scanner) lexString(ch rune) token {
 		}
 	}
 
-	strVal = str[1:]
-	return tokStringConst
+	return Token{Type: StringConst, Value: str[1:]}
 }
 
-func (scan *scanner) lexComment() bool {
+func (scan *Scanner) lexComment() bool {
 	// <!--.*-->
 
 	ch1, ok1 := scan.lookahead(0)
@@ -176,7 +187,7 @@ func (scan *scanner) lexComment() bool {
 	return false
 }
 
-func (scan *scanner) lexNumber(ch rune) token {
+func (scan *Scanner) lexNumber(ch rune) Token {
 	var ok bool
 	real := false
 	number := "" + string(ch)
@@ -197,21 +208,13 @@ func (scan *scanner) lexNumber(ch rune) token {
 	}
 
 	if real {
-		f, err := strconv.ParseFloat(number, 64)
-		check(err)
-
-		realVal = f
-		return tokRealConst
+		return Token{Type: RealConst, Value: number}
 	}
 
-	i, err := strconv.Atoi(number)
-	check(err)
-
-	intVal = i
-	return tokIntConst
+	return Token{Type: IntConst, Value: number}
 }
 
-func (scan *scanner) lexWord(ch rune) token {
+func (scan *Scanner) lexWord(ch rune) Token {
 	// &[a-zA-Z];            operators
 	// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
 
@@ -237,20 +240,19 @@ func (scan *scanner) lexWord(ch rune) token {
 	}
 
 	if tok, ok := scan.keywords[strings.ToLower(word)]; ok {
-		return tok
+		return Token{Type: tok}
 	}
 
-	strVal = word
-	return tokIdentifier
+	return Token{Type: Identifier, Value: word}
 }
 
-func (scan *scanner) lexOperator(word string) (token, bool) {
+func (scan *Scanner) lexOperator(word string) (Token, bool) {
 
 	firstChar := word[0]
 	lastChar := word[len(word)-1:]
 
 	if firstChar != '&' {
-		return tokEOF, false
+		return Token{Type: EOF}, false
 	}
 
 	if lastChar != ";" {
@@ -258,7 +260,7 @@ func (scan *scanner) lexOperator(word string) (token, bool) {
 	}
 
 	if tok, ok := scan.operators[word]; ok {
-		return tok, ok
+		return Token{Type: tok}, true
 	}
 
 	panic(fmt.Sprintf("Operator %s is not valid.", word))

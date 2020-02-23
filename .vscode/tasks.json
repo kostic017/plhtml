@@ -8,7 +8,9 @@
             "type": "shell",
             "command": "go",
             "args": [
-                "test"
+                "test",
+                "-v",
+                "./${input:testPackage}",
             ],
             "problemMatcher": [],
         },
@@ -18,8 +20,8 @@
             "command": "code",
             "args": [
                 "--diff",
-                "tests/${input:test}.expected",
-                "tests/${input:test}.actual",
+                "tests/${input:testDiff}.expected",
+                "tests/${input:testDiff}.actual",
             ],
             "problemMatcher": [],
         },
@@ -43,10 +45,20 @@
     ],
     "inputs": [
         {
-          "id": "test",
-          "type": "promptString",
-          "default": "fibonacci.scanner",
-          "description": "Name of the test to run.",
-        }
+            "id": "testPackage",
+            "type": "pickString",
+            "description": "Package to test.",
+            "options": [
+                "scanner",
+            ],
+        },
+        {
+            "id": "testDiff",
+            "type": "pickString",
+            "description": "Test to show diff for.",
+            "options": [
+                "fibonacci.scanner",
+            ],
+        },
     ]
 }
