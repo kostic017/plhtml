@@ -2,11 +2,18 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"testing"
-
-	"github.com/kylelemons/godebug/diff"
 )
+
+func TestScanner(t *testing.T) {
+	expected := readFromFile("tests/fibonacci.scanner.expected")
+	actual := scan("tests/examples/fibonacci.html")
+
+	if expected != actual {
+		writeToFile("tests/fibonacci.scanner.actual", actual)
+		t.Fail()
+	}
+}
 
 func scan(file string) string {
 	var scan scanner
@@ -23,14 +30,5 @@ func scan(file string) string {
 		}
 	}
 
-	return strings.TrimSpace(result)
-}
-
-func TestScanner(t *testing.T) {
-	expected := readFromFile("tests/fibonacci.scanner.out")
-	actual := scan("examples/fibonacci.html")
-
-	if expected != actual {
-		t.Error(diff.Diff(expected, actual))
-	}
+	return result
 }

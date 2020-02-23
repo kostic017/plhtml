@@ -1,0 +1,52 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Tests: Run",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "test"
+            ],
+            "problemMatcher": [],
+        },
+        {
+            "label": "Tests: Diff",
+            "type": "shell",
+            "command": "code",
+            "args": [
+                "--diff",
+                "tests/${input:test}.expected",
+                "tests/${input:test}.actual",
+            ],
+            "problemMatcher": [],
+        },
+        {
+            "label": "Tests: Clean",
+            "type": "shell",
+            "command": "rm",
+            "args": [
+                "-f",
+                "tests/*.actual"
+            ],
+            "windows": {
+                "command": "del",
+                "args": [
+                    "/Q",
+                    "tests\\*.actual"
+                ]
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+          "id": "test",
+          "type": "promptString",
+          "default": "fibonacci.scanner",
+          "description": "Name of the test to run.",
+        }
+    ]
+}
