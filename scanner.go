@@ -17,43 +17,44 @@ type scanner struct {
 func (scan *scanner) init(source string) {
 	scan.index = 0
 	scan.source = []rune(source)
-	scan.keywords = make(map[string]token)
-	scan.operators = make(map[string]token)
 
-	scan.keywords["doctype"] = tokDoctype
-	scan.keywords["lang"] = tokLang
-	scan.keywords["html"] = tokHTML
-	scan.keywords["head"] = tokHead
-	scan.keywords["title"] = tokTitle
-	scan.keywords["body"] = tokBody
-	scan.keywords["main"] = tokMain
-	scan.keywords["var"] = tokVar
-	scan.keywords["class"] = tokClass
-	scan.keywords["output"] = tokOutput
-	scan.keywords["input"] = tokInput
-	scan.keywords["name"] = tokName
-	scan.keywords["data"] = tokData
-	scan.keywords["value"] = tokValue
-	scan.keywords["div"] = tokDiv
-	scan.keywords["if"] = tokIf
-	scan.keywords["while"] = tokWhile
-	scan.keywords["integer"] = tokIntType
-	scan.keywords["real"] = tokRealType
-	scan.keywords["boolean"] = tokBoolType
-	scan.keywords["string"] = tokStringType
+	scan.keywords = map[string]token{
+		"doctype": tokDoctype,
+		"lang":    tokLang,
+		"html":    tokHTML,
+		"head":    tokHead,
+		"title":   tokTitle,
+		"body":    tokBody,
+		"main":    tokMain,
+		"var":     tokVar,
+		"class":   tokClass,
+		"output":  tokOutput,
+		"input":   tokInput,
+		"name":    tokName,
+		"data":    tokData,
+		"value":   tokValue,
+		"div":     tokDiv,
+		"if":      tokIf,
+		"while":   tokWhile,
+		"integer": tokIntType,
+		"real":    tokRealType,
+		"boolean": tokBoolType,
+		"string":  tokStringType,
+	}
 
-	// operators
-	scan.operators["&plus;"] = tokAddOp
-	scan.operators["&minus;"] = tokSubOp
-	scan.operators["&times;"] = tokMulOp
-	scan.operators["&divide;"] = tokDivOp
-	scan.operators["&lt;"] = tokLtOp
-	scan.operators["&gt;"] = tokGtOp
-	scan.operators["&leq;"] = tokLeqOp
-	scan.operators["&geq;"] = tokGeqOp
-	scan.operators["&Equal;"] = tokEqOp
-	scan.operators["&ne;"] = tokNeqOp
-	scan.operators["&Not;"] = tokNotOp
+	scan.operators = map[string]token{
+		"&plus;":   tokAddOp,
+		"&minus;":  tokSubOp,
+		"&times;":  tokMulOp,
+		"&divide;": tokDivOp,
+		"&lt;":     tokLtOp,
+		"&gt;":     tokGtOp,
+		"&leq;":    tokLeqOp,
+		"&geq;":    tokGeqOp,
+		"&Equal;":  tokEqOp,
+		"&ne;":     tokNeqOp,
+		"&Not;":    tokNotOp,
+	}
 }
 
 func (scan *scanner) goBack() {
