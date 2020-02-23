@@ -10,12 +10,14 @@ import (
 )
 
 type Scanner struct {
-	line      int
-	index     int
-	column    int
-	source    []rune
-	keywords  map[string]TokenType
-	operators map[string]TokenType
+	line       int
+	index      int
+	column     int
+	tabSize    int
+	prevColumn int
+	source     []rune
+	keywords   map[string]TokenType
+	operators  map[string]TokenType
 }
 
 var (
@@ -25,9 +27,10 @@ var (
 func (scan *Scanner) init(source string) {
 	logger.SetLevel(logging.Info)
 
-	scan.line = 0
+	scan.line = 1
 	scan.index = 0
 	scan.column = 0
+	scan.tabSize = 1
 	scan.source = []rune(source)
 
 	scan.keywords = map[string]TokenType{
@@ -69,21 +72,52 @@ func (scan *Scanner) init(source string) {
 	}
 }
 
+func (scan *Scanner) SetTabSize(tabSize int) {
+	scan.tabSize = tabSize
+}
+
 func (scan *Scanner) goBack() {
 	if scan.index < len(scan.source) {
 		scan.index--
-		logger.Debug("Unread char: %s\n", strconv.Quote(string(scan.source[scan.index])))
+		ch := scan.source[scan.index]
+		logger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
+		scan.oldLine(ch)
 	}
 }
 
 func (scan *Scanner) nextChar() (rune, bool) {
 	if scan.index != len(scan.source)-1 {
 		ch := scan.source[scan.index]
-		scan.index++
 		logger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
+		scan.newLine(ch)
+		scan.index++
 		return ch, true
 	}
+
 	return 0, false
+}
+
+func (scan *Scanner) oldLine(ch rune) {
+	if ch == '\n' {
+		scan.column = scan.prevColumn
+		scan.line--
+	} else if ch == '\t' {
+		scan.column -= scan.tabSize
+	} else {
+		scan.column--
+	}
+}
+
+func (scan *Scanner) newLine(ch rune) {
+	if ch == '\n' {
+		scan.prevColumn = scan.column
+		scan.column = 0
+		scan.line++
+	} else if ch == '\t' {
+		scan.column += scan.tabSize
+	} else {
+		scan.column++
+	}
 }
 
 func (scan *Scanner) lookahead(i int) (rune, bool) {
@@ -108,11 +142,11 @@ func (scan *Scanner) nextToken() Token {
 		}
 
 		if ch == '`' {
-			return scan.lexString(ch)
+			return scan.lexString(ch, scan.line, scan.column)
 		}
 
 		// after lexString because <!-- could be part of string literal
-		if ch == '<' && scan.lexComment() {
+		if ch == '<' && scan.lexComment(scan.line, scan.column) {
 			continue
 		}
 
@@ -121,7 +155,7 @@ func (scan *Scanner) nextToken() Token {
 		}
 
 		if ch == '&' || unicode.IsLetter(ch) {
-			return scan.lexWord(ch)
+			return scan.lexWord(ch, scan.line, scan.column)
 		}
 
 		switch ch {
@@ -129,14 +163,14 @@ func (scan *Scanner) nextToken() Token {
 			return Token{Type: TokenType(ch)}
 		}
 
-		panic(fmt.Sprintf("Illegal character %c.", ch))
+		panic(fmt.Sprintf("Illegal character %c at %d:%d.", ch, scan.line, scan.column))
 
 	}
 
 	return Token{Type: EOF}
 }
 
-func (scan *Scanner) lexString(ch rune) Token {
+func (scan *Scanner) lexString(ch rune, line int, column int) Token {
 	var ok bool
 	str := string(ch)
 
@@ -152,14 +186,14 @@ func (scan *Scanner) lexString(ch rune) Token {
 			str += string(ch)
 
 		} else {
-			panic("Unterminated string.")
+			panic(fmt.Sprintf("Unterminated string at %d:%d.", line, column))
 		}
 	}
 
 	return Token{Type: StringConst, Value: str[1:]}
 }
 
-func (scan *Scanner) lexComment() bool {
+func (scan *Scanner) lexComment(line int, column int) bool {
 	// <!--.*-->
 
 	ch1, ok1 := scan.lookahead(0)
@@ -170,7 +204,7 @@ func (scan *Scanner) lexComment() bool {
 		for {
 			ch, ok := scan.nextChar()
 			if !ok {
-				panic("End of file inside comment.")
+				panic(fmt.Sprintf("End of file inside comment at %d:%d.", line, column))
 			}
 			if ch == '-' {
 				ch1, ok1 := scan.lookahead(0)
@@ -214,7 +248,7 @@ func (scan *Scanner) lexNumber(ch rune) Token {
 	return Token{Type: IntConst, Value: number}
 }
 
-func (scan *Scanner) lexWord(ch rune) Token {
+func (scan *Scanner) lexWord(ch rune, line int, column int) Token {
 	// &[a-zA-Z];            operators
 	// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
 
@@ -235,7 +269,7 @@ func (scan *Scanner) lexWord(ch rune) Token {
 
 	}
 
-	if tok, ok := scan.lexOperator(word); ok {
+	if tok, ok := scan.lexOperator(word, line, column); ok {
 		return tok
 	}
 
@@ -252,7 +286,7 @@ func (scan *Scanner) lexWord(ch rune) Token {
 	return Token{Type: Identifier, Value: word}
 }
 
-func (scan *Scanner) lexOperator(word string) (Token, bool) {
+func (scan *Scanner) lexOperator(word string, line int, column int) (Token, bool) {
 
 	firstChar := word[0]
 	lastChar := word[len(word)-1:]
@@ -262,13 +296,13 @@ func (scan *Scanner) lexOperator(word string) (Token, bool) {
 	}
 
 	if lastChar != ";" {
-		panic(fmt.Sprintf("Unterminated operator %s.", word))
+		panic(fmt.Sprintf("Unterminated operator %s at %d:%d.", word, line, column))
 	}
 
 	if tok, ok := scan.operators[word]; ok {
 		return Token{Type: tok}, true
 	}
 
-	panic(fmt.Sprintf("Operator %s is not valid.", word))
+	panic(fmt.Sprintf("Operator %s is not valid at %d:%d.", word, line, column))
 
 }
