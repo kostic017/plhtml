@@ -1,10 +1,10 @@
 [*]
 indent_size = 4
 indent_style = space
-insert_final_newline: true
-trim_trailing_whitespace: true
+insert_final_newline = true
+trim_trailing_whitespace = true
 
 [*.expected]
-end_of_line: lf
-insert_final_newline: true
-trim_trailing_whitespace: false
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = false
