@@ -31,17 +31,12 @@ const (
 	TokIf      TokenType = "TokIf"
 	TokWhile   TokenType = "TokWhile"
 
-	TokAddOp TokenType = "TokAddOp"
-	TokSubOp TokenType = "TokSubOp"
-	TokMulOp TokenType = "TokMulOp"
-	TokDivOp TokenType = "TokDivOp"
 	TokLtOp  TokenType = "TokLtOp"
 	TokGtOp  TokenType = "TokGtOp"
 	TokLeqOp TokenType = "TokLeqOp"
 	TokGeqOp TokenType = "TokGeqOp"
 	TokEqOp  TokenType = "TokEqOp"
 	TokNeqOp TokenType = "TokNeqOp"
-	TokNotOp TokenType = "TokNotOp"
 
 	TokIntType    TokenType = "TokIntType"
 	TokRealType   TokenType = "TokRealType"

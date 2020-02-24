@@ -58,17 +58,12 @@ func (scan *Scanner) init(source string) {
 	}
 
 	scan.operators = map[string]TokenType{
-		"&plus;":   TokAddOp,
-		"&minus;":  TokSubOp,
-		"&times;":  TokMulOp,
-		"&divide;": TokDivOp,
 		"&lt;":     TokLtOp,
 		"&gt;":     TokGtOp,
 		"&leq;":    TokLeqOp,
 		"&geq;":    TokGeqOp,
-		"&Equal;":  TokEqOp,
+		"&equals;": TokEqOp,
 		"&ne;":     TokNeqOp,
-		"&Not;":    TokNotOp,
 	}
 }
 
@@ -159,7 +154,7 @@ func (scan *Scanner) nextToken() Token {
 		}
 
 		switch ch {
-		case '"', '!', '/', '=', '<', '>', '(', ')', '-', '.':
+		case '+', '-', '*', '/', '(', ')', '!', '"', '=', '<', '>', '.':
 			return Token{Type: TokenType(ch)}
 		}
 

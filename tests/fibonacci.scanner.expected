@@ -180,7 +180,7 @@ TokValue
 =
 "
 TokIdentifier->t1
-TokAddOp
++
 TokIdentifier->t2
 "
 >
@@ -221,7 +221,7 @@ TokValue
 =
 "
 TokIdentifier->i
-TokAddOp
++
 TokIntConst->1
 "
 >
