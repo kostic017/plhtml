@@ -4,17 +4,6 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Tests: Run",
-            "type": "shell",
-            "command": "go",
-            "args": [
-                "test",
-                "-v",
-                "./${input:testPackage}",
-            ],
-            "problemMatcher": [],
-        },
-        {
             "label": "Tests: Diff",
             "type": "shell",
             "command": "code",
@@ -44,14 +33,6 @@
         }
     ],
     "inputs": [
-        {
-            "id": "testPackage",
-            "type": "pickString",
-            "description": "Package to test.",
-            "options": [
-                "scanner",
-            ],
-        },
         {
             "id": "testDiff",
             "type": "pickString",

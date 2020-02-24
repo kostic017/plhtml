@@ -1,4 +1,4 @@
-package scanner
+package main
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	"../logging"
+	"./logging"
 )
 
 type Scanner struct {
@@ -34,41 +34,41 @@ func (scan *Scanner) init(source string) {
 	scan.source = []rune(source)
 
 	scan.keywords = map[string]TokenType{
-		"doctype": Doctype,
-		"lang":    Lang,
-		"html":    HTML,
-		"head":    Head,
-		"title":   Title,
-		"body":    Body,
-		"main":    Main,
-		"var":     Var,
-		"class":   Class,
-		"output":  Output,
-		"input":   Input,
-		"name":    Name,
-		"data":    Data,
-		"value":   Value,
-		"div":     Div,
-		"if":      If,
-		"while":   While,
-		"integer": IntType,
-		"real":    RealType,
-		"boolean": BoolType,
-		"string":  StringType,
+		"doctype": TokDoctype,
+		"lang":    TokLang,
+		"html":    TokHTML,
+		"head":    TokHead,
+		"title":   TokTitle,
+		"body":    TokBody,
+		"main":    TokMain,
+		"var":     TokVar,
+		"class":   TokClass,
+		"output":  TokOutput,
+		"input":   TokInput,
+		"name":    TokName,
+		"data":    TokData,
+		"value":   TokValue,
+		"div":     TokDiv,
+		"if":      TokIf,
+		"while":   TokWhile,
+		"integer": TokIntType,
+		"real":    TokRealType,
+		"boolean": TokBoolType,
+		"string":  TokStringType,
 	}
 
 	scan.operators = map[string]TokenType{
-		"&plus;":   AddOp,
-		"&minus;":  SubOp,
-		"&times;":  MulOp,
-		"&divide;": DivOp,
-		"&lt;":     LtOp,
-		"&gt;":     GtOp,
-		"&leq;":    LeqOp,
-		"&geq;":    GeqOp,
-		"&Equal;":  EqOp,
-		"&ne;":     NeqOp,
-		"&Not;":    NotOp,
+		"&plus;":   TokAddOp,
+		"&minus;":  TokSubOp,
+		"&times;":  TokMulOp,
+		"&divide;": TokDivOp,
+		"&lt;":     TokLtOp,
+		"&gt;":     TokGtOp,
+		"&leq;":    TokLeqOp,
+		"&geq;":    TokGeqOp,
+		"&Equal;":  TokEqOp,
+		"&ne;":     TokNeqOp,
+		"&Not;":    TokNotOp,
 	}
 }
 
@@ -167,7 +167,7 @@ func (scan *Scanner) nextToken() Token {
 
 	}
 
-	return Token{Type: EOF}
+	return Token{Type: TokEOF}
 }
 
 func (scan *Scanner) lexString(ch rune, line int, column int) Token {
@@ -190,7 +190,7 @@ func (scan *Scanner) lexString(ch rune, line int, column int) Token {
 		}
 	}
 
-	return Token{Type: StringConst, Value: str[1:]}
+	return Token{Type: TokStringConst, Value: str[1:]}
 }
 
 func (scan *Scanner) lexComment(line int, column int) bool {
@@ -242,10 +242,10 @@ func (scan *Scanner) lexNumber(ch rune) Token {
 	}
 
 	if real {
-		return Token{Type: RealConst, Value: number}
+		return Token{Type: TokRealConst, Value: number}
 	}
 
-	return Token{Type: IntConst, Value: number}
+	return Token{Type: TokIntConst, Value: number}
 }
 
 func (scan *Scanner) lexWord(ch rune, line int, column int) Token {
@@ -276,14 +276,14 @@ func (scan *Scanner) lexWord(ch rune, line int, column int) Token {
 	word = strings.ToLower(word)
 
 	if word == "true" || word == "false" {
-		return Token{Type: BoolConst, Value: word}
+		return Token{Type: TokBoolConst, Value: word}
 	}
 
 	if tok, ok := scan.keywords[word]; ok {
 		return Token{Type: tok}
 	}
 
-	return Token{Type: Identifier, Value: word}
+	return Token{Type: TokIdentifier, Value: word}
 }
 
 func (scan *Scanner) lexOperator(word string, line int, column int) (Token, bool) {
@@ -292,7 +292,7 @@ func (scan *Scanner) lexOperator(word string, line int, column int) (Token, bool
 	lastChar := word[len(word)-1:]
 
 	if firstChar != '&' {
-		return Token{Type: EOF}, false
+		return Token{Type: TokEOF}, false
 	}
 
 	if lastChar != ";" {
