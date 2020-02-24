@@ -3,8 +3,11 @@ package main
 type TokenType string
 
 type Token struct {
-	Type  TokenType
-	Value string
+	Type    TokenType
+	IntVal  int
+	BoolVal bool
+	RealVal float64
+	StrVal  string
 }
 
 const (

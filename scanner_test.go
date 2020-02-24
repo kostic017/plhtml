@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"./utility"
@@ -23,10 +24,23 @@ func scan(file string) string {
 
 	result := ""
 	for tok := scan.nextToken(); tok.Type != TokEOF; tok = scan.nextToken() {
-		if tok.Type == TokIdentifier || tok.Type == TokIntConst || tok.Type == TokRealConst || tok.Type == TokBoolConst || tok.Type == TokStringConst {
-			result += fmt.Sprintf("%s->%s\n", tok.Type, tok.Value)
-		} else {
+
+		var value string
+		switch tok.Type {
+		case TokIdentifier, TokStringConst:
+			value = tok.StrVal
+		case TokIntConst:
+			value = strconv.Itoa(tok.IntVal)
+		case TokRealConst:
+			value = strconv.FormatFloat(tok.RealVal, 'E', -1, 64)
+		case TokBoolConst:
+			value = strconv.FormatBool(tok.BoolVal)
+		}
+
+		if value == "" {
 			result += fmt.Sprintf("%s\n", tok.Type)
+		} else {
+			result += fmt.Sprintf("%s->%s\n", tok.Type, value)
 		}
 	}
 

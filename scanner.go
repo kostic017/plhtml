@@ -190,7 +190,7 @@ func (scan *Scanner) lexString(ch rune, line int, column int) Token {
 		}
 	}
 
-	return Token{Type: TokStringConst, Value: str[1:]}
+	return Token{Type: TokStringConst, StrVal: str[1:]}
 }
 
 func (scan *Scanner) lexComment(line int, column int) bool {
@@ -242,10 +242,12 @@ func (scan *Scanner) lexNumber(ch rune) Token {
 	}
 
 	if real {
-		return Token{Type: TokRealConst, Value: number}
+		realVal, _ := strconv.ParseFloat(number, 64)
+		return Token{Type: TokRealConst, RealVal: realVal}
 	}
 
-	return Token{Type: TokIntConst, Value: number}
+	intVal, _ := strconv.Atoi(number)
+	return Token{Type: TokIntConst, IntVal: intVal}
 }
 
 func (scan *Scanner) lexWord(ch rune, line int, column int) Token {
@@ -276,14 +278,14 @@ func (scan *Scanner) lexWord(ch rune, line int, column int) Token {
 	word = strings.ToLower(word)
 
 	if word == "true" || word == "false" {
-		return Token{Type: TokBoolConst, Value: word}
+		return Token{Type: TokBoolConst, BoolVal: word == "true"}
 	}
 
 	if tok, ok := scan.keywords[word]; ok {
 		return Token{Type: tok}
 	}
 
-	return Token{Type: TokIdentifier, Value: word}
+	return Token{Type: TokIdentifier, StrVal: word}
 }
 
 func (scan *Scanner) lexOperator(word string, line int, column int) (Token, bool) {
