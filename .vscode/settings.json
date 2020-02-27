@@ -1,7 +1,0 @@
-{
-    "files.trimTrailingWhitespace": false,
-    "go.lintTool":"golangci-lint",
-	"go.lintFlags": [
-		"--fast"
-	],
-}
