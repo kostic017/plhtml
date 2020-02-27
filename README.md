@@ -5,7 +5,6 @@ Recommended editor is [Visual Studio Code](https://code.visualstudio.com/) with 
 
 To avoid breaking test you have to set some specific editor's settings for `*.expected` files:
 
- * eof `\n`
  * insert final newline is on
  * trim trailing whitespace is off
 

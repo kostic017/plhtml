@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"bytes"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -8,6 +9,10 @@ import (
 func ReadFile(file string) string {
 	data, err := ioutil.ReadFile(filepath.FromSlash(file))
 	Check(err)
+	// replace CR LF \r\n (windows) with LF \n (unix)
+	data = bytes.Replace(data, []byte{13, 10}, []byte{10}, -1)
+	// replace CF \r (mac) with LF \n (unix)
+	data = bytes.Replace(data, []byte{13}, []byte{10}, -1)
 	return string(data)
 }
 
