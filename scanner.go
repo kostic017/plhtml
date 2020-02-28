@@ -16,22 +16,22 @@ type Scanner struct {
 	tabSize    int
 	prevColumn int
 	source     []rune
+	logger     *logging.MyLogger
 	keywords   map[string]TokenType
 	operators  map[string]TokenType
 }
 
-var (
-	logger = logging.New("SCANNER")
-)
-
-func (scan *Scanner) init(source string) {
-	logger.SetLevel(logging.Info)
+func NewScanner(source string) *Scanner {
+	scan := new(Scanner)
 
 	scan.line = 1
 	scan.index = 0
 	scan.column = 0
 	scan.tabSize = 1
 	scan.source = []rune(source)
+
+	scan.logger = logging.New("SCANNER")
+	scan.logger.SetLevel(logging.Info)
 
 	scan.keywords = map[string]TokenType{
 		"doctype": TokDoctype,
@@ -65,64 +65,15 @@ func (scan *Scanner) init(source string) {
 		"&equals;": TokEqOp,
 		"&ne;":     TokNeqOp,
 	}
+
+	return scan
 }
 
 func (scan *Scanner) SetTabSize(tabSize int) {
 	scan.tabSize = tabSize
 }
 
-func (scan *Scanner) goBack() {
-	if scan.index < len(scan.source) {
-		scan.index--
-		ch := scan.source[scan.index]
-		logger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
-		scan.oldLine(ch)
-	}
-}
-
-func (scan *Scanner) nextChar() (rune, bool) {
-	if scan.index != len(scan.source)-1 {
-		ch := scan.source[scan.index]
-		logger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
-		scan.newLine(ch)
-		scan.index++
-		return ch, true
-	}
-
-	return 0, false
-}
-
-func (scan *Scanner) oldLine(ch rune) {
-	if ch == '\n' {
-		scan.column = scan.prevColumn
-		scan.line--
-	} else if ch == '\t' {
-		scan.column -= scan.tabSize
-	} else {
-		scan.column--
-	}
-}
-
-func (scan *Scanner) newLine(ch rune) {
-	if ch == '\n' {
-		scan.prevColumn = scan.column
-		scan.column = 0
-		scan.line++
-	} else if ch == '\t' {
-		scan.column += scan.tabSize
-	} else {
-		scan.column++
-	}
-}
-
-func (scan *Scanner) lookahead(i int) (rune, bool) {
-	if scan.index+i < len(scan.source)-1 {
-		return scan.source[scan.index+i], true
-	}
-	return 0, false
-}
-
-func (scan *Scanner) nextToken() Token {
+func (scan *Scanner) NextToken() Token {
 
 	for {
 
@@ -163,6 +114,57 @@ func (scan *Scanner) nextToken() Token {
 	}
 
 	return Token{Type: TokEOF}
+}
+
+func (scan *Scanner) nextChar() (rune, bool) {
+	if scan.index != len(scan.source)-1 {
+		ch := scan.source[scan.index]
+		scan.logger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
+		scan.incColLine(ch)
+		scan.index++
+		return ch, true
+	}
+
+	return 0, false
+}
+
+func (scan *Scanner) lookahead(i int) (rune, bool) {
+	if scan.index+i < len(scan.source)-1 {
+		return scan.source[scan.index+i], true
+	}
+	return 0, false
+}
+
+func (scan *Scanner) goBack() {
+	if scan.index < len(scan.source) {
+		scan.index--
+		ch := scan.source[scan.index]
+		scan.logger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
+		scan.decColLine(ch)
+	}
+}
+
+func (scan *Scanner) decColLine(ch rune) {
+	if ch == '\n' {
+		scan.column = scan.prevColumn
+		scan.line--
+	} else if ch == '\t' {
+		scan.column -= scan.tabSize
+	} else {
+		scan.column--
+	}
+}
+
+func (scan *Scanner) incColLine(ch rune) {
+	if ch == '\n' {
+		scan.prevColumn = scan.column
+		scan.column = 0
+		scan.line++
+	} else if ch == '\t' {
+		scan.column += scan.tabSize
+	} else {
+		scan.column++
+	}
 }
 
 func (scan *Scanner) lexString(ch rune, line int, column int) Token {

@@ -19,11 +19,10 @@ func TestScanner(t *testing.T) {
 }
 
 func scan(file string) string {
-	var scan Scanner
-	scan.init(utility.ReadFile(file))
+	scan := NewScanner(utility.ReadFile(file))
 
 	result := ""
-	for tok := scan.nextToken(); tok.Type != TokEOF; tok = scan.nextToken() {
+	for tok := scan.NextToken(); tok.Type != TokEOF; tok = scan.NextToken() {
 
 		var value string
 		switch tok.Type {
