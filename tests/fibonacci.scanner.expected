@@ -168,7 +168,7 @@ TokIdentifier->n
 TokOutput
 >
 TokIdentifier->t1
-.
++
 TokStringConst-> 
 <
 /
