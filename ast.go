@@ -2,12 +2,8 @@ package main
 
 type (
 	ProgramNode struct {
-		Title ProgramTitleNode
+		Title StringConstNode
 		Body  ProgramBodyNode
-	}
-
-	ProgramTitleNode struct {
-		Value StringConstNode
 	}
 
 	ProgramBodyNode struct {

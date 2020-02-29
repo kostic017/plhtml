@@ -7,7 +7,6 @@ import (
 )
 
 /*
-
 prog = '<' '!' TokDoctype TokHtml '>' '<' TokHTML TokLang '=' '"' TokIdentifier '"' '>' prog_header prog_body '<' '/' TokHTML '>';
 prog_header = '<' TokHead '>' prog_title '<' '/' TokHEAD '>';
 prog_title  = '<' TokTitle '>' TokStringConst '<' '/' TokTitle '>';
@@ -122,18 +121,18 @@ func (parser Parser) parseHTML() ProgramNode {
 	return ProgramNode{Title: programTitle, Body: programBody}
 }
 
-func (parser *Parser) parseProgramHeader() ProgramTitleNode {
+func (parser *Parser) parseProgramHeader() StringConstNode {
 	parser.parseOpenTag(TokHead)
 	programTitle := parser.parseProgramTitle()
 	parser.parseCloseTag(TokHead)
 	return programTitle
 }
 
-func (parser *Parser) parseProgramTitle() ProgramTitleNode {
+func (parser *Parser) parseProgramTitle() StringConstNode {
 	parser.parseOpenTag(TokTitle)
-	value := parser.parseStringConst()
+	programTitle := parser.parseStringConst()
 	parser.parseCloseTag(TokTitle)
-	return ProgramTitleNode{Value: value}
+	return programTitle
 }
 
 func (parser *Parser) parseProgramBody() ProgramBodyNode {
