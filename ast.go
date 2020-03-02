@@ -1,6 +1,14 @@
 package main
 
 type (
+	StatementNode interface {
+	}
+
+	ExpressionNode interface {
+	}
+)
+
+type (
 	ProgramNode struct {
 		Title StringConstNode
 		Body  ProgramBodyNode
@@ -14,7 +22,14 @@ type (
 		Statements []StatementNode
 	}
 
-	StatementNode interface {
+	VarDeclNode struct {
+		Identifier IdentifierNode
+		Type       TokenType
+	}
+
+	VarAssignNode struct {
+		Identifier IdentifierNode
+		Value      ExpressionNode
 	}
 
 	IdentifierNode struct {
@@ -25,26 +40,33 @@ type (
 		Value string
 	}
 
+	IntConstNode struct {
+		Value int
+	}
+
+	RealConstNode struct {
+		Value float64
+	}
+
+	BoolConstNode struct {
+		Value bool
+	}
+
+	WriteStmtNode struct {
+		Value ExpressionNode
+	}
+
+	ReadStmtNode struct {
+		Identifier IdentifierNode
+	}
+
+	WhileStmtNode struct {
+		Condition  ExpressionNode
+		Statements []StatementNode
+	}
+
 /*
    AstNode interface {
-   }
-
-   VarDeclNode struct {
-   	Identifier IdentifierNode
-   	Type       TokenType
-   }
-
-   AssignStmtNode struct {
-   	Identifier IdentifierNode
-   	Value      ExpressionNode
-   }
-
-   WriteStmtNode struct {
-   	Value ExpressionNode
-   }
-
-   ReadStmtNode struct {
-   	Identifier IdentifierNode
    }
 
    WhileStmtNode struct {
@@ -52,20 +74,9 @@ type (
    	// statements
    }
 
-   ExpressionNode interface {
-   }
 
-   IntConstNode struct {
-   	Value int
-   }
 
-   RealConstNode struct {
-   	Value float64
-   }
 
-   BoolConstNode struct {
-   	Value bool
-   }
 
    AddExprNode struct {
    	Value1 ExpressionNode

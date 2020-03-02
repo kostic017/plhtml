@@ -17,7 +17,7 @@ stmt = '<' TokVar TokClass '=' '"' TokIntType '"' '>' TokIdentifier '<' '/' TokV
      | '<' TokVar TokClass '=' '"' TokRealType '"' '>' TokIdentifier '<' '/' TokVar '>'
      | '<' TokVar TokClass '=' '"' TokBoolType '"' '>' TokIdentifier '<' '/' TokVar '>'
      | '<' TokVar TokClass '=' '"' TokStringType '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokData TokValue '=' expr '>' TokIdentifier '<' '/' TokData '>'
+     | '<' TokData TokValue '=' '"' expr '"' '>' TokIdentifier '<' '/' TokData '>'
      | '<' TokOutput '>' expr '<' '/' TokOutput '>'
      | '<' TokInput TokName '=' '"' TokIdentifier '"' '>'
      | '<' TokDiv TokData '-' TokWhile '=' '"' expr '"' '>' ... '<' '/' TokDiv '>'
@@ -64,60 +64,67 @@ func (parser Parser) Parse() {
 	parser.parseProgram()
 }
 
+func (parser Parser) nextTokenCheck(expected TokenType) TokenType {
+	actual := parser.nextToken().Type
+	if actual != expected {
+		panic(fmt.Sprintf("'%s' expected.", expected))
+	}
+	return actual
+}
+
+func (parser Parser) nextTokenCheckMore(expected ...TokenType) TokenType {
+	actual := parser.nextToken().Type
+	for _, exp := range expected {
+		if actual == exp {
+			return actual
+		}
+	}
+	panic(fmt.Sprintf("Expected one of %s, got %s.", expected, actual))
+}
+
+func (parser *Parser) nextToken() Token {
+	parser.curTok = parser.scanner.NextToken()
+	return parser.curTok
+}
+
+func (parser *Parser) parseOpenTag(expected TokenType) {
+	parser.nextTokenCheck(TokenType('<'))
+	parser.nextTokenCheck(expected)
+	parser.nextTokenCheck(TokenType('>'))
+}
+
+func (parser *Parser) parseCloseTag(expected TokenType) {
+	parser.nextTokenCheck(TokenType('<'))
+	parser.nextTokenCheck(TokenType('/'))
+	parser.nextTokenCheck(expected)
+	parser.nextTokenCheck(TokenType('>'))
+}
+
 func (parser Parser) parseProgram() ProgramNode {
 	parser.parseDoctype()
 	return parser.parseHTML()
 }
 
 func (parser Parser) parseDoctype() {
-	if parser.nextToken().Type != TokenType('<') {
-		panic("'<' expected.")
-	}
-	if parser.nextToken().Type != TokenType('!') {
-		panic("'!' expected.")
-	}
-	if parser.nextToken().Type != TokDoctype {
-		panic("'DOCTYPE' expected.")
-	}
-	if parser.nextToken().Type != TokHTML {
-		panic("'html' expected.")
-	}
-	if parser.nextToken().Type != TokenType('>') {
-		panic("'>' expected.")
-	}
+	parser.nextTokenCheck(TokenType('<'))
+	parser.nextTokenCheck(TokenType('!'))
+	parser.nextTokenCheck(TokDoctype)
+	parser.nextTokenCheck(TokHTML)
+	parser.nextTokenCheck(TokenType('>'))
 }
 
 func (parser Parser) parseHTML() ProgramNode {
-	if parser.nextToken().Type != TokenType('<') {
-		panic("'<' expected.")
-	}
-	if parser.nextToken().Type != TokHTML {
-		panic("'html' expected.")
-	}
-	if parser.nextToken().Type != TokLang {
-		panic("'lang' expected.")
-	}
-	if parser.nextToken().Type != TokenType('=') {
-		panic("'=' expected.")
-	}
-	if parser.nextToken().Type != TokenType('"') {
-		panic("'\"' expected.")
-	}
-
+	parser.nextTokenCheck(TokenType('<'))
+	parser.nextTokenCheck(TokHTML)
+	parser.nextTokenCheck(TokLang)
+	parser.nextTokenCheck(TokenType('='))
+	parser.nextTokenCheck(TokenType('"'))
 	parser.parseIdentifier()
-
-	if parser.nextToken().Type != TokenType('"') {
-		panic("'\"' expected.")
-	}
-	if parser.nextToken().Type != TokenType('>') {
-		panic("'>' expected.")
-	}
-
+	parser.nextTokenCheck(TokenType('"'))
+	parser.nextTokenCheck(TokenType('>'))
 	programTitle := parser.parseProgramHeader()
 	programBody := parser.parseProgramBody()
-
 	parser.parseCloseTag(TokHTML)
-
 	return ProgramNode{Title: programTitle, Body: programBody}
 }
 
@@ -150,55 +157,107 @@ func (parser *Parser) parseMainFunc() MainFuncNode {
 }
 
 func (parser *Parser) parseStatements() []StatementNode {
+	parser.nextTokenCheck(TokenType('<'))
+
+	switch parser.nextToken().Type {
+	case TokVar:
+		parser.parseVarDecl()
+	case TokData:
+		parser.parseVarAssign()
+	case TokOutput:
+		parser.parseWriteStmt()
+	case TokInput:
+		parser.parseReadStmt()
+	case TokDiv:
+		parser.parseControlFlowStmt()
+	}
+
 	return nil // TODO
 }
 
+func (parser *Parser) parseVarDecl() VarDeclNode {
+	parser.nextTokenCheck(TokClass)
+	parser.nextTokenCheck(TokenType('='))
+	parser.nextTokenCheck(TokenType('"'))
+	varType := parser.nextTokenCheckMore(TokIntType, TokRealType, TokBoolType, TokStringType)
+	parser.nextTokenCheck(TokenType('"'))
+	parser.nextTokenCheck(TokenType('>'))
+	identifier := parser.parseIdentifier()
+	parser.parseCloseTag(TokVar)
+	return VarDeclNode{Type: varType, Identifier: identifier}
+}
+
+func (parser *Parser) parseVarAssign() VarAssignNode {
+	parser.nextTokenCheck(TokValue)
+	parser.nextTokenCheck(TokenType('='))
+	parser.nextTokenCheck(TokenType('"'))
+	value := parser.parseExpression()
+	parser.nextTokenCheck(TokenType('"'))
+	parser.nextTokenCheck(TokenType('>'))
+	identifier := parser.parseIdentifier()
+	parser.parseCloseTag(TokData)
+	return VarAssignNode{Identifier: identifier, Value: value}
+}
+
+func (parser *Parser) parseWriteStmt() WriteStmtNode {
+	parser.nextTokenCheck(TokenType('>'))
+	value := parser.parseExpression()
+	parser.parseCloseTag(TokOutput)
+	return WriteStmtNode{Value: value}
+}
+
+func (parser *Parser) parseReadStmt() ReadStmtNode {
+	parser.nextTokenCheck(TokName)
+	parser.nextTokenCheck(TokenType('='))
+	parser.nextTokenCheck(TokenType('"'))
+	identifier := parser.parseIdentifier()
+	parser.nextTokenCheck(TokenType('"'))
+	parser.nextTokenCheck(TokenType('>'))
+	return ReadStmtNode{Identifier: identifier}
+}
+
+func (parser *Parser) parseControlFlowStmt() StatementNode {
+	// TODO if, if-else
+	parser.nextTokenCheck(TokData)
+	parser.nextTokenCheck(TokenType('-'))
+	parser.nextTokenCheck(TokWhile)
+	parser.nextTokenCheck(TokenType('='))
+	parser.nextTokenCheck(TokenType('"'))
+	condition := parser.parseExpression()
+	parser.nextTokenCheck(TokenType('"'))
+	parser.nextTokenCheck(TokenType('>'))
+	statements := parser.parseStatements()
+	parser.parseCloseTag(TokDiv)
+	return WhileStmtNode{Condition: condition, Statements: statements}
+}
+
 func (parser *Parser) parseIdentifier() IdentifierNode {
-	parser.nextToken()
-	if parser.curTok.Type != TokIdentifier {
-		panic("Expected identifier.")
-	}
+	parser.nextTokenCheck(TokIdentifier)
 	return IdentifierNode{Name: parser.curTok.StrVal}
 }
 
+func (parser *Parser) parseExpression() ExpressionNode {
+	return nil // TODO
+}
+
 func (parser *Parser) parseStringConst() StringConstNode {
-	parser.nextToken()
-	if parser.curTok.Type != TokStringConst {
-		panic("Expected string constant.")
-	}
+	parser.nextTokenCheck(TokStringConst)
 	return StringConstNode{Value: parser.curTok.StrVal}
 }
 
-func (parser *Parser) nextToken() Token {
-	parser.curTok = parser.scanner.NextToken()
-	return parser.curTok
+func (parser *Parser) parseIntConst() IntConstNode {
+	parser.nextTokenCheck(TokStringConst)
+	return IntConstNode{Value: parser.curTok.IntVal}
 }
 
-func (parser *Parser) parseOpenTag(expected TokenType) {
-	if parser.nextToken().Type != TokenType('<') {
-		panic("'<' expected.")
-	}
-	if parser.nextToken().Type != expected {
-		panic(fmt.Sprintf("'%s' expected.", expected))
-	}
-	if parser.nextToken().Type != TokenType('>') {
-		panic("'>' expected.")
-	}
+func (parser *Parser) parseRealConst() RealConstNode {
+	parser.nextTokenCheck(TokStringConst)
+	return RealConstNode{Value: parser.curTok.RealVal}
 }
 
-func (parser *Parser) parseCloseTag(expected TokenType) {
-	if parser.nextToken().Type != TokenType('<') {
-		panic("'<' expected.")
-	}
-	if parser.nextToken().Type != TokenType('/') {
-		panic("'/' expected.")
-	}
-	if parser.nextToken().Type != expected {
-		panic(fmt.Sprintf("'%s' expected.", expected))
-	}
-	if parser.nextToken().Type != TokenType('>') {
-		panic("'>' expected.")
-	}
+func (parser *Parser) parseBoolConst() BoolConstNode {
+	parser.nextTokenCheck(TokStringConst)
+	return BoolConstNode{Value: parser.curTok.BoolVal}
 }
 
 /*
@@ -215,35 +274,4 @@ func (parser *Parser) parsePrimary() ExpressionNode {
 	}
 	panic("Unknown token.")
 }
-
-// IntConstNode -> TokIntConst
-func (parser *Parser) parseIntConst() IntConstNode {
-	node := IntConstNode{Value: parser.curTok.IntVal}
-	parser.nextToken()
-	return node
-}
-
-// RealConst -> TokRealConst
-func (parser *Parser) parseRealConst() RealConstNode {
-	node := RealConstNode{Value: parser.curTok.RealVal}
-	parser.nextToken()
-	return node
-}
-
-// BoolConstNode -> TokBoolConst
-func (parser *Parser) parseBoolConst() BoolConstNode {
-	node := BoolConstNode{Value: parser.curTok.BoolVal}
-	parser.nextToken()
-	return node
-}
-
-// StringConstNode -> TokStringConst
-func (parser *Parser) parseStringConst() StringConstNode {
-	node := StringConstNode{Value: parser.curTok.StrVal}
-	parser.nextToken()
-	return node
-}
-
-// Identifier -> TokIdentifier
-
 */
