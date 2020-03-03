@@ -32,39 +32,69 @@ expr = TokIntConst
      | TokBoolConst
      | TokStringConst
      | TokIdentifier
-     | expr '+' expr
-     | expr '-' expr
-     | expr '*' expr
-     | expr '/' expr
-     | expr TokLtOp expr
-     | expr TokGtOp expr
-     | expr TokLeqOp expr
-     | expr TokGeqOp expr
-     | expr TokEqOp expr
-     | expr TokNeqOp expr
      | "(" expr ")"
+     | expr binaryOpExpr
      ;
+
+binaryOpExpr = '+' expr
+             | '-' expr
+             | '*' expr
+             | '/' expr
+             | TokLtOp expr
+             | TokGtOp expr
+             | TokLeqOp expr
+             | TokGeqOp expr
+             | TokEqOp expr
+             | TokNeqOp expr
+             ;
 */
 
 type Parser struct {
-	scanner *Scanner
-	curTok  Token
-	logger  *logging.MyLogger
+	scanner       *Scanner
+	curTok        Token
+	logger        *logging.MyLogger
+	opPrecedences map[TokenType]int
 }
 
 func NewParser(scanner *Scanner) *Parser {
 	parser := new(Parser)
+	parser.scanner = scanner
+
 	parser.logger = logging.New("PARSER")
 	parser.logger.SetLevel(logging.Info)
-	parser.scanner = scanner
+
+	parser.setPrecedences([]TokenType{
+		TokLtOp,
+		TokGtOp,
+		TokLeqOp,
+		TokGeqOp,
+		TokEqOp,
+		TokNeqOp,
+		TokenType('+'),
+		TokenType('-'),
+		TokenType('*'),
+		TokenType('/'),
+	})
+
 	return parser
 }
 
-func (parser Parser) Parse() {
+func (parser *Parser) setPrecedences(operators []TokenType) {
+	parser.opPrecedences = make(map[TokenType]int)
+	for i, v := range operators {
+		parser.opPrecedences[v] = i
+	}
+}
+
+func (parser *Parser) getOpPrecedence(operator TokenType) int {
+
+}
+
+func (parser *Parser) Parse() {
 	parser.parseProgram()
 }
 
-func (parser Parser) nextTokenCheck(expected TokenType) TokenType {
+func (parser *Parser) checkNextToken(expected TokenType) TokenType {
 	actual := parser.nextToken().Type
 	if actual != expected {
 		panic(fmt.Sprintf("'%s' expected.", expected))
@@ -72,7 +102,7 @@ func (parser Parser) nextTokenCheck(expected TokenType) TokenType {
 	return actual
 }
 
-func (parser Parser) nextTokenCheckMore(expected ...TokenType) TokenType {
+func (parser *Parser) checkNextTokenMore(expected ...TokenType) TokenType {
 	actual := parser.nextToken().Type
 	for _, exp := range expected {
 		if actual == exp {
@@ -88,16 +118,16 @@ func (parser *Parser) nextToken() Token {
 }
 
 func (parser *Parser) parseOpenTag(expected TokenType) {
-	parser.nextTokenCheck(TokenType('<'))
-	parser.nextTokenCheck(expected)
-	parser.nextTokenCheck(TokenType('>'))
+	parser.checkNextToken(TokenType('<'))
+	parser.checkNextToken(expected)
+	parser.checkNextToken(TokenType('>'))
 }
 
 func (parser *Parser) parseCloseTag(expected TokenType) {
-	parser.nextTokenCheck(TokenType('<'))
-	parser.nextTokenCheck(TokenType('/'))
-	parser.nextTokenCheck(expected)
-	parser.nextTokenCheck(TokenType('>'))
+	parser.checkNextToken(TokenType('<'))
+	parser.checkNextToken(TokenType('/'))
+	parser.checkNextToken(expected)
+	parser.checkNextToken(TokenType('>'))
 }
 
 func (parser Parser) parseProgram() ProgramNode {
@@ -105,23 +135,23 @@ func (parser Parser) parseProgram() ProgramNode {
 	return parser.parseHTML()
 }
 
-func (parser Parser) parseDoctype() {
-	parser.nextTokenCheck(TokenType('<'))
-	parser.nextTokenCheck(TokenType('!'))
-	parser.nextTokenCheck(TokDoctype)
-	parser.nextTokenCheck(TokHTML)
-	parser.nextTokenCheck(TokenType('>'))
+func (parser *Parser) parseDoctype() {
+	parser.checkNextToken(TokenType('<'))
+	parser.checkNextToken(TokenType('!'))
+	parser.checkNextToken(TokDoctype)
+	parser.checkNextToken(TokHTML)
+	parser.checkNextToken(TokenType('>'))
 }
 
-func (parser Parser) parseHTML() ProgramNode {
-	parser.nextTokenCheck(TokenType('<'))
-	parser.nextTokenCheck(TokHTML)
-	parser.nextTokenCheck(TokLang)
-	parser.nextTokenCheck(TokenType('='))
-	parser.nextTokenCheck(TokenType('"'))
+func (parser *Parser) parseHTML() ProgramNode {
+	parser.checkNextToken(TokenType('<'))
+	parser.checkNextToken(TokHTML)
+	parser.checkNextToken(TokLang)
+	parser.checkNextToken(TokenType('='))
+	parser.checkNextToken(TokenType('"'))
 	parser.parseIdentifier()
-	parser.nextTokenCheck(TokenType('"'))
-	parser.nextTokenCheck(TokenType('>'))
+	parser.checkNextToken(TokenType('"'))
+	parser.checkNextToken(TokenType('>'))
 	programTitle := parser.parseProgramHeader()
 	programBody := parser.parseProgramBody()
 	parser.parseCloseTag(TokHTML)
@@ -157,7 +187,7 @@ func (parser *Parser) parseMainFunc() MainFuncNode {
 }
 
 func (parser *Parser) parseStatements() []StatementNode {
-	parser.nextTokenCheck(TokenType('<'))
+	parser.checkNextToken(TokenType('<'))
 
 	switch parser.nextToken().Type {
 	case TokVar:
@@ -176,93 +206,73 @@ func (parser *Parser) parseStatements() []StatementNode {
 }
 
 func (parser *Parser) parseVarDecl() VarDeclNode {
-	parser.nextTokenCheck(TokClass)
-	parser.nextTokenCheck(TokenType('='))
-	parser.nextTokenCheck(TokenType('"'))
-	varType := parser.nextTokenCheckMore(TokIntType, TokRealType, TokBoolType, TokStringType)
-	parser.nextTokenCheck(TokenType('"'))
-	parser.nextTokenCheck(TokenType('>'))
+	parser.checkNextToken(TokClass)
+	parser.checkNextToken(TokenType('='))
+	parser.checkNextToken(TokenType('"'))
+	varType := parser.checkNextTokenMore(TokIntType, TokRealType, TokBoolType, TokStringType)
+	parser.checkNextToken(TokenType('"'))
+	parser.checkNextToken(TokenType('>'))
 	identifier := parser.parseIdentifier()
 	parser.parseCloseTag(TokVar)
 	return VarDeclNode{Type: varType, Identifier: identifier}
 }
 
 func (parser *Parser) parseVarAssign() VarAssignNode {
-	parser.nextTokenCheck(TokValue)
-	parser.nextTokenCheck(TokenType('='))
-	parser.nextTokenCheck(TokenType('"'))
+	parser.checkNextToken(TokValue)
+	parser.checkNextToken(TokenType('='))
+	parser.checkNextToken(TokenType('"'))
 	value := parser.parseExpression()
-	parser.nextTokenCheck(TokenType('"'))
-	parser.nextTokenCheck(TokenType('>'))
+	parser.checkNextToken(TokenType('"'))
+	parser.checkNextToken(TokenType('>'))
 	identifier := parser.parseIdentifier()
 	parser.parseCloseTag(TokData)
 	return VarAssignNode{Identifier: identifier, Value: value}
 }
 
 func (parser *Parser) parseWriteStmt() WriteStmtNode {
-	parser.nextTokenCheck(TokenType('>'))
+	parser.checkNextToken(TokenType('>'))
 	value := parser.parseExpression()
 	parser.parseCloseTag(TokOutput)
 	return WriteStmtNode{Value: value}
 }
 
 func (parser *Parser) parseReadStmt() ReadStmtNode {
-	parser.nextTokenCheck(TokName)
-	parser.nextTokenCheck(TokenType('='))
-	parser.nextTokenCheck(TokenType('"'))
+	parser.checkNextToken(TokName)
+	parser.checkNextToken(TokenType('='))
+	parser.checkNextToken(TokenType('"'))
 	identifier := parser.parseIdentifier()
-	parser.nextTokenCheck(TokenType('"'))
-	parser.nextTokenCheck(TokenType('>'))
+	parser.checkNextToken(TokenType('"'))
+	parser.checkNextToken(TokenType('>'))
 	return ReadStmtNode{Identifier: identifier}
 }
 
 func (parser *Parser) parseControlFlowStmt() StatementNode {
 	// TODO if, if-else
-	parser.nextTokenCheck(TokData)
-	parser.nextTokenCheck(TokenType('-'))
-	parser.nextTokenCheck(TokWhile)
-	parser.nextTokenCheck(TokenType('='))
-	parser.nextTokenCheck(TokenType('"'))
+	parser.checkNextToken(TokData)
+	parser.checkNextToken(TokenType('-'))
+	parser.checkNextToken(TokWhile)
+	parser.checkNextToken(TokenType('='))
+	parser.checkNextToken(TokenType('"'))
 	condition := parser.parseExpression()
-	parser.nextTokenCheck(TokenType('"'))
-	parser.nextTokenCheck(TokenType('>'))
+	parser.checkNextToken(TokenType('"'))
+	parser.checkNextToken(TokenType('>'))
 	statements := parser.parseStatements()
 	parser.parseCloseTag(TokDiv)
 	return WhileStmtNode{Condition: condition, Statements: statements}
 }
 
 func (parser *Parser) parseIdentifier() IdentifierNode {
-	parser.nextTokenCheck(TokIdentifier)
+	parser.checkNextToken(TokIdentifier)
 	return IdentifierNode{Name: parser.curTok.StrVal}
 }
 
 func (parser *Parser) parseExpression() ExpressionNode {
-	return nil // TODO
+	lhs := parser.parsePrimaryExpression()
+	return parser.parseBinaryOpRhs(0, lhs)
 }
 
-func (parser *Parser) parseStringConst() StringConstNode {
-	parser.nextTokenCheck(TokStringConst)
-	return StringConstNode{Value: parser.curTok.StrVal}
-}
-
-func (parser *Parser) parseIntConst() IntConstNode {
-	parser.nextTokenCheck(TokStringConst)
-	return IntConstNode{Value: parser.curTok.IntVal}
-}
-
-func (parser *Parser) parseRealConst() RealConstNode {
-	parser.nextTokenCheck(TokStringConst)
-	return RealConstNode{Value: parser.curTok.RealVal}
-}
-
-func (parser *Parser) parseBoolConst() BoolConstNode {
-	parser.nextTokenCheck(TokStringConst)
-	return BoolConstNode{Value: parser.curTok.BoolVal}
-}
-
-/*
-func (parser *Parser) parsePrimary() ExpressionNode {
-	switch parser.curTok.Type {
+func (parser *Parser) parsePrimaryExpression() ExpressionNode {
+	switch parser.nextToken().Type {
 	case TokIntConst:
 		return parser.parseIntConst()
 	case TokRealConst:
@@ -271,7 +281,36 @@ func (parser *Parser) parsePrimary() ExpressionNode {
 		return parser.parseBoolConst()
 	case TokStringConst:
 		return parser.parseStringConst()
+	case TokIdentifier:
+		return parser.parseIdentifier()
+	case TokenType('('):
+		expr := parser.parseExpression()
+		parser.checkNextToken(TokenType(')'))
+		return expr
 	}
-	panic("Unknown token.")
+	panic("Invalid expression.")
 }
-*/
+
+func (parser *Parser) parseBinaryOpRhs(minPrec int, lhs ExpressionNode) BinaryOpExprNode {
+	// TODO
+}
+
+func (parser *Parser) parseStringConst() StringConstNode {
+	parser.checkNextToken(TokStringConst)
+	return StringConstNode{Value: parser.curTok.StrVal}
+}
+
+func (parser *Parser) parseIntConst() IntConstNode {
+	parser.checkNextToken(TokStringConst)
+	return IntConstNode{Value: parser.curTok.IntVal}
+}
+
+func (parser *Parser) parseRealConst() RealConstNode {
+	parser.checkNextToken(TokStringConst)
+	return RealConstNode{Value: parser.curTok.RealVal}
+}
+
+func (parser *Parser) parseBoolConst() BoolConstNode {
+	parser.checkNextToken(TokStringConst)
+	return BoolConstNode{Value: parser.curTok.BoolVal}
+}

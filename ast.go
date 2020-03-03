@@ -6,9 +6,7 @@ type (
 
 	ExpressionNode interface {
 	}
-)
 
-type (
 	ProgramNode struct {
 		Title StringConstNode
 		Body  ProgramBodyNode
@@ -65,67 +63,14 @@ type (
 		Statements []StatementNode
 	}
 
+	BinaryOpExprNode struct {
+		Value1   ExpressionNode
+		Value2   ExpressionNode
+		Operator TokenType
+	}
+
 /*
    AstNode interface {
-   }
-
-   WhileStmtNode struct {
-   	Condition ExpressionNode
-   	// statements
-   }
-
-
-
-
-
-   AddExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   SubExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   MulExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   DivExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   LtExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   GtExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   LeqExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   GeqExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   EqExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
-   }
-
-   NeqExprNode struct {
-   	Value1 ExpressionNode
-   	Value2 ExpressionNode
    }
 
    UnaryExprNode struct {
