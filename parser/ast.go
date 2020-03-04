@@ -1,79 +1,77 @@
 package parser
 
-type (
-	AstNode interface {
-	}
+type AstNode interface {
+}
 
-	StatementNode interface {
-	}
+type StatementNode interface {
+}
 
-	ExpressionNode interface {
-	}
+type ExpressionNode interface {
+}
 
-	ProgramNode struct {
-		Title StringConstNode
-		Body  ProgramBodyNode
-	}
+type ProgramNode struct {
+	Title StringConstNode
+	Body  ProgramBodyNode
+}
 
-	ProgramBodyNode struct {
-		MainFunc MainFuncNode
-	}
+type ProgramBodyNode struct {
+	MainFunc MainFuncNode
+}
 
-	MainFuncNode struct {
-		Statements []StatementNode
-	}
+type MainFuncNode struct {
+	Statements []StatementNode
+}
 
-	VarDeclNode struct {
-		Identifier IdentifierNode
-		Type       TokenType
-	}
+type VarDeclNode struct {
+	Identifier IdentifierNode
+	Type       TokenType
+}
 
-	VarAssignNode struct {
-		Identifier IdentifierNode
-		Value      ExpressionNode
-	}
+type VarAssignNode struct {
+	Identifier IdentifierNode
+	Value      ExpressionNode
+}
 
-	IdentifierNode struct {
-		Name string
-	}
+type IdentifierNode struct {
+	Name string
+}
 
-	StringConstNode struct {
-		Value string
-	}
+type StringConstNode struct {
+	Value string
+}
 
-	IntConstNode struct {
-		Value int
-	}
+type IntConstNode struct {
+	Value int
+}
 
-	RealConstNode struct {
-		Value float64
-	}
+type RealConstNode struct {
+	Value float64
+}
 
-	BoolConstNode struct {
-		Value bool
-	}
+type BoolConstNode struct {
+	Value bool
+}
 
-	WriteStmtNode struct {
-		Value ExpressionNode
-	}
+type WriteStmtNode struct {
+	Value ExpressionNode
+}
 
-	ReadStmtNode struct {
-		Identifier IdentifierNode
-	}
+type ReadStmtNode struct {
+	Identifier IdentifierNode
+}
 
-	WhileStmtNode struct {
-		Condition  ExpressionNode
-		Statements []StatementNode
-	}
+type WhileStmtNode struct {
+	Condition  ExpressionNode
+	Statements []StatementNode
+}
 
-	BinaryOpExprNode struct {
-		Value1   ExpressionNode
-		Value2   ExpressionNode
-		Operator TokenType
-	}
+type BinaryOpExprNode struct {
+	Value1   ExpressionNode
+	Value2   ExpressionNode
+	Operator TokenType
+}
 
-	UnaryExprNode struct {
-		Operator TokenType
-		Value    ExpressionNode
-	}
-)
+type UnaryExprNode struct {
+	Operator TokenType
+	Value    ExpressionNode
+}
