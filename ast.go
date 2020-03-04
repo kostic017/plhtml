@@ -1,6 +1,9 @@
 package main
 
 type (
+	AstNode interface {
+	}
+
 	StatementNode interface {
 	}
 
@@ -69,16 +72,8 @@ type (
 		Operator TokenType
 	}
 
-/*
-   AstNode interface {
-   }
-
-   UnaryExprNode struct {
-   	Value ExpressionNode
-   }
-
-   NegationExprNode struct {
-   	Value bool
-   }
-*/
+	UnaryExprNode struct {
+		Operator TokenType
+		Value    ExpressionNode
+	}
 )

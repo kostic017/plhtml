@@ -1,0 +1,72 @@
+```ini
+prog = '<' '!' TokDoctype TokHtml '>' '<' TokHTML TokLang '=' '"' TokIdentifier '"' '>' prog_header prog_body '<' '/' TokHTML '>';
+prog_header = '<' TokHead '>' prog_title '<' '/' TokHEAD '>';
+prog_title  = '<' TokTitle '>' TokStringConst '<' '/' TokTitle '>';
+prog_body   = '<' TokBody '>' func_main '<' '/' TokBody '>';
+func_main   = '<' TokMain '>' stmts '<' '/' TokMain '>';
+
+stmt = '<' TokVar TokClass '=' '"' TokIntType '"' '>' TokIdentifier '<' '/' TokVar '>'
+     | '<' TokVar TokClass '=' '"' TokRealType '"' '>' TokIdentifier '<' '/' TokVar '>'
+     | '<' TokVar TokClass '=' '"' TokBoolType '"' '>' TokIdentifier '<' '/' TokVar '>'
+     | '<' TokVar TokClass '=' '"' TokStringType '"' '>' TokIdentifier '<' '/' TokVar '>'
+     | '<' TokData TokValue '=' '"' expr '"' '>' TokIdentifier '<' '/' TokData '>'
+     | '<' TokOutput '>' expr '<' '/' TokOutput '>'
+     | '<' TokInput TokName '=' '"' TokIdentifier '"' '>'
+     | '<' TokDiv TokData '-' TokWhile '=' '"' expr '"' '>' ... '<' '/' TokDiv '>'
+     ;
+
+stmts = stmt
+      | stmt stmts
+      ;
+
+---------------------------
+# Before elimination of left recursion
+
+expr = TokIntConst
+     | TokRealConst
+     | TokBoolConst
+     | TokStringConst
+     | TokIdentifier
+     | '(' expr ')'
+     | '-' expr
+     | expr '+' expr
+     | expr '-' expr
+     | expr '*' expr
+     | expr '/' expr
+     | expr TokLtOp expr
+     | expr TokGtOp expr
+     | expr TokLeqOp expr
+     | expr TokGeqOp expr
+     | expr TokEqOp expr
+     | expr TokNeqOp expr
+     ;
+---------------------------
+
+expr = expr_prim expr_sec
+
+expr_prim = TokIntConst
+          | TokRealConst
+          | TokBoolConst
+          | TokStringConst
+          | TokIdentifier
+          | '(' expr ')'
+          | '-' expr
+          | '!' expr
+          ;
+
+expr_sec = binop expr_sec
+         |
+         ;
+
+binop = '+'
+      | '-'
+      | '*'
+      | '/'
+      | TokLtOp
+      | TokGtOp
+      | TokLeqOp
+      | TokGeqOp
+      | TokEqOp
+      | TokNeqOp
+      ;
+```

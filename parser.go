@@ -6,49 +6,6 @@ import (
 	"./logging"
 )
 
-/*
-prog = '<' '!' TokDoctype TokHtml '>' '<' TokHTML TokLang '=' '"' TokIdentifier '"' '>' prog_header prog_body '<' '/' TokHTML '>';
-prog_header = '<' TokHead '>' prog_title '<' '/' TokHEAD '>';
-prog_title  = '<' TokTitle '>' TokStringConst '<' '/' TokTitle '>';
-prog_body   = '<' TokBody '>' func_main '<' '/' TokBody '>';
-func_main   = '<' TokMain '>' stmts '<' '/' TokMain '>';
-
-stmt = '<' TokVar TokClass '=' '"' TokIntType '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokVar TokClass '=' '"' TokRealType '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokVar TokClass '=' '"' TokBoolType '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokVar TokClass '=' '"' TokStringType '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokData TokValue '=' '"' expr '"' '>' TokIdentifier '<' '/' TokData '>'
-     | '<' TokOutput '>' expr '<' '/' TokOutput '>'
-     | '<' TokInput TokName '=' '"' TokIdentifier '"' '>'
-     | '<' TokDiv TokData '-' TokWhile '=' '"' expr '"' '>' ... '<' '/' TokDiv '>'
-     ;
-
-stmts = stmt
-      | stmt stmts
-      ;
-
-expr = TokIntConst
-     | TokRealConst
-     | TokBoolConst
-     | TokStringConst
-     | TokIdentifier
-     | "(" expr ")"
-     | expr binaryOpExpr
-     ;
-
-binaryOpExpr = '+' expr
-             | '-' expr
-             | '*' expr
-             | '/' expr
-             | TokLtOp expr
-             | TokGtOp expr
-             | TokLeqOp expr
-             | TokGeqOp expr
-             | TokEqOp expr
-             | TokNeqOp expr
-             ;
-*/
-
 type Parser struct {
 	scanner       *Scanner
 	curTok        Token
@@ -267,11 +224,13 @@ func (parser *Parser) parseIdentifier() IdentifierNode {
 }
 
 func (parser *Parser) parseExpression() ExpressionNode {
-	lhs := parser.parsePrimaryExpression()
-	return parser.parseBinaryOpRhs(0, lhs)
+	// expr1 := parser.parseExpression()
+	// op := parser.checkNextTokenMore()
+	// expr2 := parser.parseExpression()
 }
 
 func (parser *Parser) parsePrimaryExpression() ExpressionNode {
+
 	switch parser.nextToken().Type {
 	case TokIntConst:
 		return parser.parseIntConst()
@@ -287,12 +246,11 @@ func (parser *Parser) parsePrimaryExpression() ExpressionNode {
 		expr := parser.parseExpression()
 		parser.checkNextToken(TokenType(')'))
 		return expr
+	case TokenType('-'), TokenType('!'):
+		return parser.parseUnaryExpression(token)
 	}
-	panic("Invalid expression.")
-}
 
-func (parser *Parser) parseBinaryOpRhs(minPrec int, lhs ExpressionNode) BinaryOpExprNode {
-	// TODO
+	panic("Invalid expression.")
 }
 
 func (parser *Parser) parseStringConst() StringConstNode {
