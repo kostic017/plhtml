@@ -1,28 +1,34 @@
-package main
+package scanner
 
 import (
 	"fmt"
 	"strconv"
 	"testing"
 
-	"./utility"
+	"../utility"
 )
 
 func TestScanner(t *testing.T) {
-	expected := utility.ReadFile("tests/fibonacci.scanner.expected")
-	actual := scan("tests/examples/fibonacci.html")
+	expected := utility.ReadFile("../tests/fibonacci.scanner.expected")
+	actual := scan("../tests/examples/fibonacci.html")
 
 	if expected != actual {
-		utility.WriteFile("tests/fibonacci.scanner.actual", actual)
+		utility.WriteFile("../tests/fibonacci.scanner.actual", actual)
 		t.Fail()
 	}
 }
 
 func scan(file string) string {
-	scan := NewScanner(utility.ReadFile(file))
+	source := utility.ReadFile("../tests/examples/fibonacci.html")
+	scanner := NewScanner()
+	tokens := scanner.Scan(source)
 
 	result := ""
-	for tok := scan.NextToken(); tok.Type != TokEOF; tok = scan.NextToken() {
+	for _, tok := range tokens {
+
+		if tok.Type == TokEOF {
+			break
+		}
 
 		var value string
 		switch tok.Type {
@@ -41,6 +47,7 @@ func scan(file string) string {
 		} else {
 			result += fmt.Sprintf("%s->%s\n", tok.Type, value)
 		}
+
 	}
 
 	return result

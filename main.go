@@ -1,9 +1,16 @@
 package main
 
-import "./utility"
+import (
+	"./parser"
+	"./scanner"
+	"./utility"
+)
 
 func main() {
-	scan := NewScanner(utility.ReadFile("tests/examples/fibonacci.html"))
-	parser := NewParser(scan)
-	parser.Parse()
+	source := utility.ReadFile("tests/examples/fibonacci.html")
+	scanner := scanner.NewScanner()
+	tokens := scanner.Scan(source)
+
+	parser := parser.NewParser()
+	parser.Parse(tokens)
 }
