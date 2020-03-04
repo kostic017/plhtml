@@ -42,11 +42,7 @@ func scan(file string) string {
 			value = strconv.FormatBool(tok.BoolVal)
 		}
 
-		if value == "" {
-			result += fmt.Sprintf("%s\n", tok.Type)
-		} else {
-			result += fmt.Sprintf("%s->%s\n", tok.Type, value)
-		}
+		result += fmt.Sprintf("(%s,%s)\n", tok.Type, value)
 
 	}
 
