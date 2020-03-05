@@ -1,4 +1,4 @@
-package logging
+package logger
 
 import (
 	"fmt"
@@ -6,30 +6,30 @@ import (
 	"os"
 )
 
-type logLevel int
+type LogLevel int
 
 const (
 	// Off to turn off logging
-	Off logLevel = iota
+	Off LogLevel = iota
 	// Fine for fine-grained information
-	Fine logLevel = iota
+	Fine LogLevel = iota
 	// Debug for diagnostic information
-	Debug logLevel = iota
+	Debug LogLevel = iota
 	// Info for normal application behavior
-	Info logLevel = iota
+	Info LogLevel = iota
 	// Warn for potentially harmful situations
-	Warn logLevel = iota
+	Warn LogLevel = iota
 	// Error for not so severe errors
-	Error logLevel = iota
+	Error LogLevel = iota
 	// Fatal for very severe errors
-	Fatal logLevel = iota
+	Fatal LogLevel = iota
 	// All levels
-	All logLevel = iota
+	All LogLevel = iota
 )
 
 // MyLogger wraps log.Logger and adds support for logging levels
 type MyLogger struct {
-	level     logLevel
+	level     LogLevel
 	stdLogger *log.Logger
 }
 
@@ -42,7 +42,7 @@ func New(name string) *MyLogger {
 }
 
 // SetLevel to change logging level
-func (logger *MyLogger) SetLevel(level logLevel) {
+func (logger *MyLogger) SetLevel(level LogLevel) {
 	logger.level = level
 }
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	"../logging"
+	"../logger"
 )
 
 type Scanner struct {
@@ -16,7 +16,7 @@ type Scanner struct {
 	tabSize    int
 	prevColumn int
 	source     []rune
-	logger     *logging.MyLogger
+	logger     *logger.MyLogger
 	keywords   map[string]TokenType
 	operators  map[string]TokenType
 }
@@ -26,8 +26,8 @@ func NewScanner() *Scanner {
 
 	scanner.tabSize = 4
 
-	scanner.logger = logging.New("SCANNER")
-	scanner.logger.SetLevel(logging.Info)
+	scanner.logger = logger.New("SCANNER")
+	scanner.logger.SetLevel(logger.Info)
 
 	scanner.keywords = map[string]TokenType{
 		"doctype": TokDoctype,
@@ -67,6 +67,10 @@ func NewScanner() *Scanner {
 
 func (scanner *Scanner) SetTabSize(tabSize int) {
 	scanner.tabSize = tabSize
+}
+
+func (scanner *Scanner) SetLogLevel(level logger.LogLevel) {
+	scanner.logger.SetLevel(level)
 }
 
 func (scanner *Scanner) Scan(source string) []Token {

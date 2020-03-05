@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"../logging"
+	"../logger"
 	"../scanner"
 )
 
@@ -11,15 +11,15 @@ type TokenType = scanner.TokenType
 type Parser struct {
 	index  int
 	tokens []Token
-	logger *logging.MyLogger
+	logger *logger.MyLogger
 	opPrec map[TokenType]int
 }
 
 func NewParser() *Parser {
 	parser := new(Parser)
 
-	parser.logger = logging.New("PARSER")
-	parser.logger.SetLevel(logging.Info)
+	parser.logger = logger.New("PARSER")
+	parser.logger.SetLevel(logger.Info)
 
 	parser.setOpPrec([]TokenType{
 		scanner.TokLtOp,
@@ -35,6 +35,10 @@ func NewParser() *Parser {
 	})
 
 	return parser
+}
+
+func (parser *Parser) SetLogLevel(level logger.LogLevel) {
+	parser.logger.SetLevel(level)
 }
 
 func (parser *Parser) Parse(tokens []Token) {
