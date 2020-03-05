@@ -3,6 +3,7 @@ package scanner
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"../utility"
@@ -12,7 +13,7 @@ func TestScanner(t *testing.T) {
 	expected := utility.ReadFile("../tests/fibonacci.scanner.expected")
 	actual := scan("../tests/examples/fibonacci.html")
 
-	if expected != actual {
+	if strings.TrimSpace(expected) != strings.TrimSpace(actual) {
 		utility.WriteFile("../tests/fibonacci.scanner.actual", actual)
 		t.Fail()
 	}
