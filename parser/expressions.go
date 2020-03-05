@@ -4,8 +4,12 @@ import "../scanner"
 
 func (parser *Parser) parseExpr() ExpressionNode {
 	// expr1 := parser.parseExpr()
-	// op := parser.expect()
-	// expr2 := parser.parseExpr()
+
+	// for _, ok := parser.binOps[parser.peek().Type]; ok; _, ok = parser.binOps[parser.peek().Type] {
+	// 	op := parser.next()
+	// 	expr2 := parser.parsePrimaryExpr()
+	// }
+
 	return nil
 }
 

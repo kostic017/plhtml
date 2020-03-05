@@ -12,7 +12,7 @@ type Parser struct {
 	index  int
 	tokens []Token
 	logger *logger.MyLogger
-	opPrec map[TokenType]int
+	binOps map[TokenType]int
 }
 
 func NewParser() *Parser {
@@ -21,7 +21,7 @@ func NewParser() *Parser {
 	parser.logger = logger.New("PARSER")
 	parser.logger.SetLevel(logger.Info)
 
-	parser.setOpPrec([]TokenType{
+	parser.setbinOps([]TokenType{
 		scanner.TokLtOp,
 		scanner.TokGtOp,
 		scanner.TokLeqOp,
@@ -47,14 +47,14 @@ func (parser *Parser) Parse(tokens []Token) {
 	parser.parseProgram()
 }
 
-func (parser *Parser) setOpPrec(operators []TokenType) {
-	parser.opPrec = make(map[TokenType]int)
+func (parser *Parser) setbinOps(operators []TokenType) {
+	parser.binOps = make(map[TokenType]int)
 	for i, v := range operators {
-		parser.opPrec[v] = i
+		parser.binOps[v] = i
 	}
 }
 
-// func (parser *Parser) getOpPrec(operator TokenType) int {
+// func (parser *Parser) getbinOps(operator TokenType) int {
 
 // }
 

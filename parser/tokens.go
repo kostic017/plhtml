@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"../scanner"
 )
 
@@ -33,5 +31,5 @@ func (parser *Parser) expect(expected ...TokenType) TokenType {
 			return actual
 		}
 	}
-	panic(fmt.Sprintf("Expected one of %s, got %s.", expected, actual))
+	panic("Unexpected token " + actual)
 }
