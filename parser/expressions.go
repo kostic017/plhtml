@@ -10,7 +10,7 @@ func (parser *Parser) parseExpr() ExpressionNode {
 func (parser *Parser) parseBinOpRhs(lhs ExpressionNode, minPrec int) ExpressionNode {
 
     for {
-        prec := peakBinOpPrec()
+        prec := peekBinOpPrec()
 
         if prec < minPrec
             return lhs;
@@ -19,7 +19,7 @@ func (parser *Parser) parseBinOpRhs(lhs ExpressionNode, minPrec int) ExpressionN
         rhs := parser.parsePrimaryExpr()
         
         // lhs binop rhs next_binop ...
-        nextPrec := peakBinOpPrec()
+        nextPrec := peekBinOpPrec()
 
         if prec < nextPrec {
             // lhs binop (rhs next_binop ...)
@@ -32,8 +32,8 @@ func (parser *Parser) parseBinOpRhs(lhs ExpressionNode, minPrec int) ExpressionN
 
 }
 
-func (parser *Parser) peakBinOpPrec() int {
-    prec, ok := parser.binOpsPrec[parser.peak().Type]
+func (parser *Parser) peekBinOpPrec() int {
+    prec, ok := parser.binOpsPrec[parser.peek().Type]
 	if !ok {
 		return -1 // if not binop
 	}
