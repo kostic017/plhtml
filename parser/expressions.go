@@ -28,7 +28,7 @@ func (parser *Parser) parsePrimaryExpr() ExpressionNode {
 		return parser.parseIdentifier()
 	case TokenType('('):
 		return parser.parseParenExpr()
-	case TokenType('-'), TokenType('!'):
+	case TokenType('+'), TokenType('-'), TokenType('!'):
 		return parser.parseUnaryExpr()
 	}
 
@@ -68,7 +68,7 @@ func (parser *Parser) parseParenExpr() ExpressionNode {
 }
 
 func (parser *Parser) parseUnaryExpr() UnaryExprNode {
-	op := parser.expect(TokenType('-'), TokenType('!'))
+	op := parser.expect(TokenType('+'), TokenType('-'), TokenType('!'))
 	expr := parser.parsePrimaryExpr()
 	return UnaryExprNode{Operator: op, Value: expr}
 }

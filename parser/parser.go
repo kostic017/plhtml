@@ -9,10 +9,10 @@ type Token = scanner.Token
 type TokenType = scanner.TokenType
 
 type Parser struct {
-	index  int
-	tokens []Token
-	logger *logger.MyLogger
-	binOps map[TokenType]int
+	index      int
+	tokens     []Token
+	logger     *logger.MyLogger
+	binOpsPrec map[TokenType]int
 }
 
 func NewParser() *Parser {
@@ -21,24 +21,28 @@ func NewParser() *Parser {
 	parser.logger = logger.New("PARSER")
 	parser.logger.SetLevel(logger.Info)
 
-	parser.setbinOps([]TokenType{
-		scanner.TokLtOp,
-		scanner.TokGtOp,
-		scanner.TokLeqOp,
-		scanner.TokGeqOp,
-		scanner.TokEqOp,
-		scanner.TokNeqOp,
-		TokenType('+'),
-		TokenType('-'),
-		TokenType('*'),
-		TokenType('/'),
+	parser.setBinOpsPrec([][]TokenType{
+		[]TokenType{
+			scanner.TokEqOp,
+			scanner.TokNeqOp,
+		},
+		[]TokenType{
+			scanner.TokLtOp,
+			scanner.TokGtOp,
+			scanner.TokLeqOp,
+			scanner.TokGeqOp,
+		},
+		[]TokenType{
+			TokenType('+'),
+			TokenType('-'),
+		},
+		[]TokenType{
+			TokenType('*'),
+			TokenType('/'),
+		},
 	})
 
 	return parser
-}
-
-func (parser *Parser) SetLogLevel(level logger.LogLevel) {
-	parser.logger.SetLevel(level)
 }
 
 func (parser *Parser) Parse(tokens []Token) {
@@ -47,16 +51,26 @@ func (parser *Parser) Parse(tokens []Token) {
 	parser.parseProgram()
 }
 
-func (parser *Parser) setbinOps(operators []TokenType) {
-	parser.binOps = make(map[TokenType]int)
-	for i, v := range operators {
-		parser.binOps[v] = i
+func (parser *Parser) SetLogLevel(level logger.LogLevel) {
+	parser.logger.SetLevel(level)
+}
+
+func (parser *Parser) setBinOpsPrec(operators [][]TokenType) {
+	parser.binOpsPrec = make(map[TokenType]int)
+	for i, group := range operators {
+		for _, op := range group {
+			parser.binOpsPrec[op] = i
+		}
 	}
 }
 
-// func (parser *Parser) getbinOps(operator TokenType) int {
-
-// }
+func (parser *Parser) getBinOpsPrec(operator TokenType) int {
+	prec, ok := parser.binOpsPrec[operator]
+	if !ok {
+		return -1
+	}
+	return prec
+}
 
 func (parser *Parser) parseOpenTag(expected TokenType) {
 	parser.expect(TokenType('<'))
