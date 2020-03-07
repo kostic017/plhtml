@@ -62,13 +62,13 @@ func (parser *Parser) parseStringConst() StringConstNode {
 
 func (parser *Parser) parseParenExpr() ExpressionNode {
 	parser.expect(TokenType('('))
-	expr := parser.parseExpr()
+	expr := parser.parsePrimaryExpr()
 	parser.expect(TokenType(')'))
 	return expr
 }
 
 func (parser *Parser) parseUnaryExpr() UnaryExprNode {
 	op := parser.expect(TokenType('-'), TokenType('!'))
-	expr := parser.parseExpr()
+	expr := parser.parsePrimaryExpr()
 	return UnaryExprNode{Operator: op, Value: expr}
 }
