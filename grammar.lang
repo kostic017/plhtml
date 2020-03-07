@@ -4,18 +4,24 @@ prog_title  = '<' TokTitle '>' TokStringConst '<' '/' TokTitle '>';
 prog_body   = '<' TokBody '>' func_main '<' '/' TokBody '>';
 func_main   = '<' TokMain '>' stmts '<' '/' TokMain '>';
 
-stmt = '<' TokVar TokClass '=' '"' TokIntType '"' '>' TokIdentifier '<' '/' TokVar '>'
+stmt = stmt_ctrl
+     | '<' TokVar TokClass '=' '"' TokIntType '"' '>' TokIdentifier '<' '/' TokVar '>'
      | '<' TokVar TokClass '=' '"' TokRealType '"' '>' TokIdentifier '<' '/' TokVar '>'
      | '<' TokVar TokClass '=' '"' TokBoolType '"' '>' TokIdentifier '<' '/' TokVar '>'
      | '<' TokVar TokClass '=' '"' TokStringType '"' '>' TokIdentifier '<' '/' TokVar '>'
      | '<' TokData TokValue '=' '"' expr '"' '>' TokIdentifier '<' '/' TokData '>'
      | '<' TokOutput '>' expr '<' '/' TokOutput '>'
      | '<' TokInput TokName '=' '"' TokIdentifier '"' '>'
-     | '<' TokDiv TokData '-' TokWhile '=' '"' expr '"' '>' ... '<' '/' TokDiv '>'
      ;
 
-stmts = stmt
-      | stmt stmts
+stmt_ctrl = '<' TokDiv TokData '-' TokIf '=' '"' expr '"' '>' stmts '<' '/' TokDiv '>'
+          | '<' TokDiv TokData '-' TokWhile '=' '"' expr '"' '>' stmts '<' '/' TokDiv '>'
+          ;
+
+; stmts = stmt*
+
+stmts = stmt stmts
+      |
       ;
 
 expr_prim = TokIntConst
@@ -29,19 +35,6 @@ expr_prim = TokIntConst
           | '!' expr_prim
           ;
 
-; expr = expr_prim
-;      | expr '+' expr
-;      | expr '-' expr
-;      | expr '*' expr
-;      | expr '/' expr
-;      | expr TokLtOp expr
-;      | expr TokGtOp expr
-;      | expr TokLeqOp expr
-;      | expr TokGeqOp expr
-;      | expr TokEqOp expr
-;      | expr TokNeqOp expr
-;      ;
-
 binop = '+'
       | '-'
       | '*'
@@ -54,14 +47,10 @@ binop = '+'
       | TokNeqOp
       ;
 
+; expr = expr_prim (binop expr_prim)*;
 
+expr = expr_prim binop_rhs;
 
-; expr = expr binop expr
-;      | expr_prim
-;      ;
-
-expr = expr_prim binop_rhs
-
-binop_rhs = binop expr binop_rhs
+binop_rhs = binop expr_prim binop_rhs
          |
          ;
