@@ -16,6 +16,10 @@ func (parser Parser) peek() Token {
 	return parser.tokens[parser.index+1]
 }
 
+func (parser *Parser) goBack() {
+    parser.index--
+}
+
 func (parser *Parser) next() Token {
 	current := parser.current()
 	if current.Type != scanner.TokEOF {

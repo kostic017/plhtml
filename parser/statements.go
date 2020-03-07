@@ -3,22 +3,31 @@ package parser
 import "../scanner"
 
 func (parser *Parser) parseStatements() []StatementNode {
+    var stmts []StatementNode
+    for stmt := parser.parseStmt(); stmt != nil; stmt = parser.parseStmt() {
+        stmts = append(stmts, stmt)
+    }
+    return stmts
+}
+
+func (parser *Parser) parseStatement() StatementNode {
 	parser.expect(TokenType('<'))
 
 	switch parser.peek().Type {
 	case scanner.TokVar:
-		parser.parseVarDecl()
+		return parser.parseVarDecl()
 	case scanner.TokData:
-		parser.parseVarAssign()
+		return parser.parseVarAssign()
 	case scanner.TokOutput:
-		parser.parseWriteStmt()
+		return parser.parseWriteStmt()
 	case scanner.TokInput:
-		parser.parseReadStmt()
+		return parser.parseReadStmt()
 	case scanner.TokDiv:
-		parser.parseControlFlowStmt()
+		return parser.parseControlFlowStmt()
 	}
 
-	return nil // TODO
+    parser.goBack() // '<'
+    return nil
 }
 
 func (parser *Parser) parseVarDecl() VarDeclNode {
