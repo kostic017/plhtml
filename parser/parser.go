@@ -64,14 +64,6 @@ func (parser *Parser) setBinOpsPrec(operators [][]TokenType) {
 	}
 }
 
-func (parser *Parser) getBinOpsPrec(operator TokenType) int {
-	prec, ok := parser.binOpsPrec[operator]
-	if !ok {
-		return -1
-	}
-	return prec
-}
-
 func (parser *Parser) parseOpenTag(expected TokenType) {
 	parser.expect(TokenType('<'))
 	parser.expect(expected)

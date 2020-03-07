@@ -3,14 +3,41 @@ package parser
 import "../scanner"
 
 func (parser *Parser) parseExpr() ExpressionNode {
-	// expr1 := parser.parseExpr()
+	lhs := parser.parsePrimaryExpr()
+    return parser.parseBinOpRhs(lhs, 0)
+}
 
-	// for _, ok := parser.binOps[parser.peek().Type]; ok; _, ok = parser.binOps[parser.peek().Type] {
-	// 	op := parser.next()
-	// 	expr2 := parser.parsePrimaryExpr()
-	// }
+func (parser *Parser) parseBinOpRhs(lhs ExpressionNode, minPrec int) ExpressionNode {
 
-	return nil
+    for {
+        prec := peakBinOpPrec()
+
+        if prec < minPrec
+            return lhs;
+
+        binop := parser.next()
+        rhs := parser.parsePrimaryExpr()
+        
+        // lhs binop rhs next_binop ...
+        nextPrec := peakBinOpPrec()
+
+        if prec < nextPrec {
+            // lhs binop (rhs next_binop ...)
+            rhs = parser.parseBinOpRhs(prec+1, rhs)
+        }
+
+        // (lhs binop rhs) next_binop ...
+        lhs = BinaryOpExprNode{Value1: lhs, Value2: rhs, Operator: binop}
+    }
+
+}
+
+func (parser *Parser) peakBinOpPrec() int {
+    prec, ok := parser.binOpsPrec[parser.peak().Type]
+	if !ok {
+		return -1 // if not binop
+	}
+	return prec
 }
 
 func (parser *Parser) parsePrimaryExpr() ExpressionNode {
@@ -32,7 +59,7 @@ func (parser *Parser) parsePrimaryExpr() ExpressionNode {
 		return parser.parseUnaryExpr()
 	}
 
-	panic("Invalid expression.")
+	panic("Invalid primary expression.")
 }
 
 func (parser *Parser) parseIdentifier() IdentifierNode {
@@ -62,7 +89,7 @@ func (parser *Parser) parseStringConst() StringConstNode {
 
 func (parser *Parser) parseParenExpr() ExpressionNode {
 	parser.expect(TokenType('('))
-	expr := parser.parsePrimaryExpr()
+	expr := parser.parseExpression()
 	parser.expect(TokenType(')'))
 	return expr
 }
