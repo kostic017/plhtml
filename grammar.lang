@@ -18,44 +18,29 @@ stmts = stmt
       | stmt stmts
       ;
 
-######################################
-# Before elimination of left recursion
-
-expr = TokIntConst
-     | TokRealConst
-     | TokBoolConst
-     | TokStringConst
-     | TokIdentifier
-     | '(' expr ')'
-     | '-' expr
-     | expr '+' expr
-     | expr '-' expr
-     | expr '*' expr
-     | expr '/' expr
-     | expr TokLtOp expr
-     | expr TokGtOp expr
-     | expr TokLeqOp expr
-     | expr TokGeqOp expr
-     | expr TokEqOp expr
-     | expr TokNeqOp expr
-     ;
-######################################
-
-expr = expr_prim expr_sec
-
 expr_prim = TokIntConst
           | TokRealConst
           | TokBoolConst
           | TokStringConst
           | TokIdentifier
           | '(' expr ')'
+          | '+' expr_prim
           | '-' expr_prim
           | '!' expr_prim
           ;
 
-expr_sec = binop expr_sec
-         |
-         ;
+; expr = expr_prim
+;      | expr '+' expr
+;      | expr '-' expr
+;      | expr '*' expr
+;      | expr '/' expr
+;      | expr TokLtOp expr
+;      | expr TokGtOp expr
+;      | expr TokLeqOp expr
+;      | expr TokGeqOp expr
+;      | expr TokEqOp expr
+;      | expr TokNeqOp expr
+;      ;
 
 binop = '+'
       | '-'
@@ -68,3 +53,15 @@ binop = '+'
       | TokEqOp
       | TokNeqOp
       ;
+
+
+
+; expr = expr binop expr
+;      | expr_prim
+;      ;
+
+expr = expr_prim binop_rhs
+
+binop_rhs = binop expr binop_rhs
+         |
+         ;
