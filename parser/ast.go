@@ -60,7 +60,8 @@ type ReadStmtNode struct {
 	Identifier IdentifierNode
 }
 
-type WhileStmtNode struct {
+type ControlFlowStmtNode struct {
+    Type       TokenType
 	Condition  ExpressionNode
 	Statements []StatementNode
 }

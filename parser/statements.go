@@ -75,18 +75,17 @@ func (parser *Parser) parseReadStmt() ReadStmtNode {
 	return ReadStmtNode{Identifier: identifier}
 }
 
-func (parser *Parser) parseControlFlowStmt() StatementNode {
-	// TODO if, if-else
+func (parser *Parser) parseControlFlowStmt() ControlFlowStmtNode {
 	parser.expect(scanner.TokDiv)
 	parser.expect(scanner.TokData)
 	parser.expect(TokenType('-'))
-	parser.expect(scanner.TokWhile)
+    stmtType := parser.expect(scanner.TokIf, scanner.TokWhile)
 	parser.expect(TokenType('='))
 	parser.expect(TokenType('"'))
 	condition := parser.parseExpr()
 	parser.expect(TokenType('"'))
 	parser.expect(TokenType('>'))
-	statements := parser.parseStatements()
+	stmts := parser.parseStatements()
 	parser.parseCloseTag(scanner.TokDiv)
-	return WhileStmtNode{Condition: condition, Statements: statements}
+    return ControlFlowStmtNode{Type: stmtType, Condition: condition, Statements: stmts}
 }
