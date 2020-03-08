@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"../scanner"
 )
 
@@ -9,31 +11,32 @@ func (parser Parser) current() Token {
 }
 
 func (parser Parser) peek() Token {
-	current := parser.current()
-	if current.Type == scanner.TokEOF {
-		return current
+	if parser.current().Type == scanner.TokEOF {
+		return parser.current()
 	}
 	return parser.tokens[parser.index+1]
 }
 
 func (parser *Parser) goBack() {
-    parser.index--
+	parser.index--
 }
 
 func (parser *Parser) next() Token {
-	current := parser.current()
-	if current.Type != scanner.TokEOF {
+	if parser.index < 0 || parser.current().Type != scanner.TokEOF {
 		parser.index++
 	}
-	return current
+	return parser.current()
 }
 
 func (parser *Parser) expect(expected ...TokenType) TokenType {
 	actual := parser.next().Type
+	parser.logger.Debug("got '%s'", string(actual))
+
 	for _, exp := range expected {
 		if actual == exp {
 			return actual
 		}
 	}
-	panic("Unexpected token " + actual)
+
+	panic(fmt.Sprintf("Unexpected token %s.", string(actual)))
 }
