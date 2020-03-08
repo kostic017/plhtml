@@ -3,11 +3,11 @@ package parser
 import "../scanner"
 
 func (parser *Parser) parseStatements() []StatementNode {
-    var stmts []StatementNode
-    for stmt := parser.parseStmt(); stmt != nil; stmt = parser.parseStmt() {
-        stmts = append(stmts, stmt)
-    }
-    return stmts
+	var stmts []StatementNode
+	for stmt := parser.parseStatement(); stmt != nil; stmt = parser.parseStatement() {
+		stmts = append(stmts, stmt)
+	}
+	return stmts
 }
 
 func (parser *Parser) parseStatement() StatementNode {
@@ -26,8 +26,8 @@ func (parser *Parser) parseStatement() StatementNode {
 		return parser.parseControlFlowStmt()
 	}
 
-    parser.goBack() // '<'
-    return nil
+	parser.goBack() // '<'
+	return nil
 }
 
 func (parser *Parser) parseVarDecl() VarDeclNode {
@@ -79,7 +79,7 @@ func (parser *Parser) parseControlFlowStmt() ControlFlowStmtNode {
 	parser.expect(scanner.TokDiv)
 	parser.expect(scanner.TokData)
 	parser.expect(TokenType('-'))
-    stmtType := parser.expect(scanner.TokIf, scanner.TokWhile)
+	stmtType := parser.expect(scanner.TokIf, scanner.TokWhile)
 	parser.expect(TokenType('='))
 	parser.expect(TokenType('"'))
 	condition := parser.parseExpr()
@@ -87,5 +87,5 @@ func (parser *Parser) parseControlFlowStmt() ControlFlowStmtNode {
 	parser.expect(TokenType('>'))
 	stmts := parser.parseStatements()
 	parser.parseCloseTag(scanner.TokDiv)
-    return ControlFlowStmtNode{Type: stmtType, Condition: condition, Statements: stmts}
+	return ControlFlowStmtNode{Type: stmtType, Condition: condition, Statements: stmts}
 }

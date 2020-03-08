@@ -4,36 +4,37 @@ import "../scanner"
 
 func (parser *Parser) parseExpr() ExpressionNode {
 	lhs := parser.parsePrimaryExpr()
-    return parser.parseBinOpRhs(lhs, 0)
+	return parser.parseBinOpRhs(lhs, 0)
 }
 
 func (parser *Parser) parseBinOpRhs(lhs ExpressionNode, minPrec int) ExpressionNode {
 
-    for {
-        prec := peekBinOpPrec()
+	for {
+		prec := parser.peekBinOpPrec()
 
-        if prec < minPrec
-            return lhs;
+		if prec < minPrec {
+			return lhs
+		}
 
-        binop := parser.next()
-        rhs := parser.parsePrimaryExpr()
-        
-        // lhs binop rhs next_binop ...
-        nextPrec := peekBinOpPrec()
+		binop := parser.next()
+		rhs := parser.parsePrimaryExpr()
 
-        if prec < nextPrec {
-            // lhs binop (rhs next_binop ...)
-            rhs = parser.parseBinOpRhs(prec+1, rhs)
-        }
+		// lhs binop rhs next_binop ...
+		nextPrec := parser.peekBinOpPrec()
 
-        // (lhs binop rhs) next_binop ...
-        lhs = BinaryOpExprNode{Value1: lhs, Value2: rhs, Operator: binop}
-    }
+		if prec < nextPrec {
+			// lhs binop (rhs next_binop ...)
+			rhs = parser.parseBinOpRhs(rhs, prec+1)
+		}
+
+		// (lhs binop rhs) next_binop ...
+		lhs = BinaryOpExprNode{Value1: lhs, Value2: rhs, Operator: binop.Type}
+	}
 
 }
 
 func (parser *Parser) peekBinOpPrec() int {
-    prec, ok := parser.binOpsPrec[parser.peek().Type]
+	prec, ok := parser.binOpsPrec[parser.peek().Type]
 	if !ok {
 		return -1 // if not binop
 	}
@@ -89,7 +90,7 @@ func (parser *Parser) parseStringConst() StringConstNode {
 
 func (parser *Parser) parseParenExpr() ExpressionNode {
 	parser.expect(TokenType('('))
-	expr := parser.parseExpression()
+	expr := parser.parseExpr()
 	parser.expect(TokenType(')'))
 	return expr
 }
