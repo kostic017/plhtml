@@ -30,7 +30,7 @@ func (parser *Parser) next() Token {
 
 func (parser *Parser) expect(expected ...TokenType) TokenType {
 	actual := parser.next().Type
-	parser.logger.Debug("got '%s'", string(actual))
+	parser.logger.Debug("'%s'", string(actual))
 
 	for _, exp := range expected {
 		if actual == exp {

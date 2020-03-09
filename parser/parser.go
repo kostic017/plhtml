@@ -65,14 +65,14 @@ func (parser *Parser) setBinOpsPrec(operators [][]TokenType) {
 }
 
 func (parser *Parser) parseOpenTag(expected TokenType) {
-	parser.logger.Debug("'%s' begin tag expected", string(expected))
+	parser.logger.Debug("<%s> expected", string(expected))
 	parser.expect(TokenType('<'))
 	parser.expect(expected)
 	parser.expect(TokenType('>'))
 }
 
 func (parser *Parser) parseCloseTag(expected TokenType) {
-	parser.logger.Debug("'%s' close tag expected", string(expected))
+	parser.logger.Debug("</%s> expected", string(expected))
 	parser.expect(TokenType('<'))
 	parser.expect(TokenType('/'))
 	parser.expect(expected)
