@@ -1,11 +1,14 @@
 package parser
 
-import "../scanner"
+import (
+	"../ast"
+	"../scanner"
+)
 
-func (parser *Parser) parseStatements() []StatementNode {
+func (parser *Parser) parseStatements() []ast.StatementNode {
 	parser.logger.Debug("=BEG= Statements")
 
-	var stmts []StatementNode
+	var stmts []ast.StatementNode
 	for stmt := parser.parseStatement(); stmt != nil; stmt = parser.parseStatement() {
 		stmts = append(stmts, stmt)
 	}
@@ -14,7 +17,7 @@ func (parser *Parser) parseStatements() []StatementNode {
 	return stmts
 }
 
-func (parser *Parser) parseStatement() StatementNode {
+func (parser *Parser) parseStatement() ast.StatementNode {
 	parser.expect(TokenType('<'))
 
 	switch parser.peek().Type {
@@ -35,7 +38,7 @@ func (parser *Parser) parseStatement() StatementNode {
 	return nil
 }
 
-func (parser *Parser) parseVarDecl() VarDeclNode {
+func (parser *Parser) parseVarDecl() ast.VarDeclNode {
 	parser.logger.Debug("=BEG= Var Declaration")
 	parser.expect(scanner.TokVar)
 	parser.expect(scanner.TokClass)
@@ -47,10 +50,10 @@ func (parser *Parser) parseVarDecl() VarDeclNode {
 	identifier := parser.parseIdentifier()
 	parser.parseCloseTag(scanner.TokVar)
 	parser.logger.Debug("=END= Var Declaration")
-	return VarDeclNode{Type: varType, Identifier: identifier}
+	return ast.VarDeclNode{Type: varType, Identifier: identifier}
 }
 
-func (parser *Parser) parseVarAssign() VarAssignNode {
+func (parser *Parser) parseVarAssign() ast.VarAssignNode {
 	parser.logger.Debug("=BEG= Var Assignment")
 	parser.expect(scanner.TokData)
 	parser.expect(scanner.TokValue)
@@ -62,20 +65,20 @@ func (parser *Parser) parseVarAssign() VarAssignNode {
 	identifier := parser.parseIdentifier()
 	parser.parseCloseTag(scanner.TokData)
 	parser.logger.Debug("=END= Var Assignment")
-	return VarAssignNode{Identifier: identifier, Value: value}
+	return ast.VarAssignNode{Identifier: identifier, Value: value}
 }
 
-func (parser *Parser) parseWriteStmt() WriteStmtNode {
+func (parser *Parser) parseWriteStmt() ast.WriteStmtNode {
 	parser.logger.Debug("=BEG= Write")
 	parser.expect(scanner.TokOutput)
 	parser.expect(TokenType('>'))
 	value := parser.parseExpr()
 	parser.parseCloseTag(scanner.TokOutput)
 	parser.logger.Debug("=END= Write")
-	return WriteStmtNode{Value: value}
+	return ast.WriteStmtNode{Value: value}
 }
 
-func (parser *Parser) parseReadStmt() ReadStmtNode {
+func (parser *Parser) parseReadStmt() ast.ReadStmtNode {
 	parser.logger.Debug("=BEG= Read")
 	parser.expect(scanner.TokInput)
 	parser.expect(scanner.TokName)
@@ -85,10 +88,10 @@ func (parser *Parser) parseReadStmt() ReadStmtNode {
 	parser.expect(TokenType('"'))
 	parser.expect(TokenType('>'))
 	parser.logger.Debug("=END= Read")
-	return ReadStmtNode{Identifier: identifier}
+	return ast.ReadStmtNode{Identifier: identifier}
 }
 
-func (parser *Parser) parseControlFlowStmt() ControlFlowStmtNode {
+func (parser *Parser) parseControlFlowStmt() ast.ControlFlowStmtNode {
 	parser.logger.Debug("=BEG= Control Flow")
 	parser.expect(scanner.TokDiv)
 	parser.expect(scanner.TokData)
@@ -102,5 +105,5 @@ func (parser *Parser) parseControlFlowStmt() ControlFlowStmtNode {
 	stmts := parser.parseStatements()
 	parser.parseCloseTag(scanner.TokDiv)
 	parser.logger.Debug("=END= Control Flow")
-	return ControlFlowStmtNode{Type: stmtType, Condition: condition, Statements: stmts}
+	return ast.ControlFlowStmtNode{Type: stmtType, Condition: condition, Statements: stmts}
 }

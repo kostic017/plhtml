@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./logger"
 	"./parser"
 	"./scanner"
 	"./utility"
@@ -13,7 +12,6 @@ func main() {
 	tokens := scanner.Scan(source)
 
 	parser := parser.NewParser()
-	parser.SetLogLevel(logger.Debug)
 	prgNode := parser.Parse(tokens)
-	_ = prgNode
+	prgNode.Print()
 }

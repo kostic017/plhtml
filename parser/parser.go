@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"../ast"
 	"../logger"
 	"../scanner"
 )
@@ -45,7 +46,7 @@ func NewParser() *Parser {
 	return parser
 }
 
-func (parser *Parser) Parse(tokens []Token) ProgramNode {
+func (parser *Parser) Parse(tokens []Token) ast.ProgramNode {
 	parser.index = -1
 	parser.tokens = tokens
 	return parser.parseProgram()
@@ -79,7 +80,7 @@ func (parser *Parser) parseCloseTag(expected TokenType) {
 	parser.expect(TokenType('>'))
 }
 
-func (parser Parser) parseProgram() ProgramNode {
+func (parser Parser) parseProgram() ast.ProgramNode {
 	parser.logger.Debug("=BEG= Program")
 	parser.parseDoctype()
 	prg := parser.parseHTML()
@@ -97,7 +98,7 @@ func (parser *Parser) parseDoctype() {
 	parser.logger.Debug("=END= Doctype")
 }
 
-func (parser *Parser) parseHTML() ProgramNode {
+func (parser *Parser) parseHTML() ast.ProgramNode {
 	parser.logger.Debug("=BEG= HTML")
 	parser.expect(TokenType('<'))
 	parser.expect(scanner.TokHTML)
@@ -111,10 +112,10 @@ func (parser *Parser) parseHTML() ProgramNode {
 	programBody := parser.parseProgramBody()
 	parser.parseCloseTag(scanner.TokHTML)
 	parser.logger.Debug("=END= HTML")
-	return ProgramNode{Title: programTitle, Body: programBody}
+	return ast.ProgramNode{Title: programTitle, Body: programBody}
 }
 
-func (parser *Parser) parseProgramHeader() StringConstNode {
+func (parser *Parser) parseProgramHeader() ast.StringConstNode {
 	parser.logger.Debug("=BEG= Prg Header")
 	parser.parseOpenTag(scanner.TokHead)
 	programTitle := parser.parseProgramTitle()
@@ -123,7 +124,7 @@ func (parser *Parser) parseProgramHeader() StringConstNode {
 	return programTitle
 }
 
-func (parser *Parser) parseProgramTitle() StringConstNode {
+func (parser *Parser) parseProgramTitle() ast.StringConstNode {
 	parser.logger.Debug("=BEG= Prg Title")
 	parser.parseOpenTag(scanner.TokTitle)
 	programTitle := parser.parseStringConst()
@@ -132,20 +133,20 @@ func (parser *Parser) parseProgramTitle() StringConstNode {
 	return programTitle
 }
 
-func (parser *Parser) parseProgramBody() ProgramBodyNode {
+func (parser *Parser) parseProgramBody() ast.ProgramBodyNode {
 	parser.logger.Debug("=BEG= Prg Body")
 	parser.parseOpenTag(scanner.TokBody)
 	mainFunc := parser.parseMainFunc()
 	parser.parseCloseTag(scanner.TokBody)
 	parser.logger.Debug("=END= Prg Title")
-	return ProgramBodyNode{MainFunc: mainFunc}
+	return ast.ProgramBodyNode{MainFunc: mainFunc}
 }
 
-func (parser *Parser) parseMainFunc() MainFuncNode {
+func (parser *Parser) parseMainFunc() ast.MainFuncNode {
 	parser.logger.Debug("=BEG= Main")
 	parser.parseOpenTag(scanner.TokMain)
 	statements := parser.parseStatements()
 	parser.parseCloseTag(scanner.TokMain)
 	parser.logger.Debug("=END= Main")
-	return MainFuncNode{Statements: statements}
+	return ast.MainFuncNode{Statements: statements}
 }

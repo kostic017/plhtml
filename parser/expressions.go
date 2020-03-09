@@ -3,10 +3,11 @@ package parser
 import (
 	"fmt"
 
+	"../ast"
 	"../scanner"
 )
 
-func (parser *Parser) parseExpr() ExpressionNode {
+func (parser *Parser) parseExpr() ast.ExpressionNode {
 	parser.logger.Debug("=BEG= Expression")
 	lhs := parser.parsePrimaryExpr()
 	expr := parser.parseBinOpRhs(lhs, 0)
@@ -14,7 +15,7 @@ func (parser *Parser) parseExpr() ExpressionNode {
 	return expr
 }
 
-func (parser *Parser) parseBinOpRhs(lhs ExpressionNode, minPrec int) ExpressionNode {
+func (parser *Parser) parseBinOpRhs(lhs ast.ExpressionNode, minPrec int) ast.ExpressionNode {
 
 	for {
 		prec := parser.peekBinOpPrec()
@@ -35,7 +36,7 @@ func (parser *Parser) parseBinOpRhs(lhs ExpressionNode, minPrec int) ExpressionN
 		}
 
 		// (lhs binop rhs) next_binop ...
-		lhs = BinaryOpExprNode{Value1: lhs, Value2: rhs, Operator: binop.Type}
+		lhs = ast.BinaryOpExprNode{Expr1: lhs, Expr2: rhs, Operator: binop.Type}
 	}
 
 }
@@ -48,7 +49,7 @@ func (parser *Parser) peekBinOpPrec() int {
 	return prec
 }
 
-func (parser *Parser) parsePrimaryExpr() ExpressionNode {
+func (parser *Parser) parsePrimaryExpr() ast.ExpressionNode {
 
 	switch parser.peek().Type {
 	case scanner.TokIntConst:
@@ -70,42 +71,42 @@ func (parser *Parser) parsePrimaryExpr() ExpressionNode {
 	panic(fmt.Sprintf("Invalid primary expression '%s'.", string(parser.peek().Type)))
 }
 
-func (parser *Parser) parseIdentifier() IdentifierNode {
+func (parser *Parser) parseIdentifier() ast.IdentifierNode {
 	parser.logger.Debug("=BEG= Identifier")
 	parser.expect(scanner.TokIdentifier)
 	parser.logger.Debug("=END= Identifier")
-	return IdentifierNode{Name: parser.current().StrVal}
+	return ast.IdentifierNode{Name: parser.current().StrVal}
 }
 
-func (parser *Parser) parseIntConst() IntConstNode {
+func (parser *Parser) parseIntConst() ast.IntConstNode {
 	parser.logger.Debug("=BEG= Integer Constant")
 	parser.expect(scanner.TokIntConst)
 	parser.logger.Debug("=END= Integer Constant")
-	return IntConstNode{Value: parser.current().IntVal}
+	return ast.IntConstNode{Value: parser.current().IntVal}
 }
 
-func (parser *Parser) parseRealConst() RealConstNode {
+func (parser *Parser) parseRealConst() ast.RealConstNode {
 	parser.logger.Debug("=BEG= Real Constant")
 	parser.expect(scanner.TokRealConst)
 	parser.logger.Debug("=END= Real Constant")
-	return RealConstNode{Value: parser.current().RealVal}
+	return ast.RealConstNode{Value: parser.current().RealVal}
 }
 
-func (parser *Parser) parseBoolConst() BoolConstNode {
+func (parser *Parser) parseBoolConst() ast.BoolConstNode {
 	parser.logger.Debug("=BEG= Boolean Constant")
 	parser.expect(scanner.TokBoolConst)
 	parser.logger.Debug("=END= Boolean Constant")
-	return BoolConstNode{Value: parser.current().BoolVal}
+	return ast.BoolConstNode{Value: parser.current().BoolVal}
 }
 
-func (parser *Parser) parseStringConst() StringConstNode {
+func (parser *Parser) parseStringConst() ast.StringConstNode {
 	parser.logger.Debug("=BEG= String Constant")
 	parser.expect(scanner.TokStringConst)
 	parser.logger.Debug("=END= String Constant")
-	return StringConstNode{Value: parser.current().StrVal}
+	return ast.StringConstNode{Value: parser.current().StrVal}
 }
 
-func (parser *Parser) parseParenExpr() ExpressionNode {
+func (parser *Parser) parseParenExpr() ast.ExpressionNode {
 	parser.logger.Debug("=BEG= ()")
 	parser.expect(TokenType('('))
 	expr := parser.parseExpr()
@@ -114,10 +115,10 @@ func (parser *Parser) parseParenExpr() ExpressionNode {
 	return expr
 }
 
-func (parser *Parser) parseUnaryExpr() UnaryExprNode {
+func (parser *Parser) parseUnaryExpr() ast.UnaryExprNode {
 	parser.logger.Debug("=BEG= Unary")
 	op := parser.expect(TokenType('+'), TokenType('-'), TokenType('!'))
 	expr := parser.parsePrimaryExpr()
 	parser.logger.Debug("=END= Unary")
-	return UnaryExprNode{Operator: op, Value: expr}
+	return ast.UnaryExprNode{Operator: op, Expr: expr}
 }
