@@ -5,7 +5,7 @@ import "../scanner"
 type TokenType = scanner.TokenType
 
 type AstNode interface {
-	Print()
+	ToString() string
 }
 
 type StatementNode interface {

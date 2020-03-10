@@ -4,6 +4,6 @@ type ProgramBodyNode struct {
 	MainFunc MainFuncNode
 }
 
-func (node ProgramBodyNode) Print() {
-	node.MainFunc.Print()
+func (node ProgramBodyNode) ToString() string {
+	return node.MainFunc.ToString()
 }

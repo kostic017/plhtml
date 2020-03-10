@@ -39,6 +39,7 @@
             "description": "Test to show diff for.",
             "options": [
                 "fibonacci.scanner",
+                "fibonacci.parser",
             ],
         },
     ]

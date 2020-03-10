@@ -5,7 +5,6 @@ type ProgramNode struct {
 	Body  ProgramBodyNode
 }
 
-func (node ProgramNode) Print() {
-	node.Title.Print()
-	node.Body.Print()
+func (node ProgramNode) ToString() string {
+	return node.Title.ToString() + node.Body.ToString() + "\n"
 }

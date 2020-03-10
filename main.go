@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"./parser"
 	"./scanner"
 	"./utility"
@@ -13,5 +15,5 @@ func main() {
 
 	parser := parser.NewParser()
 	prgNode := parser.Parse(tokens)
-	prgNode.Print()
+	fmt.Print(prgNode.ToString())
 }

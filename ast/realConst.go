@@ -6,6 +6,6 @@ type RealConstNode struct {
 	Value float64
 }
 
-func (node RealConstNode) Print() {
-	fmt.Printf("%f", node.Value)
+func (node RealConstNode) ToString() string {
+	return fmt.Sprintf("%f", node.Value)
 }

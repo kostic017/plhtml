@@ -4,8 +4,10 @@ type MainFuncNode struct {
 	Statements []StatementNode
 }
 
-func (node MainFuncNode) Print() {
-	for _, s := range node.Statements {
-		s.Print()
+func (node MainFuncNode) ToString() string {
+	str := ""
+	for _, stmt := range node.Statements {
+		str += "\n" + stmt.ToString()
 	}
+	return str
 }

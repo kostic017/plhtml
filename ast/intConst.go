@@ -6,6 +6,6 @@ type IntConstNode struct {
 	Value int
 }
 
-func (node IntConstNode) Print() {
-	fmt.Printf("%d", node.Value)
+func (node IntConstNode) ToString() string {
+	return fmt.Sprintf("%d", node.Value)
 }

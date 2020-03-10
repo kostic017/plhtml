@@ -8,12 +8,10 @@ type ControlFlowStmtNode struct {
 	Statements []StatementNode
 }
 
-func (node ControlFlowStmtNode) Print() {
-	fmt.Print(string(node.Type))
-	fmt.Print("(")
-	node.Condition.Print()
-	fmt.Print(")")
+func (node ControlFlowStmtNode) ToString() string {
+	str := fmt.Sprintf("%s (%s)", string(node.Type), node.Condition.ToString())
 	for _, stmt := range node.Statements {
-		stmt.Print()
+		str += "\n    " + stmt.ToString()
 	}
+	return str
 }

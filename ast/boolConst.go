@@ -6,6 +6,6 @@ type BoolConstNode struct {
 	Value bool
 }
 
-func (node BoolConstNode) Print() {
-	fmt.Printf("%t", node.Value)
+func (node BoolConstNode) ToString() string {
+	return fmt.Sprintf("%t", node.Value)
 }

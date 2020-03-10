@@ -1,12 +1,9 @@
 package ast
 
-import "fmt"
-
 type WriteStmtNode struct {
 	Value ExpressionNode
 }
 
-func (node WriteStmtNode) Print() {
-	fmt.Print("Write: ")
-	node.Value.Print()
+func (node WriteStmtNode) ToString() string {
+	return "Write: " + node.Value.ToString()
 }
