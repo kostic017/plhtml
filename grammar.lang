@@ -5,14 +5,17 @@ prog_body   = '<' TokBody '>' func_main '<' '/' TokBody '>';
 func_main   = '<' TokMain '>' stmts '<' '/' TokMain '>';
 
 stmt = stmt_ctrl
-     | '<' TokVar TokClass '=' '"' TokIntType '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokVar TokClass '=' '"' TokRealType '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokVar TokClass '=' '"' TokBoolType '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokVar TokClass '=' '"' TokStringType '"' '>' TokIdentifier '<' '/' TokVar '>'
+     | '<' TokVar TokClass '=' '"' var_type '"' '>' TokIdentifier '<' '/' TokVar '>'
      | '<' TokData TokValue '=' '"' expr '"' '>' TokIdentifier '<' '/' TokData '>'
      | '<' TokOutput '>' expr '<' '/' TokOutput '>'
      | '<' TokInput TokName '=' '"' TokIdentifier '"' '>'
      ;
+
+var_type = TokIntType
+         | TokRealType
+         | TokBoolType
+         | TokStringType
+         ;
 
 stmt_ctrl = '<' TokDiv TokData '-' TokIf '=' '"' expr '"' '>' stmts '<' '/' TokDiv '>'
           | '<' TokDiv TokData '-' TokWhile '=' '"' expr '"' '>' stmts '<' '/' TokDiv '>'
@@ -30,10 +33,13 @@ expr_prim = TokIntConst
           | TokStringConst
           | TokIdentifier
           | '(' expr ')'
-          | '+' expr_prim
-          | '-' expr_prim
-          | '!' expr_prim
+          | unrop expr_prim
           ;
+
+unrop = '+'
+      | '-'
+      | '!'
+      ;
 
 binop = '+'
       | '-'
