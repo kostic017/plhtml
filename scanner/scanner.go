@@ -7,18 +7,24 @@ import (
 	"unicode"
 
 	"../logger"
+	"../utility"
 )
 
 type Scanner struct {
-	line       int
-	index      int
-	column     int
-	tabSize    int
-	prevColumn int
-	source     []rune
-	logger     *logger.MyLogger
-	keywords   map[string]TokenType
-	operators  map[string]TokenType
+	line             int
+	column           int
+	prevColumn       int
+	tokenStartLine   int
+	tokenStartColumn int
+	tabSize          int
+
+	index  int
+	source []rune
+
+	keywords  map[string]TokenType
+	operators map[string]TokenType
+
+	logger *logger.MyLogger
 }
 
 func NewScanner() *Scanner {
@@ -106,12 +112,15 @@ func (scanner *Scanner) nextToken() Token {
 			continue
 		}
 
+		scanner.tokenStartLine = scanner.line
+		scanner.tokenStartColumn = scanner.column
+
 		if ch == '`' {
-			return scanner.lexString(ch, scanner.line, scanner.column)
+			return scanner.lexString(ch)
 		}
 
 		// after lexString because <!-- could be part of string literal
-		if ch == '<' && scanner.lexComment(scanner.line, scanner.column) {
+		if ch == '<' && scanner.lexComment() {
 			continue
 		}
 
@@ -120,73 +129,22 @@ func (scanner *Scanner) nextToken() Token {
 		}
 
 		if ch == '&' || unicode.IsLetter(ch) {
-			return scanner.lexWord(ch, scanner.line, scanner.column)
+			return scanner.lexWord(ch)
 		}
 
 		switch ch {
 		case '+', '-', '*', '/', '(', ')', '!', '"', '=', '<', '>', '.':
-			return Token{Type: TokenType(ch)}
+			return scanner.newToken(TokenType(ch))
 		}
 
-		panic(fmt.Sprintf("Illegal character %c at %d:%d.", ch, scanner.line, scanner.column))
+		panic(fmt.Sprintf("Illegal character %c at %d:%d.", ch, scanner.tokenStartLine, scanner.tokenStartColumn))
 
 	}
 
 	return Token{Type: TokEOF}
 }
 
-func (scanner *Scanner) nextChar() (rune, bool) {
-	if scanner.index != len(scanner.source)-1 {
-		ch := scanner.source[scanner.index]
-		scanner.logger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
-		scanner.incColLine(ch)
-		scanner.index++
-		return ch, true
-	}
-
-	return 0, false
-}
-
-func (scanner *Scanner) lookahead(i int) (rune, bool) {
-	if scanner.index+i < len(scanner.source)-1 {
-		return scanner.source[scanner.index+i], true
-	}
-	return 0, false
-}
-
-func (scanner *Scanner) goBack() {
-	if scanner.index < len(scanner.source) {
-		scanner.index--
-		ch := scanner.source[scanner.index]
-		scanner.logger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
-		scanner.decColLine(ch)
-	}
-}
-
-func (scanner *Scanner) decColLine(ch rune) {
-	if ch == '\n' {
-		scanner.column = scanner.prevColumn
-		scanner.line--
-	} else if ch == '\t' {
-		scanner.column -= scanner.tabSize
-	} else {
-		scanner.column--
-	}
-}
-
-func (scanner *Scanner) incColLine(ch rune) {
-	if ch == '\n' {
-		scanner.prevColumn = scanner.column
-		scanner.column = 0
-		scanner.line++
-	} else if ch == '\t' {
-		scanner.column += scanner.tabSize
-	} else {
-		scanner.column++
-	}
-}
-
-func (scanner *Scanner) lexString(ch rune, line int, column int) Token {
+func (scanner *Scanner) lexString(ch rune) Token {
 	var ok bool
 	str := string(ch)
 
@@ -202,14 +160,16 @@ func (scanner *Scanner) lexString(ch rune, line int, column int) Token {
 			str += string(ch)
 
 		} else {
-			panic(fmt.Sprintf("Unterminated string at %d:%d.", line, column))
+			panic(fmt.Sprintf("Unterminated string at %d:%d.", scanner.tokenStartLine, scanner.tokenStartColumn))
 		}
 	}
 
-	return Token{Type: TokStringConst, StrVal: str[1:]}
+	token := scanner.newToken(TokStringConst)
+	token.StrVal = str[1:]
+	return token
 }
 
-func (scanner *Scanner) lexComment(line int, column int) bool {
+func (scanner *Scanner) lexComment() bool {
 	// <!--.*-->
 
 	ch1, ok1 := scanner.lookahead(0)
@@ -220,7 +180,7 @@ func (scanner *Scanner) lexComment(line int, column int) bool {
 		for {
 			ch, ok := scanner.nextChar()
 			if !ok {
-				panic(fmt.Sprintf("End of file inside comment at %d:%d.", line, column))
+				panic(fmt.Sprintf("End of file inside comment at %d:%d.", scanner.tokenStartLine, scanner.tokenStartColumn))
 			}
 			if ch == '-' {
 				ch1, ok1 := scanner.lookahead(0)
@@ -258,15 +218,21 @@ func (scanner *Scanner) lexNumber(ch rune) Token {
 	}
 
 	if real {
-		realVal, _ := strconv.ParseFloat(number, 64)
-		return Token{Type: TokRealConst, RealVal: realVal}
+		realVal, err := strconv.ParseFloat(number, 64)
+		utility.Check(err)
+		token := scanner.newToken(TokRealConst)
+		token.RealVal = realVal
+		return token
 	}
 
-	intVal, _ := strconv.Atoi(number)
-	return Token{Type: TokIntConst, IntVal: intVal}
+	intVal, err := strconv.Atoi(number)
+	utility.Check(err)
+	token := scanner.newToken(TokIntConst)
+	token.IntVal = intVal
+	return token
 }
 
-func (scanner *Scanner) lexWord(ch rune, line int, column int) Token {
+func (scanner *Scanner) lexWord(ch rune) Token {
 	// &[a-zA-Z];            operators
 	// [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
 
@@ -287,24 +253,28 @@ func (scanner *Scanner) lexWord(ch rune, line int, column int) Token {
 
 	}
 
-	if tok, ok := scanner.lexOperator(word, line, column); ok {
+	if tok, ok := scanner.lexOperator(word); ok {
 		return tok
 	}
 
 	word = strings.ToLower(word)
 
 	if word == "true" || word == "false" {
-		return Token{Type: TokBoolConst, BoolVal: word == "true"}
+		token := scanner.newToken(TokBoolConst)
+		token.BoolVal = word == "true"
+		return token
 	}
 
 	if tok, ok := scanner.keywords[word]; ok {
-		return Token{Type: tok}
+		return scanner.newToken(tok)
 	}
 
-	return Token{Type: TokIdentifier, StrVal: word}
+	token := scanner.newToken(TokIdentifier)
+	token.StrVal = word
+	return token
 }
 
-func (scanner *Scanner) lexOperator(word string, line int, column int) (Token, bool) {
+func (scanner *Scanner) lexOperator(word string) (Token, bool) {
 
 	firstChar := word[0]
 	lastChar := word[len(word)-1:]
@@ -314,13 +284,68 @@ func (scanner *Scanner) lexOperator(word string, line int, column int) (Token, b
 	}
 
 	if lastChar != ";" {
-		panic(fmt.Sprintf("Unterminated operator %s at %d:%d.", word, line, column))
+		panic(fmt.Sprintf("Unterminated operator %s at %d:%d.", word, scanner.tokenStartLine, scanner.tokenStartColumn))
 	}
 
 	if tok, ok := scanner.operators[word]; ok {
-		return Token{Type: tok}, true
+		return scanner.newToken(tok), true
 	}
 
-	panic(fmt.Sprintf("Operator %s is not valid at %d:%d.", word, line, column))
+	panic(fmt.Sprintf("Operator %s is not valid at %d:%d.", word, scanner.tokenStartLine, scanner.tokenStartColumn))
 
+}
+
+func (scanner Scanner) newToken(tokType TokenType) Token {
+	return Token{Type: tokType, Line: scanner.tokenStartLine, Column: scanner.tokenStartColumn}
+}
+
+func (scanner *Scanner) nextChar() (rune, bool) {
+	if scanner.index != len(scanner.source)-1 {
+		ch := scanner.source[scanner.index]
+		scanner.logger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
+		scanner.incCounters(ch)
+		scanner.index++
+		return ch, true
+	}
+
+	return 0, false
+}
+
+func (scanner *Scanner) lookahead(i int) (rune, bool) {
+	if scanner.index+i < len(scanner.source)-1 {
+		return scanner.source[scanner.index+i], true
+	}
+	return 0, false
+}
+
+func (scanner *Scanner) goBack() {
+	if scanner.index < len(scanner.source) {
+		scanner.index--
+		ch := scanner.source[scanner.index]
+		scanner.logger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
+		scanner.decCounters(ch)
+	}
+}
+
+func (scanner *Scanner) decCounters(ch rune) {
+	if ch == '\n' {
+		scanner.column = scanner.prevColumn
+		scanner.line--
+	} else if ch == '\t' {
+		scanner.column -= scanner.tabSize
+	} else {
+		scanner.column--
+	}
+}
+
+func (scanner *Scanner) incCounters(ch rune) {
+	if ch == '\n' {
+		scanner.prevColumn = scanner.column
+		scanner.column = 0
+		scanner.line++
+	} else if ch == '\t' {
+		scanner.column += scanner.tabSize
+	} else {
+		scanner.column++
+	}
 }

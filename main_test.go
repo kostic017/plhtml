@@ -65,7 +65,7 @@ func tokensToString(tokens []scanner.Token) string {
 			value = strconv.FormatBool(tok.BoolVal)
 		}
 
-		result += fmt.Sprintf("(%s,%s)\n", tok.Type, value)
+		result += fmt.Sprintf("(%s,%d,%d,%s)\n", tok.Type, tok.Line, tok.Column, value)
 
 	}
 

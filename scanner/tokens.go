@@ -4,6 +4,8 @@ type TokenType string
 
 type Token struct {
 	Type    TokenType
+	Line    int
+	Column  int
 	IntVal  int
 	BoolVal bool
 	RealVal float64
