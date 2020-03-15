@@ -10,39 +10,15 @@ type Token = scanner.Token
 type TokenType = scanner.TokenType
 
 type Parser struct {
-	index      int
-	tokens     []Token
-	logger     *logger.MyLogger
-	binOpsPrec map[TokenType]int
+	index  int
+	tokens []Token
+	logger *logger.MyLogger
 }
 
 func NewParser() *Parser {
 	parser := new(Parser)
-
 	parser.logger = logger.New("PARSER")
 	parser.logger.SetLevel(logger.Info)
-
-	parser.setBinOpsPrec([][]TokenType{
-		[]TokenType{
-			scanner.TokEqOp,
-			scanner.TokNeqOp,
-		},
-		[]TokenType{
-			scanner.TokLtOp,
-			scanner.TokGtOp,
-			scanner.TokLeqOp,
-			scanner.TokGeqOp,
-		},
-		[]TokenType{
-			TokenType('+'),
-			TokenType('-'),
-		},
-		[]TokenType{
-			TokenType('*'),
-			TokenType('/'),
-		},
-	})
-
 	return parser
 }
 
@@ -54,15 +30,6 @@ func (parser *Parser) Parse(tokens []Token) ast.ProgramNode {
 
 func (parser *Parser) SetLogLevel(level logger.LogLevel) {
 	parser.logger.SetLevel(level)
-}
-
-func (parser *Parser) setBinOpsPrec(operators [][]TokenType) {
-	parser.binOpsPrec = make(map[TokenType]int)
-	for i, group := range operators {
-		for _, op := range group {
-			parser.binOpsPrec[op] = i
-		}
-	}
 }
 
 func (parser *Parser) parseOpenTag(expected TokenType) {

@@ -23,40 +23,42 @@ stmt_ctrl = '<' TokDiv TokData '-' TokIf '=' '"' expr '"' '>' stmts '<' '/' TokD
 
 ; stmts = stmt*
 
-stmts = stmt stmts
-      |
-      ;
+expr = expr_l1
+     ;
 
-expr_prim = TokIntConst
-          | TokRealConst
-          | TokBoolConst
-          | TokStringConst
-          | TokIdentifier
-          | '(' expr ')'
-          | unrop expr_prim
-          ;
+; expr_l1 = expr_l2 (binop1 expr_l2)*
+; expr_l2 = expr_l3 (binop2 expr_l3)*
+; expr_l3 = expr_l4 (binop3 expr_l4)*
+; expr_l4 = factor (binop4 factor)*
+
+factor = TokIntConst
+       | TokRealConst
+       | TokBoolConst
+       | TokStringConst
+       | TokIdentifier
+       | '(' expr ')'
+       | unrop factor
+       ;
 
 unrop = '+'
       | '-'
       | '!'
       ;
 
-binop = '+'
-      | '-'
-      | '*'
-      | '/'
-      | TokLtOp
-      | TokGtOp
-      | TokLeqOp
-      | TokGeqOp
-      | TokEqOp
-      | TokNeqOp
-      ;
+bionp1 = TokEqOp
+       | TokNeqOp
+       ;
 
-; expr = expr_prim (binop expr_prim)*;
+binop2 = TokLtOp
+       | TokGtOp
+       | TokLeqOp
+       | TokGeqOp
+       ;
 
-expr = expr_prim binop_rhs;
+binop3 = '+'
+       | '-'
+       ;
 
-binop_rhs = binop expr_prim binop_rhs
-         |
-         ;
+binop4 = '*'
+       | '/'
+       ;

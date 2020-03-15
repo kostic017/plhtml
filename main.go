@@ -14,6 +14,7 @@ func main() {
 	tokens := scanner.Scan(source)
 
 	parser := parser.NewParser()
+	// parser.SetLogLevel(logger.Debug)
 	prgNode := parser.Parse(tokens)
 	fmt.Print(prgNode.ToString())
 }

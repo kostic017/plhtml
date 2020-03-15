@@ -8,48 +8,54 @@ import (
 )
 
 func (parser *Parser) parseExpr() ast.ExpressionNode {
-	parser.logger.Debug("=BEG= Expression")
-	lhs := parser.parsePrimaryExpr()
-	expr := parser.parseBinOpRhs(lhs, 0)
-	parser.logger.Debug("=END= Expression")
-	return expr
+	return parser.parseExprL1()
 }
 
-func (parser *Parser) parseBinOpRhs(lhs ast.ExpressionNode, minPrec int) ast.ExpressionNode {
-
+func (parser *Parser) parseExprL1() ast.ExpressionNode {
+	expr := parser.parseExprL2()
 	for {
-		prec := parser.peekBinOpPrec()
-
-		if prec < minPrec {
-			return lhs
+		ok := parser.expectOpt(scanner.TokEqOp, scanner.TokNeqOp)
+		if !ok {
+			return expr
 		}
-
-		binop := parser.next()
-		rhs := parser.parsePrimaryExpr()
-
-		// lhs binop rhs next_binop ...
-		nextPrec := parser.peekBinOpPrec()
-
-		if prec < nextPrec {
-			// lhs binop (rhs next_binop ...)
-			rhs = parser.parseBinOpRhs(rhs, prec+1)
-		}
-
-		// (lhs binop rhs) next_binop ...
-		lhs = ast.BinaryOpExprNode{Expr1: lhs, Expr2: rhs, Operator: binop.Type}
+		expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL2()}
 	}
-
 }
 
-func (parser *Parser) peekBinOpPrec() int {
-	prec, ok := parser.binOpsPrec[parser.peek().Type]
-	if !ok {
-		return -1 // if not binop
+func (parser *Parser) parseExprL2() ast.ExpressionNode {
+	expr := parser.parseExprL3()
+	for {
+		ok := parser.expectOpt(scanner.TokLtOp, scanner.TokGtOp, scanner.TokLeqOp, scanner.TokGeqOp)
+		if !ok {
+			return expr
+		}
+		expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL3()}
 	}
-	return prec
 }
 
-func (parser *Parser) parsePrimaryExpr() ast.ExpressionNode {
+func (parser *Parser) parseExprL3() ast.ExpressionNode {
+	expr := parser.parseExprL4()
+	for {
+		ok := parser.expectOpt(TokenType('+'), TokenType('-'))
+		if !ok {
+			return expr
+		}
+		expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL4()}
+	}
+}
+
+func (parser *Parser) parseExprL4() ast.ExpressionNode {
+	expr := parser.parseFactor()
+	for {
+		ok := parser.expectOpt(TokenType('*'), TokenType('/'))
+		if !ok {
+			return expr
+		}
+		expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseFactor()}
+	}
+}
+
+func (parser *Parser) parseFactor() ast.ExpressionNode {
 
 	switch parser.peek().Type {
 	case scanner.TokIntConst:
@@ -68,7 +74,7 @@ func (parser *Parser) parsePrimaryExpr() ast.ExpressionNode {
 		return parser.parseUnaryExpr()
 	}
 
-	panic(fmt.Sprintf("Invalid primary expression '%s'.", string(parser.peek().Type)))
+	panic(fmt.Sprintf("Invalid factor '%s'.", string(parser.peek().Type)))
 }
 
 func (parser *Parser) parseIdentifier() ast.IdentifierNode {
@@ -118,7 +124,7 @@ func (parser *Parser) parseParenExpr() ast.ExpressionNode {
 func (parser *Parser) parseUnaryExpr() ast.UnaryExprNode {
 	parser.logger.Debug("=BEG= Unary")
 	op := parser.expect(TokenType('+'), TokenType('-'), TokenType('!'))
-	expr := parser.parsePrimaryExpr()
+	expr := parser.parseFactor()
 	parser.logger.Debug("=END= Unary")
 	return ast.UnaryExprNode{Operator: op, Expr: expr}
 }
