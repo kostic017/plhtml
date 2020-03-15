@@ -8,51 +8,30 @@ import (
 )
 
 func (parser *Parser) parseExpr() ast.ExpressionNode {
-	return parser.parseExprL1()
+	return parser.parseExprL(1)
 }
 
-func (parser *Parser) parseExprL1() ast.ExpressionNode {
-	expr := parser.parseExprL2()
-	for {
-		ok := parser.expectOpt(scanner.TokEqOp, scanner.TokNeqOp)
-		if !ok {
-			return expr
-		}
-		expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL2()}
-	}
-}
+func (parser *Parser) parseExprL(l int) ast.ExpressionNode {
+	var operators []TokenType
 
-func (parser *Parser) parseExprL2() ast.ExpressionNode {
-	expr := parser.parseExprL3()
-	for {
-		ok := parser.expectOpt(scanner.TokLtOp, scanner.TokGtOp, scanner.TokLeqOp, scanner.TokGeqOp)
-		if !ok {
-			return expr
-		}
-		expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL3()}
+	switch l {
+	case 1:
+		operators = []TokenType{scanner.TokEqOp, scanner.TokNeqOp}
+	case 2:
+		operators = []TokenType{scanner.TokLtOp, scanner.TokGtOp, scanner.TokLeqOp, scanner.TokGeqOp}
+	case 3:
+		operators = []TokenType{TokenType('+'), TokenType('-')}
+	case 4:
+		operators = []TokenType{TokenType('*'), TokenType('/')}
+	case 5:
+		return parser.parseFactor()
 	}
-}
 
-func (parser *Parser) parseExprL3() ast.ExpressionNode {
-	expr := parser.parseExprL4()
-	for {
-		ok := parser.expectOpt(TokenType('+'), TokenType('-'))
-		if !ok {
-			return expr
-		}
-		expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL4()}
+	expr := parser.parseExprL(l + 1)
+	if parser.expectOpt(operators...) {
+		return ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL(l + 1)}
 	}
-}
-
-func (parser *Parser) parseExprL4() ast.ExpressionNode {
-	expr := parser.parseFactor()
-	for {
-		ok := parser.expectOpt(TokenType('*'), TokenType('/'))
-		if !ok {
-			return expr
-		}
-		expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseFactor()}
-	}
+	return expr
 }
 
 func (parser *Parser) parseFactor() ast.ExpressionNode {
