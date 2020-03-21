@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"../ast"
 	"../logger"
 	"../scanner"
@@ -32,6 +34,48 @@ func (parser *Parser) SetLogLevel(level logger.LogLevel) {
 	parser.logger.SetLevel(level)
 }
 
+func (parser Parser) current() Token {
+	return parser.tokens[parser.index]
+}
+
+func (parser *Parser) next() Token {
+	if parser.index < 0 || parser.current().Type != scanner.TokEOF {
+		parser.index++
+	}
+	return parser.current()
+}
+
+func (parser *Parser) goBack() {
+	parser.index--
+}
+
+func (parser Parser) peek() Token {
+	next := parser.next()
+	parser.goBack()
+	return next
+}
+
+func (parser *Parser) expectOpt(expected ...TokenType) bool {
+	actual := parser.peek().Type
+	parser.logger.Debug("'%s'", string(actual))
+
+	for _, exp := range expected {
+		if actual == exp {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (parser *Parser) expect(expected ...TokenType) TokenType {
+	ok := parser.expectOpt(expected...)
+	if !ok {
+		panic(fmt.Sprintf("Unexpected token '%s'.", string(parser.peek().Type)))
+	}
+	return parser.next().Type
+}
+
 func (parser *Parser) parseOpenTag(expected TokenType) {
 	parser.logger.Debug("<%s> expected", string(expected))
 	parser.expect(TokenType('<'))
@@ -45,75 +89,4 @@ func (parser *Parser) parseCloseTag(expected TokenType) {
 	parser.expect(TokenType('/'))
 	parser.expect(expected)
 	parser.expect(TokenType('>'))
-}
-
-func (parser Parser) parseProgram() ast.ProgramNode {
-	parser.logger.Debug("=BEG= Program")
-	parser.parseDoctype()
-	prg := parser.parseHTML()
-	parser.logger.Debug("=END= Program")
-	return prg
-}
-
-func (parser *Parser) parseDoctype() {
-	parser.logger.Debug("=BEG= Doctype")
-	parser.expect(TokenType('<'))
-	parser.expect(TokenType('!'))
-	parser.expect(scanner.TokDoctype)
-	parser.expect(scanner.TokHTML)
-	parser.expect(TokenType('>'))
-	parser.logger.Debug("=END= Doctype")
-}
-
-func (parser *Parser) parseHTML() ast.ProgramNode {
-	parser.logger.Debug("=BEG= HTML")
-	parser.expect(TokenType('<'))
-	parser.expect(scanner.TokHTML)
-	parser.expect(scanner.TokLang)
-	parser.expect(TokenType('='))
-	parser.expect(TokenType('"'))
-	parser.parseIdentifier()
-	parser.expect(TokenType('"'))
-	parser.expect(TokenType('>'))
-	programTitle := parser.parseProgramHeader()
-	programBody := parser.parseProgramBody()
-	parser.parseCloseTag(scanner.TokHTML)
-	parser.logger.Debug("=END= HTML")
-	return ast.ProgramNode{Title: programTitle, Body: programBody}
-}
-
-func (parser *Parser) parseProgramHeader() ast.StringConstNode {
-	parser.logger.Debug("=BEG= Prg Header")
-	parser.parseOpenTag(scanner.TokHead)
-	programTitle := parser.parseProgramTitle()
-	parser.parseCloseTag(scanner.TokHead)
-	parser.logger.Debug("=END= Prg Header")
-	return programTitle
-}
-
-func (parser *Parser) parseProgramTitle() ast.StringConstNode {
-	parser.logger.Debug("=BEG= Prg Title")
-	parser.parseOpenTag(scanner.TokTitle)
-	programTitle := parser.parseStringConst()
-	parser.parseCloseTag(scanner.TokTitle)
-	parser.logger.Debug("=END= Prg Title")
-	return programTitle
-}
-
-func (parser *Parser) parseProgramBody() ast.ProgramBodyNode {
-	parser.logger.Debug("=BEG= Prg Body")
-	parser.parseOpenTag(scanner.TokBody)
-	mainFunc := parser.parseMainFunc()
-	parser.parseCloseTag(scanner.TokBody)
-	parser.logger.Debug("=END= Prg Title")
-	return ast.ProgramBodyNode{MainFunc: mainFunc}
-}
-
-func (parser *Parser) parseMainFunc() ast.MainFuncNode {
-	parser.logger.Debug("=BEG= Main")
-	parser.parseOpenTag(scanner.TokMain)
-	statements := parser.parseStatements()
-	parser.parseCloseTag(scanner.TokMain)
-	parser.logger.Debug("=END= Main")
-	return ast.MainFuncNode{Statements: statements}
 }
