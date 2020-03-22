@@ -1,23 +1,23 @@
 package main
 
 import (
-	"./parser"
-	"./scanner"
-	"./semantic"
-	"./utility"
+    "./parser"
+    "./scanner"
+    "./semantic"
+    "./utility"
 )
 
 func main() {
 
-	source := utility.ReadFile("tests/examples/fibonacci.html")
+    source := utility.ReadFile("tests/examples/fibonacci.html")
 
-	scanner := scanner.NewScanner()
-	tokens := scanner.Scan(source)
+    myScanner := scanner.New()
+    tokens := myScanner.Scan(source)
 
-	parser := parser.NewParser()
-	prgNode := parser.Parse(tokens)
+    myParser := parser.New()
+    prgNode := myParser.Parse(tokens)
 
-	semanticAnalyzer := semantic.NewSemanticAnalyzer()
-	prgNode.Accept(semanticAnalyzer)
+    semanticAnalyzer := semantic.NewAnalyzer()
+    prgNode.Accept(semanticAnalyzer)
 
 }
