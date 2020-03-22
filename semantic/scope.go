@@ -19,8 +19,16 @@ func NewScope(id int, parent *Scope) *Scope {
     scope := new(Scope)
     scope.id = id
     scope.parent = parent
-    scope.symbols = make(map[string]symbol)
+    scope.initializeSymbolTable()
     return scope
+}
+
+func (scope *Scope) initializeSymbolTable() {
+    scope.symbols = make(map[string]symbol)
+    scope.symbols["integer"] = symbol{"integer"}
+    scope.symbols["real"] = symbol{"real"}
+    scope.symbols["boolean"] = symbol{"boolean"}
+    scope.symbols["string"] = symbol{"string"}
 }
 
 func (scope *Scope) insert(sym symbol) {

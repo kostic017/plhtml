@@ -44,13 +44,13 @@ func (parser *Parser) parseVarDecl() ast.VarDeclNode {
     parser.expect(scanner.TokClass)
     parser.expect(TokenType('='))
     parser.expect(TokenType('"'))
-    varType := parser.expect(scanner.TokIntType, scanner.TokRealType, scanner.TokBoolType, scanner.TokStringType)
+    varType := parser.parseIdentifier()
     parser.expect(TokenType('"'))
     parser.expect(TokenType('>'))
-    identifier := parser.parseIdentifier()
+    varName := parser.parseIdentifier()
     parser.parseCloseTag(scanner.TokVar)
     myLogger.Debug("=END= Var Declaration")
-    return ast.VarDeclNode{Type: varType, Identifier: identifier}
+    return ast.VarDeclNode{Type: varType, Identifier: varName}
 }
 
 func (parser *Parser) parseVarAssign() ast.VarAssignNode {

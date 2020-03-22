@@ -53,10 +53,6 @@ func New() *Scanner {
         "div":     TokDiv,
         "if":      TokIf,
         "while":   TokWhile,
-        "integer": TokIntType,
-        "real":    TokRealType,
-        "boolean": TokBoolType,
-        "string":  TokStringType,
     }
 
     scanner.operators = map[string]TokenType{

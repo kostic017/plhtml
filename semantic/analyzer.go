@@ -1,7 +1,9 @@
 package semantic
 
-import "../ast"
-import "../logger"
+import (
+	"../ast"
+	"../logger"
+)
 
 var myLogger = logger.New("ANALYZER")
 
@@ -80,6 +82,7 @@ func (analyzer *Analyzer) VisitVarAssign(node ast.VarAssignNode) {
 }
 
 func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
+	analyzer.scope.expect(node.Type.Name)
 	name := node.Identifier.Name
 	if _, ok := analyzer.scope.lookup(name); ok {
 		panic("Identifier " + name + " is already declared.")

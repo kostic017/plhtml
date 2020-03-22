@@ -5,17 +5,11 @@ prog_body   = '<' TokBody '>' func_main '<' '/' TokBody '>';
 func_main   = '<' TokMain '>' stmts '<' '/' TokMain '>';
 
 stmt = stmt_ctrl
-     | '<' TokVar TokClass '=' '"' var_type '"' '>' TokIdentifier '<' '/' TokVar '>'
+     | '<' TokVar TokClass '=' '"' TokIdentifier '"' '>' TokIdentifier '<' '/' TokVar '>'
      | '<' TokData TokValue '=' '"' expr '"' '>' TokIdentifier '<' '/' TokData '>'
      | '<' TokOutput '>' expr '<' '/' TokOutput '>'
      | '<' TokInput TokName '=' '"' TokIdentifier '"' '>'
      ;
-
-var_type = TokIntType
-         | TokRealType
-         | TokBoolType
-         | TokStringType
-         ;
 
 stmt_ctrl = '<' TokDiv TokData '-' TokIf '=' '"' expr '"' '>' stmts '<' '/' TokDiv '>'
           | '<' TokDiv TokData '-' TokWhile '=' '"' expr '"' '>' stmts '<' '/' TokDiv '>'
