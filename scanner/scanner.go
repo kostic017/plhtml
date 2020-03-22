@@ -295,18 +295,6 @@ func (scanner Scanner) newToken(tokType TokenType) Token {
     return Token{Type: tokType, Line: scanner.tokenStartLine, Column: scanner.tokenStartColumn}
 }
 
-func (scanner *Scanner) nextChar() (rune, bool) {
-    if scanner.index != len(scanner.source)-1 {
-        ch := scanner.source[scanner.index]
-        myLogger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
-        scanner.incCounters(ch)
-        scanner.index++
-        return ch, true
-    }
-
-    return 0, false
-}
-
 func (scanner *Scanner) lookahead(i int) (rune, bool) {
     if scanner.index+i < len(scanner.source)-1 {
         return scanner.source[scanner.index+i], true
@@ -314,27 +302,17 @@ func (scanner *Scanner) lookahead(i int) (rune, bool) {
     return 0, false
 }
 
-func (scanner *Scanner) goBack() {
-    if scanner.index < len(scanner.source) {
-        scanner.index--
-        ch := scanner.source[scanner.index]
-        myLogger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
-        scanner.decCounters(ch)
-    }
-}
+func (scanner *Scanner) nextChar() (rune, bool) {
 
-func (scanner *Scanner) decCounters(ch rune) {
-    if ch == '\n' {
-        scanner.column = scanner.prevColumn
-        scanner.line--
-    } else if ch == '\t' {
-        scanner.column -= scanner.tabSize
-    } else {
-        scanner.column--
+    if scanner.index >= len(scanner.source)-1 {
+        return 0, false
     }
-}
 
-func (scanner *Scanner) incCounters(ch rune) {
+    ch := scanner.source[scanner.index]
+    scanner.index++
+
+    myLogger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
+
     if ch == '\n' {
         scanner.prevColumn = scanner.column
         scanner.column = 0
@@ -343,5 +321,28 @@ func (scanner *Scanner) incCounters(ch rune) {
         scanner.column += scanner.tabSize
     } else {
         scanner.column++
+    }
+
+    return ch, true
+
+}
+
+func (scanner *Scanner) goBack() {
+    if scanner.index < len(scanner.source) {
+
+        scanner.index--
+        ch := scanner.source[scanner.index]
+
+        myLogger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
+
+        if ch == '\n' {
+            scanner.column = scanner.prevColumn
+            scanner.line--
+        } else if ch == '\t' {
+            scanner.column -= scanner.tabSize
+        } else {
+            scanner.column--
+        }
+
     }
 }
