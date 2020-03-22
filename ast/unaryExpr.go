@@ -8,3 +8,7 @@ type UnaryExprNode struct {
 func (node UnaryExprNode) ToString() string {
 	return string(node.Operator) + node.Expr.ToString()
 }
+
+func (node UnaryExprNode) Accept(v Visitor) {
+	v.VisitUnaryExpr(node)
+}

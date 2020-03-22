@@ -11,3 +11,7 @@ func (node MainFuncNode) ToString() string {
 	}
 	return str
 }
+
+func (node MainFuncNode) Accept(v Visitor) {
+	v.VisitMainFunc(node)
+}

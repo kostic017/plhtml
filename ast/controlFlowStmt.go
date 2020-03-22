@@ -15,3 +15,7 @@ func (node ControlFlowStmtNode) ToString() string {
 	}
 	return str
 }
+
+func (node ControlFlowStmtNode) Accept(v Visitor) {
+	v.VisitControlFlowStmt(node)
+}

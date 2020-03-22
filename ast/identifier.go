@@ -7,3 +7,7 @@ type IdentifierNode struct {
 func (node IdentifierNode) ToString() string {
 	return node.Name
 }
+
+func (node IdentifierNode) Accept(v Visitor) {
+	v.VisitIdentifier(node)
+}

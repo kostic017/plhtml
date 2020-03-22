@@ -7,3 +7,7 @@ type WriteStmtNode struct {
 func (node WriteStmtNode) ToString() string {
 	return "Write: " + node.Value.ToString()
 }
+
+func (node WriteStmtNode) Accept(v Visitor) {
+	v.VisitWriteStmt(node)
+}

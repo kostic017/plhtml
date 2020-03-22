@@ -7,3 +7,7 @@ type StringConstNode struct {
 func (node StringConstNode) ToString() string {
 	return "\"" + node.Value + "\""
 }
+
+func (node StringConstNode) Accept(v Visitor) {
+	v.VisitStringConst(node)
+}
