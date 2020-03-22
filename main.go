@@ -1,6 +1,7 @@
 package main
 
 import (
+    "./logger"
     "./parser"
     "./scanner"
     "./semantic"
@@ -17,6 +18,7 @@ func main() {
     myParser := parser.New()
     prgNode := myParser.Parse(tokens)
 
+    semantic.SetLogLevel(logger.Debug)
     semanticAnalyzer := semantic.NewAnalyzer()
     prgNode.Accept(semanticAnalyzer)
 

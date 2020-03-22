@@ -10,6 +10,12 @@ import (
     "../utility"
 )
 
+var myLogger = logger.New("SCANNER")
+
+func (scanner *Scanner) SetLogLevel(level logger.LogLevel) {
+    myLogger.SetLevel(level)
+}
+
 type Scanner struct {
     line             int
     column           int
@@ -23,17 +29,11 @@ type Scanner struct {
 
     keywords  map[string]TokenType
     operators map[string]TokenType
-
-    logger *logger.MyLogger
 }
 
 func New() *Scanner {
     scanner := new(Scanner)
-
     scanner.tabSize = 4
-
-    scanner.logger = logger.New("SCANNER")
-    scanner.logger.SetLevel(logger.Info)
 
     scanner.keywords = map[string]TokenType{
         "doctype": TokDoctype,
@@ -73,10 +73,6 @@ func New() *Scanner {
 
 func (scanner *Scanner) SetTabSize(tabSize int) {
     scanner.tabSize = tabSize
-}
-
-func (scanner *Scanner) SetLogLevel(level logger.LogLevel) {
-    scanner.logger.SetLevel(level)
 }
 
 func (scanner *Scanner) Scan(source string) []Token {
@@ -302,7 +298,7 @@ func (scanner Scanner) newToken(tokType TokenType) Token {
 func (scanner *Scanner) nextChar() (rune, bool) {
     if scanner.index != len(scanner.source)-1 {
         ch := scanner.source[scanner.index]
-        scanner.logger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
+        myLogger.Debug("Read char: %s\n", strconv.Quote(string(ch)))
         scanner.incCounters(ch)
         scanner.index++
         return ch, true
@@ -322,7 +318,7 @@ func (scanner *Scanner) goBack() {
     if scanner.index < len(scanner.source) {
         scanner.index--
         ch := scanner.source[scanner.index]
-        scanner.logger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
+        myLogger.Debug("Unread char: %s\n", strconv.Quote(string(ch)))
         scanner.decCounters(ch)
     }
 }

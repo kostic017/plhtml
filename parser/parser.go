@@ -11,16 +11,19 @@ import (
 type Token = scanner.Token
 type TokenType = scanner.TokenType
 
+var myLogger = logger.New("PARSER")
+
+func SetLogLevel(level logger.LogLevel) {
+    myLogger.SetLevel(level)
+}
+
 type Parser struct {
     index  int
     tokens []Token
-    logger *logger.MyLogger
 }
 
 func New() *Parser {
     parser := new(Parser)
-    parser.logger = logger.New("PARSER")
-    parser.logger.SetLevel(logger.Info)
     return parser
 }
 
@@ -28,10 +31,6 @@ func (parser *Parser) Parse(tokens []Token) ast.ProgramNode {
     parser.index = -1
     parser.tokens = tokens
     return parser.parseProgram()
-}
-
-func (parser *Parser) SetLogLevel(level logger.LogLevel) {
-    parser.logger.SetLevel(level)
 }
 
 func (parser Parser) current() Token {
@@ -57,7 +56,7 @@ func (parser Parser) peek() Token {
 
 func (parser *Parser) expectOpt(expected ...TokenType) bool {
     actual := parser.peek().Type
-    parser.logger.Debug("'%s'", string(actual))
+    myLogger.Debug("'%s'", string(actual))
 
     for _, exp := range expected {
         if actual == exp {
@@ -77,14 +76,14 @@ func (parser *Parser) expect(expected ...TokenType) TokenType {
 }
 
 func (parser *Parser) parseOpenTag(expected TokenType) {
-    parser.logger.Debug("<%s> expected", string(expected))
+    myLogger.Debug("<%s> expected", string(expected))
     parser.expect(TokenType('<'))
     parser.expect(expected)
     parser.expect(TokenType('>'))
 }
 
 func (parser *Parser) parseCloseTag(expected TokenType) {
-    parser.logger.Debug("</%s> expected", string(expected))
+    myLogger.Debug("</%s> expected", string(expected))
     parser.expect(TokenType('<'))
     parser.expect(TokenType('/'))
     parser.expect(expected)
