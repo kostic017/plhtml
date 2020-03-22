@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"./parser"
 	"./scanner"
 	"./semantic"
@@ -18,10 +16,8 @@ func main() {
 
 	parser := parser.NewParser()
 	prgNode := parser.Parse(tokens)
-	fmt.Print(prgNode.ToString())
 
-	symbolTable := semantic.NewSymbolTable()
-	semanticVisitor := semantic.NewSemanticVisitor(symbolTable)
-	prgNode.Accept(semanticVisitor)
+	semanticAnalyzer := semantic.NewSemanticAnalyzer()
+	prgNode.Accept(semanticAnalyzer)
 
 }

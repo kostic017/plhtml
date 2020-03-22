@@ -5,11 +5,13 @@ type symbol struct {
 }
 
 type SymbolTable struct {
+	level   int
 	symbols map[string]symbol
 }
 
-func NewSymbolTable() *SymbolTable {
+func NewSymbolTable(level int) *SymbolTable {
 	st := new(SymbolTable)
+	st.level = level
 	st.symbols = make(map[string]symbol)
 	return st
 }
