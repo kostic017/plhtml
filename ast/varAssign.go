@@ -5,8 +5,8 @@ type VarAssignNode struct {
 	Value      ExpressionNode
 }
 
-func (node VarAssignNode) ToString() string {
-	return node.Identifier.ToString() + " = " + node.Value.ToString()
+func (node VarAssignNode) ToString(lvl int) string {
+	return ident(lvl, node.Identifier.ToString()+" = "+node.Value.ToString())
 }
 
 func (node VarAssignNode) Accept(v Visitor) {

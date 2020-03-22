@@ -1,17 +1,15 @@
 package ast
 
-import "fmt"
-
 type ControlFlowStmtNode struct {
 	Type       TokenType
 	Condition  ExpressionNode
 	Statements []StatementNode
 }
 
-func (node ControlFlowStmtNode) ToString() string {
-	str := fmt.Sprintf("%s (%s)", string(node.Type), node.Condition.ToString())
+func (node ControlFlowStmtNode) ToString(lvl int) string {
+	str := ident(lvl, string(node.Type)+" "+node.Condition.ToString())
 	for _, stmt := range node.Statements {
-		str += "\n    " + stmt.ToString()
+		str += "\n" + stmt.ToString(lvl+1)
 	}
 	return str
 }

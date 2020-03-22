@@ -5,9 +5,9 @@ type MainFuncNode struct {
 }
 
 func (node MainFuncNode) ToString() string {
-	str := ""
+	str := "\nMain:"
 	for _, stmt := range node.Statements {
-		str += "\n" + stmt.ToString()
+		str += "\n" + stmt.ToString(1)
 	}
 	return str
 }

@@ -1,20 +1,25 @@
 package ast
 
-import "../scanner"
+import (
+	"strings"
+
+	"../scanner"
+)
 
 type TokenType = scanner.TokenType
 
 type AstNode interface {
-	ToString() string
 	Accept(v Visitor)
 }
 
 type StatementNode interface {
 	AstNode
+	ToString(lvl int) string
 }
 
 type ExpressionNode interface {
 	AstNode
+	ToString() string
 }
 
 type Visitor interface {
@@ -33,4 +38,8 @@ type Visitor interface {
 	VisitVarAssign(node VarAssignNode)
 	VisitVarDecl(node VarDeclNode)
 	VisitWriteStmt(node WriteStmtNode)
+}
+
+func ident(lvl int, str string) string {
+	return strings.Repeat(" ", lvl*4) + str
 }

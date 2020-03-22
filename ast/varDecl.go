@@ -5,8 +5,8 @@ type VarDeclNode struct {
 	Type       TokenType
 }
 
-func (node VarDeclNode) ToString() string {
-	return string(node.Type) + " " + node.Identifier.ToString()
+func (node VarDeclNode) ToString(lvl int) string {
+	return ident(lvl, string(node.Type)+" "+node.Identifier.ToString())
 }
 
 func (node VarDeclNode) Accept(v Visitor) {
