@@ -5,12 +5,12 @@ import (
     "./parser"
     "./scanner"
     "./semantic"
-    "./utility"
+    "./util"
 )
 
 func main() {
 
-    source := utility.ReadFile("tests/examples/fibonacci.html")
+    source := util.ReadFile("tests/examples/fibonacci.html")
 
     myScanner := scanner.New()
     tokens := myScanner.Scan(source)

@@ -10,12 +10,12 @@ import (
     "./ast"
     "./parser"
     "./scanner"
-    "./utility"
+    "./util"
 )
 
 func TestCompiler(t *testing.T) {
 
-    source := utility.ReadFile("./tests/examples/fibonacci.html")
+    source := util.ReadFile("./tests/examples/fibonacci.html")
 
     myScanner := scanner.New()
     tokens := myScanner.Scan(source)
@@ -36,7 +36,7 @@ func testParser(t *testing.T, prgNode ast.ProgramNode) {
 }
 
 func test(t *testing.T, testName string, actual string) {
-    expected := utility.ReadFile("./tests/" + testName + ".expected")
+    expected := util.ReadFile("./tests/" + testName + ".expected")
     assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(actual), "These two should be the same.")
 }
 

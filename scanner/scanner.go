@@ -7,7 +7,7 @@ import (
     "unicode"
 
     "../logger"
-    "../utility"
+    "../util"
 )
 
 var myLogger = logger.New("SCANNER")
@@ -215,14 +215,14 @@ func (scanner *Scanner) lexNumber(ch rune) Token {
 
     if isReal {
         realVal, err := strconv.ParseFloat(number, 64)
-        utility.Check(err)
+        util.Check(err)
         token := scanner.newToken(TokRealConst)
         token.RealVal = realVal
         return token
     }
 
     intVal, err := strconv.Atoi(number)
-    utility.Check(err)
+    util.Check(err)
     token := scanner.newToken(TokIntConst)
     token.IntVal = intVal
     return token

@@ -42,6 +42,6 @@ func (scope *Scope) lookup(name string) (symbol, bool) {
 
 func (scope *Scope) expect(name string) {
     if _, ok := scope.lookup(name); !ok {
-        panic("Identifier " + name + " undefined!")
+        panic("Identifier " + name + " undefined.")
     }
 }

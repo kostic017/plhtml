@@ -35,8 +35,8 @@ func (parser *Parser) parseExprL(l int) ast.ExpressionNode {
 }
 
 func (parser *Parser) parseFactor() ast.ExpressionNode {
-
-    switch parser.peek().Type {
+    nextToken := parser.peek()
+    switch nextToken.Type {
     case scanner.TokIntConst:
         return parser.parseIntConst()
     case scanner.TokRealConst:
@@ -51,9 +51,9 @@ func (parser *Parser) parseFactor() ast.ExpressionNode {
         return parser.parseParenExpr()
     case TokenType('+'), TokenType('-'), TokenType('!'):
         return parser.parseUnaryExpr()
+    default:
+        panic(fmt.Sprintf("Invalid factor '%s' at %d:%d.", string(nextToken.Type), nextToken.Line, nextToken.Column))
     }
-
-    panic(fmt.Sprintf("Invalid factor '%s'.", string(parser.peek().Type)))
 }
 
 func (parser *Parser) parseIdentifier() ast.IdentifierNode {

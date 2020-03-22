@@ -70,7 +70,8 @@ func (parser *Parser) expectOpt(expected ...TokenType) bool {
 func (parser *Parser) expect(expected ...TokenType) TokenType {
     ok := parser.expectOpt(expected...)
     if !ok {
-        panic(fmt.Sprintf("Unexpected token '%s'.", string(parser.peek().Type)))
+        nextToken := parser.peek()
+        panic(fmt.Sprintf("Unexpected token '%s' at %d:%d.", string(nextToken.Type), nextToken.Line, nextToken.Column))
     }
     return parser.next().Type
 }
