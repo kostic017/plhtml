@@ -84,8 +84,8 @@ func (analyzer *Analyzer) VisitVarAssign(node ast.VarAssignNode) {
 func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
 	analyzer.scope.expect(node.Type.Name)
 	name := node.Identifier.Name
-	if _, ok := analyzer.scope.lookup(name); ok {
-		panic("Identifier " + name + " is already declared.")
+	if analyzer.scope.declaredLocally(name) {
+		panic("Variable " + name + " is already declared.")
 	}
 	analyzer.scope.insert(symbol{name: name})
 }
