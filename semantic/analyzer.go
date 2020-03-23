@@ -12,12 +12,18 @@ func SetLogLevel(level logger.LogLevel) {
 }
 
 type Analyzer struct {
-	scope *Scope
+	rootScope    *Scope
+	currentScope *Scope
 }
 
 func NewAnalyzer() *Analyzer {
 	analyzer := new(Analyzer)
-	analyzer.scope = NewScope(0, nil)
+	analyzer.rootScope = NewScope(0, nil)
+	analyzer.rootScope.symbols["integer"] = symbol{"integer"}
+	analyzer.rootScope.symbols["real"] = symbol{"real"}
+	analyzer.rootScope.symbols["boolean"] = symbol{"boolean"}
+	analyzer.rootScope.symbols["string"] = symbol{"string"}
+	analyzer.currentScope = NewScope(1, analyzer.rootScope)
 	return analyzer
 }
 
@@ -32,26 +38,26 @@ func (analyzer *Analyzer) VisitBoolConst(node ast.BoolConstNode) {
 func (analyzer *Analyzer) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
 	node.Condition.Accept(analyzer)
 
-	analyzer.scope = NewScope(analyzer.scope.id+1, analyzer.scope)
+	analyzer.currentScope = NewScope(analyzer.currentScope.id+1, analyzer.currentScope)
 	for _, stmt := range node.Statements {
 		stmt.Accept(analyzer)
 	}
-	analyzer.scope = analyzer.scope.parent
+	analyzer.currentScope = analyzer.currentScope.parent
 }
 
 func (analyzer *Analyzer) VisitIdentifier(node ast.IdentifierNode) {
-	analyzer.scope.expect(node.Name)
+	analyzer.currentScope.expect(node.Name)
 }
 
 func (analyzer *Analyzer) VisitIntConst(node ast.IntConstNode) {
 }
 
 func (analyzer *Analyzer) VisitMainFunc(node ast.MainFuncNode) {
-	analyzer.scope = NewScope(analyzer.scope.id+1, analyzer.scope)
+	analyzer.currentScope = NewScope(analyzer.currentScope.id+1, analyzer.currentScope)
 	for _, stmt := range node.Statements {
 		stmt.Accept(analyzer)
 	}
-	analyzer.scope = analyzer.scope.parent
+	analyzer.currentScope = analyzer.currentScope.parent
 }
 
 func (analyzer *Analyzer) VisitProgram(node ast.ProgramNode) {
@@ -63,7 +69,7 @@ func (analyzer *Analyzer) VisitProgramBody(node ast.ProgramBodyNode) {
 }
 
 func (analyzer *Analyzer) VisitReadStmt(node ast.ReadStmtNode) {
-	analyzer.scope.expect(node.Identifier.Name)
+	analyzer.currentScope.expect(node.Identifier.Name)
 }
 
 func (analyzer *Analyzer) VisitRealConst(node ast.RealConstNode) {
@@ -77,17 +83,17 @@ func (analyzer *Analyzer) VisitUnaryExpr(node ast.UnaryExprNode) {
 }
 
 func (analyzer *Analyzer) VisitVarAssign(node ast.VarAssignNode) {
-	analyzer.scope.expect(node.Identifier.Name)
+	analyzer.currentScope.expect(node.Identifier.Name)
 	node.Value.Accept(analyzer)
 }
 
 func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
-	analyzer.scope.expect(node.Type.Name)
+	analyzer.currentScope.expect(node.Type.Name)
 	name := node.Identifier.Name
-	if analyzer.scope.declaredLocally(name) {
+	if analyzer.currentScope.declaredLocally(name) {
 		panic("Variable " + name + " is already declared.")
 	}
-	analyzer.scope.insert(symbol{name: name})
+	analyzer.currentScope.insert(symbol{name: name})
 }
 
 func (analyzer *Analyzer) VisitWriteStmt(node ast.WriteStmtNode) {
