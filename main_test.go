@@ -1,73 +1,69 @@
 package main
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-	"testing"
+    "fmt"
+    "github.com/stretchr/testify/assert"
+    "strconv"
+    "strings"
+    "testing"
 
-	"./ast"
-	"./parser"
-	"./scanner"
-	"./utility"
+    "./ast"
+    "./parser"
+    "./scanner"
+    "./util"
 )
 
 func TestCompiler(t *testing.T) {
 
-	source := utility.ReadFile("./tests/examples/fibonacci.html")
+    source := util.ReadFile("./tests/examples/fibonacci.html")
 
-	scan := scanner.NewScanner()
-	tokens := scan.Scan(source)
-	assertThatScannerWorks(t, tokens)
+    myScanner := scanner.New()
+    tokens := myScanner.Scan(source)
+    testScanner(t, tokens)
 
-	parser := parser.NewParser()
-	prgNode := parser.Parse(tokens)
-	assertThatParserWorks(t, prgNode)
+    myParser := parser.New()
+    prgNode := myParser.Parse(tokens)
+    testParser(t, prgNode)
 
 }
 
-func assertThatScannerWorks(t *testing.T, tokens []scanner.Token) {
-	assert(t, "fibonacci.scanner", tokensToString(tokens))
+func testScanner(t *testing.T, tokens []scanner.Token) {
+    test(t, "fibonacci.scanner", tokensToString(tokens))
 }
 
-func assertThatParserWorks(t *testing.T, prgNode ast.ProgramNode) {
-	assert(t, "fibonacci.parser", prgNode.ToString())
+func testParser(t *testing.T, prgNode ast.ProgramNode) {
+    test(t, "fibonacci.parser", prgNode.ToString())
 }
 
-func assert(t *testing.T, test string, actual string) {
-	expected := utility.ReadFile("./tests/" + test + ".expected")
-
-	if strings.TrimSpace(expected) != strings.TrimSpace(actual) {
-		utility.WriteFile("./tests/"+test+".actual", actual)
-		fmt.Printf("Failed: %s\n", test)
-		t.Fail()
-	}
+func test(t *testing.T, testName string, actual string) {
+    expected := util.ReadFile("./tests/" + testName + ".expected")
+    assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(actual), "These two should be the same.")
 }
 
 func tokensToString(tokens []scanner.Token) string {
 
-	result := ""
-	for _, tok := range tokens {
+    result := ""
+    for _, tok := range tokens {
 
-		if tok.Type == scanner.TokEOF {
-			break
-		}
+        if tok.Type == scanner.TokEOF {
+            break
+        }
 
-		var value string
-		switch tok.Type {
-		case scanner.TokIdentifier, scanner.TokStringConst:
-			value = tok.StrVal
-		case scanner.TokIntConst:
-			value = strconv.Itoa(tok.IntVal)
-		case scanner.TokRealConst:
-			value = strconv.FormatFloat(tok.RealVal, 'E', -1, 64)
-		case scanner.TokBoolConst:
-			value = strconv.FormatBool(tok.BoolVal)
-		}
+        var value string
+        switch tok.Type {
+        case scanner.TokIdentifier, scanner.TokStringConst:
+            value = tok.StrVal
+        case scanner.TokIntConst:
+            value = strconv.Itoa(tok.IntVal)
+        case scanner.TokRealConst:
+            value = strconv.FormatFloat(tok.RealVal, 'E', -1, 64)
+        case scanner.TokBoolConst:
+            value = strconv.FormatBool(tok.BoolVal)
+        }
 
-		result += fmt.Sprintf("(%s,%d,%d,%s)\n", tok.Type, tok.Line, tok.Column, value)
+        result += fmt.Sprintf("(%s,%d,%d,%s)\n", tok.Type, tok.Line, tok.Column, value)
 
-	}
+    }
 
-	return result
+    return result
 }

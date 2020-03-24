@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"../ast"
 	"../logger"
 	"../scanner"
@@ -9,40 +11,19 @@ import (
 type Token = scanner.Token
 type TokenType = scanner.TokenType
 
-type Parser struct {
-	index      int
-	tokens     []Token
-	logger     *logger.MyLogger
-	binOpsPrec map[TokenType]int
+var myLogger = logger.New("PARSER")
+
+func SetLogLevel(level logger.LogLevel) {
+	myLogger.SetLevel(level)
 }
 
-func NewParser() *Parser {
+type Parser struct {
+	index  int
+	tokens []Token
+}
+
+func New() *Parser {
 	parser := new(Parser)
-
-	parser.logger = logger.New("PARSER")
-	parser.logger.SetLevel(logger.Info)
-
-	parser.setBinOpsPrec([][]TokenType{
-		[]TokenType{
-			scanner.TokEqOp,
-			scanner.TokNeqOp,
-		},
-		[]TokenType{
-			scanner.TokLtOp,
-			scanner.TokGtOp,
-			scanner.TokLeqOp,
-			scanner.TokGeqOp,
-		},
-		[]TokenType{
-			TokenType('+'),
-			TokenType('-'),
-		},
-		[]TokenType{
-			TokenType('*'),
-			TokenType('/'),
-		},
-	})
-
 	return parser
 }
 
@@ -52,101 +33,60 @@ func (parser *Parser) Parse(tokens []Token) ast.ProgramNode {
 	return parser.parseProgram()
 }
 
-func (parser *Parser) SetLogLevel(level logger.LogLevel) {
-	parser.logger.SetLevel(level)
+func (parser Parser) current() Token {
+	return parser.tokens[parser.index]
 }
 
-func (parser *Parser) setBinOpsPrec(operators [][]TokenType) {
-	parser.binOpsPrec = make(map[TokenType]int)
-	for i, group := range operators {
-		for _, op := range group {
-			parser.binOpsPrec[op] = i
+func (parser *Parser) next() Token {
+	if parser.index < 0 || parser.current().Type != scanner.TokEOF {
+		parser.index++
+	}
+	return parser.current()
+}
+
+func (parser *Parser) goBack() {
+	parser.index--
+}
+
+func (parser Parser) peek() Token {
+	next := parser.next()
+	parser.goBack()
+	return next
+}
+
+func (parser *Parser) eatOpt(expected ...TokenType) bool {
+	actual := parser.peek().Type
+	myLogger.Debug("'%s'", string(actual))
+
+	for _, exp := range expected {
+		if actual == exp {
+			return true
 		}
 	}
+
+	return false
+}
+
+func (parser *Parser) eat(expected ...TokenType) TokenType {
+	ok := parser.eatOpt(expected...)
+	if !ok {
+		nextToken := parser.peek()
+		panic(fmt.Sprintf("Unexpected token '%s' at %d:%d.", string(nextToken.Type), nextToken.Line, nextToken.Column))
+	}
+	return parser.next().Type
 }
 
 func (parser *Parser) parseOpenTag(expected TokenType) {
-	parser.logger.Debug("<%s> expected", string(expected))
-	parser.expect(TokenType('<'))
-	parser.expect(expected)
-	parser.expect(TokenType('>'))
+	myLogger.Debug("<%s> expected", string(expected))
+	parser.eat(TokenType('<'))
+	parser.eat(expected)
+	parser.eat(TokenType('>'))
 }
 
 func (parser *Parser) parseCloseTag(expected TokenType) {
-	parser.logger.Debug("</%s> expected", string(expected))
-	parser.expect(TokenType('<'))
-	parser.expect(TokenType('/'))
-	parser.expect(expected)
-	parser.expect(TokenType('>'))
-}
-
-func (parser Parser) parseProgram() ast.ProgramNode {
-	parser.logger.Debug("=BEG= Program")
-	parser.parseDoctype()
-	prg := parser.parseHTML()
-	parser.logger.Debug("=END= Program")
-	return prg
-}
-
-func (parser *Parser) parseDoctype() {
-	parser.logger.Debug("=BEG= Doctype")
-	parser.expect(TokenType('<'))
-	parser.expect(TokenType('!'))
-	parser.expect(scanner.TokDoctype)
-	parser.expect(scanner.TokHTML)
-	parser.expect(TokenType('>'))
-	parser.logger.Debug("=END= Doctype")
-}
-
-func (parser *Parser) parseHTML() ast.ProgramNode {
-	parser.logger.Debug("=BEG= HTML")
-	parser.expect(TokenType('<'))
-	parser.expect(scanner.TokHTML)
-	parser.expect(scanner.TokLang)
-	parser.expect(TokenType('='))
-	parser.expect(TokenType('"'))
-	parser.parseIdentifier()
-	parser.expect(TokenType('"'))
-	parser.expect(TokenType('>'))
-	programTitle := parser.parseProgramHeader()
-	programBody := parser.parseProgramBody()
-	parser.parseCloseTag(scanner.TokHTML)
-	parser.logger.Debug("=END= HTML")
-	return ast.ProgramNode{Title: programTitle, Body: programBody}
-}
-
-func (parser *Parser) parseProgramHeader() ast.StringConstNode {
-	parser.logger.Debug("=BEG= Prg Header")
-	parser.parseOpenTag(scanner.TokHead)
-	programTitle := parser.parseProgramTitle()
-	parser.parseCloseTag(scanner.TokHead)
-	parser.logger.Debug("=END= Prg Header")
-	return programTitle
-}
-
-func (parser *Parser) parseProgramTitle() ast.StringConstNode {
-	parser.logger.Debug("=BEG= Prg Title")
-	parser.parseOpenTag(scanner.TokTitle)
-	programTitle := parser.parseStringConst()
-	parser.parseCloseTag(scanner.TokTitle)
-	parser.logger.Debug("=END= Prg Title")
-	return programTitle
-}
-
-func (parser *Parser) parseProgramBody() ast.ProgramBodyNode {
-	parser.logger.Debug("=BEG= Prg Body")
-	parser.parseOpenTag(scanner.TokBody)
-	mainFunc := parser.parseMainFunc()
-	parser.parseCloseTag(scanner.TokBody)
-	parser.logger.Debug("=END= Prg Title")
-	return ast.ProgramBodyNode{MainFunc: mainFunc}
-}
-
-func (parser *Parser) parseMainFunc() ast.MainFuncNode {
-	parser.logger.Debug("=BEG= Main")
-	parser.parseOpenTag(scanner.TokMain)
-	statements := parser.parseStatements()
-	parser.parseCloseTag(scanner.TokMain)
-	parser.logger.Debug("=END= Main")
-	return ast.MainFuncNode{Statements: statements}
+	myLogger.Debug("</%s> expected", string(expected))
+	parser.eat(TokenType('<'))
+	parser.eat(TokenType('/'))
+	parser.eat(expected)
+	parser.eat(TokenType('>'))
 }

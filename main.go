@@ -1,19 +1,25 @@
 package main
 
 import (
-	"fmt"
-
-	"./parser"
-	"./scanner"
-	"./utility"
+    "./logger"
+    "./parser"
+    "./scanner"
+    "./semantic"
+    "./util"
 )
 
 func main() {
-	source := utility.ReadFile("tests/examples/fibonacci.html")
-	scanner := scanner.NewScanner()
-	tokens := scanner.Scan(source)
 
-	parser := parser.NewParser()
-	prgNode := parser.Parse(tokens)
-	fmt.Print(prgNode.ToString())
+    source := util.ReadFile("tests/examples/fibonacci.html")
+
+    myScanner := scanner.New()
+    tokens := myScanner.Scan(source)
+
+    myParser := parser.New()
+    prgNode := myParser.Parse(tokens)
+
+    semantic.SetLogLevel(logger.Debug)
+    semanticAnalyzer := semantic.NewAnalyzer()
+    prgNode.Accept(semanticAnalyzer)
+
 }

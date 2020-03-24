@@ -1,9 +1,13 @@
 package ast
 
 type WriteStmtNode struct {
-	Value ExpressionNode
+    Value ExpressionNode
 }
 
-func (node WriteStmtNode) ToString() string {
-	return "Write: " + node.Value.ToString()
+func (node WriteStmtNode) ToString(lvl int) string {
+    return ident(lvl, "Write: "+node.Value.ToString())
+}
+
+func (node WriteStmtNode) Accept(v Visitor) {
+    v.VisitWriteStmt(node)
 }
