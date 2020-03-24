@@ -1,45 +1,45 @@
 package ast
 
 import (
-    "strings"
+	"strings"
 
-    "../scanner"
+	"../token"
 )
 
-type TokenType = scanner.TokenType
+type TokenType = token.Type
 
 type Node interface {
-    Accept(v Visitor)
+	Accept(v Visitor) interface{}
 }
 
 type StatementNode interface {
-    Node
-    ToString(lvl int) string
+	Node
+	ToString(lvl int) string
 }
 
 type ExpressionNode interface {
-    Node
-    ToString() string
+	Node
+	ToString() string
 }
 
 type Visitor interface {
-    VisitBinaryOpExpr(node BinaryOpExprNode)
-    VisitBoolConst(node BoolConstNode)
-    VisitControlFlowStmt(node ControlFlowStmtNode)
-    VisitIdentifier(node IdentifierNode)
-    VisitIntConst(node IntConstNode)
-    VisitMainFunc(node MainFuncNode)
-    VisitProgram(node ProgramNode)
-    VisitProgramBody(node ProgramBodyNode)
-    VisitReadStmt(node ReadStmtNode)
-    VisitRealConst(node RealConstNode)
-    VisitStringConst(node StringConstNode)
-    VisitUnaryExpr(node UnaryExprNode)
-    VisitVarAssign(node VarAssignNode)
-    VisitVarDecl(node VarDeclNode)
-    VisitWriteStmt(node WriteStmtNode)
+	VisitBinaryOpExpr(node BinaryOpExprNode) interface{}
+	VisitBoolConst(node BoolConstNode) interface{}
+	VisitControlFlowStmt(node ControlFlowStmtNode) interface{}
+	VisitIdentifier(node IdentifierNode) interface{}
+	VisitIntConst(node IntConstNode) interface{}
+	VisitMainFunc(node MainFuncNode) interface{}
+	VisitProgram(node ProgramNode) interface{}
+	VisitProgramBody(node ProgramBodyNode) interface{}
+	VisitReadStmt(node ReadStmtNode) interface{}
+	VisitRealConst(node RealConstNode) interface{}
+	VisitStringConst(node StringConstNode) interface{}
+	VisitUnaryExpr(node UnaryExprNode) interface{}
+	VisitVarAssign(node VarAssignNode) interface{}
+	VisitVarDecl(node VarDeclNode) interface{}
+	VisitWriteStmt(node WriteStmtNode) interface{}
 }
 
 func ident(lvl int, str string) string {
-    return strings.Repeat(" ", lvl*4) + str
+	return strings.Repeat(" ", lvl*4) + str
 }

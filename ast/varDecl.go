@@ -1,14 +1,14 @@
 package ast
 
 type VarDeclNode struct {
-    Type       IdentifierNode
-    Identifier IdentifierNode
+	TypeName IdentifierNode
+	VarName  IdentifierNode
 }
 
 func (node VarDeclNode) ToString(lvl int) string {
-    return ident(lvl, node.Type.ToString() + " " + node.Identifier.ToString())
+	return ident(lvl, node.TypeName.ToString()+" "+node.VarName.ToString())
 }
 
-func (node VarDeclNode) Accept(v Visitor) {
-    v.VisitVarDecl(node)
+func (node VarDeclNode) Accept(v Visitor) interface{} {
+	return v.VisitVarDecl(node)
 }

@@ -10,7 +10,7 @@ Main:
     t2 = 1
     Write: "n: "
     Read n
-    TokWhile i TokLeqOp n
+    While i LeqOp n
         Write: t1 + " "
         t = t1 + t2
         t2 = t1

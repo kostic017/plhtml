@@ -2,7 +2,7 @@ package parser
 
 import (
 	"../ast"
-	"../scanner"
+	"../token"
 )
 
 func (parser *Parser) parseStatements() []ast.StatementNode {
@@ -18,18 +18,18 @@ func (parser *Parser) parseStatements() []ast.StatementNode {
 }
 
 func (parser *Parser) parseStatement() ast.StatementNode {
-	parser.eat(TokenType('<'))
+	parser.eat(token.LessThan)
 
 	switch parser.peek().Type {
-	case scanner.TokVar:
+	case token.Var:
 		return parser.parseVarDecl()
-	case scanner.TokData:
+	case token.Data:
 		return parser.parseVarAssign()
-	case scanner.TokOutput:
+	case token.Output:
 		return parser.parseWriteStmt()
-	case scanner.TokInput:
+	case token.Input:
 		return parser.parseReadStmt()
-	case scanner.TokDiv:
+	case token.Div:
 		return parser.parseControlFlowStmt()
 	}
 
@@ -40,70 +40,70 @@ func (parser *Parser) parseStatement() ast.StatementNode {
 
 func (parser *Parser) parseVarDecl() ast.VarDeclNode {
 	myLogger.Debug("=BEG= Var Declaration")
-	parser.eat(scanner.TokVar)
-	parser.eat(scanner.TokClass)
-	parser.eat(TokenType('='))
-	parser.eat(TokenType('"'))
+	parser.eat(token.Var)
+	parser.eat(token.Class)
+	parser.eat(token.Equal)
+	parser.eat(token.DQuote)
 	varType := parser.parseIdentifier()
-	parser.eat(TokenType('"'))
-	parser.eat(TokenType('>'))
+	parser.eat(token.DQuote)
+	parser.eat(token.GreaterThan)
 	varName := parser.parseIdentifier()
-	parser.parseCloseTag(scanner.TokVar)
+	parser.parseCloseTag(token.Var)
 	myLogger.Debug("=END= Var Declaration")
-	return ast.VarDeclNode{Type: varType, Identifier: varName}
+	return ast.VarDeclNode{TypeName: varType, VarName: varName}
 }
 
 func (parser *Parser) parseVarAssign() ast.VarAssignNode {
 	myLogger.Debug("=BEG= Var Assignment")
-	parser.eat(scanner.TokData)
-	parser.eat(scanner.TokValue)
-	parser.eat(TokenType('='))
-	parser.eat(TokenType('"'))
+	parser.eat(token.Data)
+	parser.eat(token.Value)
+	parser.eat(token.Equal)
+	parser.eat(token.DQuote)
 	value := parser.parseExpr()
-	parser.eat(TokenType('"'))
-	parser.eat(TokenType('>'))
+	parser.eat(token.DQuote)
+	parser.eat(token.GreaterThan)
 	identifier := parser.parseIdentifier()
-	parser.parseCloseTag(scanner.TokData)
+	parser.parseCloseTag(token.Data)
 	myLogger.Debug("=END= Var Assignment")
 	return ast.VarAssignNode{Identifier: identifier, Value: value}
 }
 
 func (parser *Parser) parseWriteStmt() ast.WriteStmtNode {
 	myLogger.Debug("=BEG= Write")
-	parser.eat(scanner.TokOutput)
-	parser.eat(TokenType('>'))
+	parser.eat(token.Output)
+	parser.eat(token.GreaterThan)
 	value := parser.parseExpr()
-	parser.parseCloseTag(scanner.TokOutput)
+	parser.parseCloseTag(token.Output)
 	myLogger.Debug("=END= Write")
 	return ast.WriteStmtNode{Value: value}
 }
 
 func (parser *Parser) parseReadStmt() ast.ReadStmtNode {
 	myLogger.Debug("=BEG= Read")
-	parser.eat(scanner.TokInput)
-	parser.eat(scanner.TokName)
-	parser.eat(TokenType('='))
-	parser.eat(TokenType('"'))
+	parser.eat(token.Input)
+	parser.eat(token.Name)
+	parser.eat(token.Equal)
+	parser.eat(token.DQuote)
 	identifier := parser.parseIdentifier()
-	parser.eat(TokenType('"'))
-	parser.eat(TokenType('>'))
+	parser.eat(token.DQuote)
+	parser.eat(token.GreaterThan)
 	myLogger.Debug("=END= Read")
 	return ast.ReadStmtNode{Identifier: identifier}
 }
 
 func (parser *Parser) parseControlFlowStmt() ast.ControlFlowStmtNode {
 	myLogger.Debug("=BEG= Control Flow")
-	parser.eat(scanner.TokDiv)
-	parser.eat(scanner.TokData)
-	parser.eat(TokenType('-'))
-	stmtType := parser.eat(scanner.TokIf, scanner.TokWhile)
-	parser.eat(TokenType('='))
-	parser.eat(TokenType('"'))
+	parser.eat(token.Div)
+	parser.eat(token.Data)
+	parser.eat(token.Minus)
+	stmtType := parser.eat(token.If, token.While)
+	parser.eat(token.Equal)
+	parser.eat(token.DQuote)
 	condition := parser.parseExpr()
-	parser.eat(TokenType('"'))
-	parser.eat(TokenType('>'))
+	parser.eat(token.DQuote)
+	parser.eat(token.GreaterThan)
 	stmts := parser.parseStatements()
-	parser.parseCloseTag(scanner.TokDiv)
+	parser.parseCloseTag(token.Div)
 	myLogger.Debug("=END= Control Flow")
 	return ast.ControlFlowStmtNode{Type: stmtType, Condition: condition, Statements: stmts}
 }

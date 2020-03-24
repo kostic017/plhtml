@@ -6,10 +6,11 @@ import (
 	"../ast"
 	"../logger"
 	"../scanner"
+	"../token"
 )
 
 type Token = scanner.Token
-type TokenType = scanner.TokenType
+type TokenType = token.Type
 
 var myLogger = logger.New("PARSER")
 
@@ -38,7 +39,7 @@ func (parser Parser) current() Token {
 }
 
 func (parser *Parser) next() Token {
-	if parser.index < 0 || parser.current().Type != scanner.TokEOF {
+	if parser.index < 0 || parser.current().Type != token.EOF {
 		parser.index++
 	}
 	return parser.current()
@@ -78,15 +79,15 @@ func (parser *Parser) eat(expected ...TokenType) TokenType {
 
 func (parser *Parser) parseOpenTag(expected TokenType) {
 	myLogger.Debug("<%s> expected", string(expected))
-	parser.eat(TokenType('<'))
+	parser.eat(token.LessThan)
 	parser.eat(expected)
-	parser.eat(TokenType('>'))
+	parser.eat(token.GreaterThan)
 }
 
 func (parser *Parser) parseCloseTag(expected TokenType) {
 	myLogger.Debug("</%s> expected", string(expected))
-	parser.eat(TokenType('<'))
-	parser.eat(TokenType('/'))
+	parser.eat(token.LessThan)
+	parser.eat(token.Slash)
 	parser.eat(expected)
-	parser.eat(TokenType('>'))
+	parser.eat(token.GreaterThan)
 }
