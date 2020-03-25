@@ -118,35 +118,38 @@ func calc(leftValue constant.Value, operator TokenType, rightValue constant.Valu
 		return nil, false
 	}
 
-	if leftValue.Kind() == constant.Float || rightValue.Kind() == constant.Float {
-		leftVal, _ := constant.Float64Val(leftValue)
-		rightVal, _ := constant.Float64Val(rightValue)
+	if leftValue.Kind() == constant.Int || rightValue.Kind() == constant.Int {
+
+		leftVal, _ := constant.Int64Val(leftValue)
+		rightVal, _ := constant.Int64Val(rightValue)
+
 		switch operator {
 		case token.Plus:
-			return constant.MakeFloat64(leftVal + rightVal), true
+			return constant.MakeInt64(leftVal + rightVal), true
 		case token.Minus:
-			return constant.MakeFloat64(leftVal - rightVal), true
+			return constant.MakeInt64(leftVal - rightVal), true
 		case token.Asterisk:
-			return constant.MakeFloat64(leftVal * rightVal), true
+			return constant.MakeInt64(leftVal * rightVal), true
 		case token.Slash:
-			return constant.MakeFloat64(leftVal / rightVal), true
+			return constant.MakeInt64(leftVal / rightVal), true
 		default:
 			return nil, false
 		}
+
 	}
 
-	leftVal, _ := constant.Int64Val(leftValue)
-	rightVal, _ := constant.Int64Val(rightValue)
+	leftVal, _ := constant.Float64Val(leftValue)
+	rightVal, _ := constant.Float64Val(rightValue)
 
 	switch operator {
 	case token.Plus:
-		return constant.MakeInt64(leftVal + rightVal), true
+		return constant.MakeFloat64(leftVal + rightVal), true
 	case token.Minus:
-		return constant.MakeInt64(leftVal - rightVal), true
+		return constant.MakeFloat64(leftVal - rightVal), true
 	case token.Asterisk:
-		return constant.MakeInt64(leftVal * rightVal), true
+		return constant.MakeFloat64(leftVal * rightVal), true
 	case token.Slash:
-		return constant.MakeInt64(leftVal / rightVal), true
+		return constant.MakeFloat64(leftVal / rightVal), true
 	default:
 		return nil, false
 	}
