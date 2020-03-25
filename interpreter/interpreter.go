@@ -5,6 +5,7 @@ import (
 	"../logger"
 	"../token"
 	"../util"
+	"fmt"
 	"go/constant"
 	"strconv"
 )
@@ -25,7 +26,9 @@ func New() *Interpreter {
 	return interpreter
 }
 
-// Visit methods should return constant.Value!
+/**********************************************
+ * Visit methods should return constant.Value *
+ **********************************************/
 
 func (interpreter *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) interface{} {
 	leftValue := node.LeftExpr.Accept(interpreter).(constant.Value)
@@ -43,75 +46,102 @@ func (interpreter *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) int
 	//    return opsWithBools(leftValue, node.Operator, rightValue)
 	//}
 
-	panic("Operator " + token.TypeToStr[node.Operator] + " is not supported for operands of given types.")
+	panic("Binary operator " + token.TypeToStr[node.Operator] + " is not supported for operands of given types.")
 }
 
 func (interpreter *Interpreter) VisitBoolConst(node ast.BoolConstNode) interface{} {
 	return constant.MakeBool(node.Value)
 }
 
-func (interpreter *Interpreter) VisitControlFlowStmt(node ast.ControlFlowStmtNode) interface{} {
-	node.Condition.Accept(interpreter)
-	for _, stmt := range node.Statements {
-		stmt.Accept(interpreter)
+func (interpreter *Interpreter) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
+	switch node.Type {
+	case token.If:
+		if constant.BoolVal(node.Condition.Accept(interpreter).(constant.Value)) {
+			for _, stmt := range node.Statements {
+				stmt.Accept(interpreter)
+			}
+		}
+		break
+	case token.While:
+		for constant.BoolVal(node.Condition.Accept(interpreter).(constant.Value)) {
+			for _, stmt := range node.Statements {
+				stmt.Accept(interpreter)
+			}
+		}
 	}
-	return nil
 }
 
 func (interpreter *Interpreter) VisitIdentifier(node ast.IdentifierNode) interface{} {
-	return nil
+	return nil // TODO
 }
 
 func (interpreter *Interpreter) VisitIntConst(node ast.IntConstNode) interface{} {
-	return nil
+	return constant.MakeInt64(int64(node.Value))
 }
 
-func (interpreter *Interpreter) VisitMainFunc(node ast.MainFuncNode) interface{} {
+func (interpreter *Interpreter) VisitMainFunc(node ast.MainFuncNode) {
 	for _, stmt := range node.Statements {
 		stmt.Accept(interpreter)
 	}
-	return nil
 }
 
-func (interpreter *Interpreter) VisitProgram(node ast.ProgramNode) interface{} {
+func (interpreter *Interpreter) VisitProgram(node ast.ProgramNode) {
 	node.Body.Accept(interpreter)
-	return nil
 }
 
-func (interpreter *Interpreter) VisitProgramBody(node ast.ProgramBodyNode) interface{} {
+func (interpreter *Interpreter) VisitProgramBody(node ast.ProgramBodyNode) {
 	node.MainFunc.Accept(interpreter)
-	return nil
 }
 
-func (interpreter *Interpreter) VisitReadStmt(node ast.ReadStmtNode) interface{} {
-	return nil
+func (interpreter *Interpreter) VisitReadStmt(node ast.ReadStmtNode) {
+	// TODO
 }
 
 func (interpreter *Interpreter) VisitRealConst(node ast.RealConstNode) interface{} {
-	return nil
+	return constant.MakeFloat64(node.Value)
 }
 
 func (interpreter *Interpreter) VisitStringConst(node ast.StringConstNode) interface{} {
-	return nil
+	return constant.MakeString(node.Value)
 }
 
 func (interpreter *Interpreter) VisitUnaryExpr(node ast.UnaryExprNode) interface{} {
-	node.Expr.Accept(interpreter)
-	return nil
+	exprValue := node.Expr.Accept(interpreter).(constant.Value)
+
+	switch node.Operator {
+	case token.Minus:
+		if exprValue.Kind() == constant.Int {
+			exprVal, _ := constant.Int64Val(exprValue)
+			return -exprVal
+		} else if exprValue.Kind() == constant.Float {
+			exprVal, _ := constant.Float64Val(exprValue)
+			return -exprVal
+		}
+		break
+	case token.Exclamation:
+		if exprValue.Kind() == constant.Bool {
+			return !constant.BoolVal(exprValue)
+		}
+	}
+
+	panic("Unary operator " + token.TypeToStr[node.Operator] + " is not supported for given types.")
 }
 
-func (interpreter *Interpreter) VisitVarAssign(node ast.VarAssignNode) interface{} {
-	node.Value.Accept(interpreter)
-	return nil
+func (interpreter *Interpreter) VisitVarAssign(node ast.VarAssignNode) {
+	// TODO
 }
 
-func (interpreter *Interpreter) VisitVarDecl(node ast.VarDeclNode) interface{} {
-	return nil
+func (interpreter *Interpreter) VisitVarDecl(node ast.VarDeclNode) {
+	// TODO
 }
 
-func (interpreter *Interpreter) VisitWriteStmt(node ast.WriteStmtNode) interface{} {
-	node.Value.Accept(interpreter)
-	return nil
+func (interpreter *Interpreter) VisitWriteStmt(node ast.WriteStmtNode) {
+	exprValue := node.Value.Accept(interpreter).(constant.Value)
+	if exprValue.Kind() == constant.String {
+		fmt.Print(constant.StringVal(exprValue))
+	} else {
+		panic("You can print strings only.")
+	}
 }
 
 func isNum(val constant.Value) bool {
