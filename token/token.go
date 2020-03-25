@@ -5,6 +5,7 @@ type Type int
 const (
 	Illegal Type = iota
 	EOF
+
 	Doctype
 	Lang
 	HTML
@@ -22,17 +23,21 @@ const (
 	Div
 	If
 	While
+
 	LtOp
 	GtOp
 	LeqOp
 	GeqOp
 	EqOp
 	NeqOp
+
 	IntConst
 	RealConst
 	BoolConst
 	StringConst
+
 	Identifier
+
 	Plus
 	Minus
 	Asterisk
@@ -92,7 +97,7 @@ var TypeToStr = [...]string{
 	Period:      ".",
 }
 
-var Keywords = map[string]Type{
+var KeywordLexemes = map[string]Type{
 	"doctype": Doctype,
 	"lang":    Lang,
 	"html":    HTML,
@@ -112,7 +117,7 @@ var Keywords = map[string]Type{
 	"while":   While,
 }
 
-var BoolOp = map[string]Type{
+var BoolOpLexemes = map[string]Type{
 	"&lt;":     LtOp,
 	"&gt;":     GtOp,
 	"&leq;":    LeqOp,

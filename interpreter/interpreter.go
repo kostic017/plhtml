@@ -29,16 +29,19 @@ func (interpreter *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) int
 	left := node.LeftExpr.Accept(interpreter).(constant.Value)
 	right := node.RightExpr.Accept(interpreter).(constant.Value)
 
-	if node.Operator == token.Plus {
-		if val, ok := calc(left, node.Operator, right); ok {
-			return val
-		}
-		if val, ok := strcat(left, right); ok {
-			return val
-		}
+	if node.Operator == token.Plus && (isStr(left) || isStr(right)) {
+		return strcat(left, right)
 	}
 
-	panic("Operator + is not supported for operands of given types.")
+	if isNum(left) && isNum(right) {
+		return opsWithNums(left, node.Operator, right)
+	}
+
+	//if isBool(left) && isBool(right) {
+	//    return opsWithBools(left, node.Operator, right)
+	//}
+
+	panic("Operator " + token.TypeToStr[node.Operator] + " is not supported for operands of given types.")
 }
 
 func (interpreter *Interpreter) VisitBoolConst(node ast.BoolConstNode) interface{} {
@@ -109,72 +112,37 @@ func (interpreter *Interpreter) VisitWriteStmt(node ast.WriteStmtNode) interface
 	return nil
 }
 
-func calc(leftValue constant.Value, operator TokenType, rightValue constant.Value) (constant.Value, bool) {
-
-	leftIsNum := leftValue.Kind() == constant.Int || leftValue.Kind() == constant.Float
-	rightIsNum := rightValue.Kind() == constant.Int || rightValue.Kind() == constant.Float
-
-	if !leftIsNum || !rightIsNum {
-		return nil, false
-	}
-
-	if leftValue.Kind() == constant.Int || rightValue.Kind() == constant.Int {
-
-		leftVal, _ := constant.Int64Val(leftValue)
-		rightVal, _ := constant.Int64Val(rightValue)
-
-		switch operator {
-		case token.Plus:
-			return constant.MakeInt64(leftVal + rightVal), true
-		case token.Minus:
-			return constant.MakeInt64(leftVal - rightVal), true
-		case token.Asterisk:
-			return constant.MakeInt64(leftVal * rightVal), true
-		case token.Slash:
-			return constant.MakeInt64(leftVal / rightVal), true
-		default:
-			return nil, false
-		}
-
-	}
-
-	leftVal, _ := constant.Float64Val(leftValue)
-	rightVal, _ := constant.Float64Val(rightValue)
-
-	switch operator {
-	case token.Plus:
-		return constant.MakeFloat64(leftVal + rightVal), true
-	case token.Minus:
-		return constant.MakeFloat64(leftVal - rightVal), true
-	case token.Asterisk:
-		return constant.MakeFloat64(leftVal * rightVal), true
-	case token.Slash:
-		return constant.MakeFloat64(leftVal / rightVal), true
-	default:
-		return nil, false
-	}
-
+func isNum(val constant.Value) bool {
+	return val.Kind() == constant.Int || val.Kind() == constant.Float
 }
 
-func strcat(leftValue constant.Value, rightValue constant.Value) (constant.Value, bool) {
+func isStr(val constant.Value) bool {
+	return val.Kind() == constant.String
+}
+
+func isBool(val constant.Value) bool {
+	return val.Kind() == constant.Bool
+}
+
+func strcat(leftValue constant.Value, rightValue constant.Value) constant.Value {
 
 	if leftValue.Kind() == constant.String && rightValue.Kind() == constant.String {
-		return constant.MakeString(constant.StringVal(leftValue) + constant.StringVal(rightValue)), true
+		return constant.MakeString(constant.StringVal(leftValue) + constant.StringVal(rightValue))
 	}
 
 	if leftValue.Kind() == constant.String {
 		leftString := constant.StringVal(leftValue)
 		if rightValue.Kind() == constant.Int {
 			val, _ := constant.Int64Val(rightValue)
-			return constant.MakeString(leftString + strconv.FormatInt(val, 10)), true
+			return constant.MakeString(leftString + strconv.FormatInt(val, 10))
 		}
 		if rightValue.Kind() == constant.Float {
 			val, _ := constant.Float64Val(rightValue)
-			return constant.MakeString(leftString + util.FloatToString(val)), true
+			return constant.MakeString(leftString + util.FloatToString(val))
 		}
 		if rightValue.Kind() == constant.Bool {
 			val := constant.BoolVal(rightValue)
-			return constant.MakeString(leftString + strconv.FormatBool(val)), true
+			return constant.MakeString(leftString + strconv.FormatBool(val))
 		}
 	}
 
@@ -182,18 +150,82 @@ func strcat(leftValue constant.Value, rightValue constant.Value) (constant.Value
 		rightString := constant.StringVal(rightValue)
 		if leftValue.Kind() == constant.Int {
 			val, _ := constant.Int64Val(leftValue)
-			return constant.MakeString(strconv.FormatInt(val, 10) + rightString), true
+			return constant.MakeString(strconv.FormatInt(val, 10) + rightString)
 		}
 		if leftValue.Kind() == constant.Float {
 			val, _ := constant.Float64Val(leftValue)
-			return constant.MakeString(util.FloatToString(val) + rightString), true
+			return constant.MakeString(util.FloatToString(val) + rightString)
 		}
 		if leftValue.Kind() == constant.Bool {
 			val := constant.BoolVal(leftValue)
-			return constant.MakeString(strconv.FormatBool(val) + rightString), true
+			return constant.MakeString(strconv.FormatBool(val) + rightString)
 		}
 	}
 
-	return nil, false
+	panic("You can concatenate string with other strings, integers, floats or booleans.")
+
+}
+
+func opsWithNums(left constant.Value, operator TokenType, right constant.Value) constant.Value {
+
+	if left.Kind() == constant.Int || right.Kind() == constant.Int {
+
+		leftVal, _ := constant.Int64Val(left)
+		rightVal, _ := constant.Int64Val(right)
+
+		switch operator {
+		case token.Plus:
+			return constant.MakeInt64(leftVal + rightVal)
+		case token.Minus:
+			return constant.MakeInt64(leftVal - rightVal)
+		case token.Asterisk:
+			return constant.MakeInt64(leftVal * rightVal)
+		case token.Slash:
+			return constant.MakeInt64(leftVal / rightVal)
+		case token.LtOp:
+			return constant.MakeBool(leftVal < rightVal)
+		case token.GtOp:
+			return constant.MakeBool(leftVal > rightVal)
+		case token.LeqOp:
+			return constant.MakeBool(leftVal <= rightVal)
+		case token.GeqOp:
+			return constant.MakeBool(leftVal >= rightVal)
+		case token.EqOp:
+			return constant.MakeBool(leftVal == rightVal)
+		case token.NeqOp:
+			return constant.MakeBool(leftVal != rightVal)
+		default:
+			panic("Operator " + token.TypeToStr[operator] + " cannot be applied to two integers.")
+		}
+
+	}
+
+	leftVal, _ := constant.Float64Val(left)
+	rightVal, _ := constant.Float64Val(right)
+
+	switch operator {
+	case token.Plus:
+		return constant.MakeFloat64(leftVal + rightVal)
+	case token.Minus:
+		return constant.MakeFloat64(leftVal - rightVal)
+	case token.Asterisk:
+		return constant.MakeFloat64(leftVal * rightVal)
+	case token.Slash:
+		return constant.MakeFloat64(leftVal / rightVal)
+	case token.LtOp:
+		return constant.MakeBool(leftVal < rightVal)
+	case token.GtOp:
+		return constant.MakeBool(leftVal > rightVal)
+	case token.LeqOp:
+		return constant.MakeBool(leftVal <= rightVal)
+	case token.GeqOp:
+		return constant.MakeBool(leftVal >= rightVal)
+	case token.EqOp:
+		return constant.MakeBool(leftVal == rightVal)
+	case token.NeqOp:
+		return constant.MakeBool(leftVal != rightVal)
+	default:
+		panic("Operator " + token.TypeToStr[operator] + " cannot be applied to two numbers.")
+	}
 
 }

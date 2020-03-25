@@ -272,7 +272,7 @@ func (scanner *Scanner) lexWord(ch rune, line int, column int) Token {
 		return tok
 	}
 
-	if tok, ok := token.Keywords[word]; ok {
+	if tok, ok := token.KeywordLexemes[word]; ok {
 		return newTok(tok, line, column)
 	}
 
@@ -294,7 +294,7 @@ func (scanner *Scanner) lexBoolOperator(word string, line int, column int) (Toke
 		panic(fmt.Sprintf("Unterminated operator %s at %d:%d.", word, line, column))
 	}
 
-	if tok, ok := token.BoolOp[word]; ok {
+	if tok, ok := token.BoolOpLexemes[word]; ok {
 		return newTok(tok, line, column), true
 	}
 
