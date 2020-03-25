@@ -25,27 +25,29 @@ func New() *Interpreter {
 	return interpreter
 }
 
+// Visit methods should return constant.Value!
+
 func (interpreter *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) interface{} {
-	left := node.LeftExpr.Accept(interpreter).(constant.Value)
-	right := node.RightExpr.Accept(interpreter).(constant.Value)
+	leftValue := node.LeftExpr.Accept(interpreter).(constant.Value)
+	rightValue := node.RightExpr.Accept(interpreter).(constant.Value)
 
-	if node.Operator == token.Plus && (isStr(left) || isStr(right)) {
-		return strcat(left, right)
+	if node.Operator == token.Plus && (isStr(leftValue) || isStr(rightValue)) {
+		return strcat(leftValue, rightValue)
 	}
 
-	if isNum(left) && isNum(right) {
-		return opsWithNums(left, node.Operator, right)
+	if isNum(leftValue) && isNum(rightValue) {
+		return opsWithNums(leftValue, node.Operator, rightValue)
 	}
 
-	//if isBool(left) && isBool(right) {
-	//    return opsWithBools(left, node.Operator, right)
+	//if isBool(leftValue) && isBool(rightValue) {
+	//    return opsWithBools(leftValue, node.Operator, rightValue)
 	//}
 
 	panic("Operator " + token.TypeToStr[node.Operator] + " is not supported for operands of given types.")
 }
 
 func (interpreter *Interpreter) VisitBoolConst(node ast.BoolConstNode) interface{} {
-	return nil
+	return constant.MakeBool(node.Value)
 }
 
 func (interpreter *Interpreter) VisitControlFlowStmt(node ast.ControlFlowStmtNode) interface{} {
