@@ -18,6 +18,6 @@ func (node ControlFlowStmtNode) ToString(lvl int) string {
 	return str
 }
 
-func (node ControlFlowStmtNode) Accept(v Visitor) interface{} {
-	return v.VisitControlFlowStmt(node)
+func (node ControlFlowStmtNode) Accept(v Visitor) {
+	v.VisitControlFlowStmt(node)
 }

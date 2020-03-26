@@ -157,44 +157,50 @@ func isBool(val constant.Value) bool {
 }
 
 func strcat(leftValue constant.Value, rightValue constant.Value) constant.Value {
-
 	if leftValue.Kind() == constant.String && rightValue.Kind() == constant.String {
 		return constant.MakeString(constant.StringVal(leftValue) + constant.StringVal(rightValue))
 	}
-
 	if leftValue.Kind() == constant.String {
-		leftString := constant.StringVal(leftValue)
-		if rightValue.Kind() == constant.Int {
-			val, _ := constant.Int64Val(rightValue)
-			return constant.MakeString(leftString + strconv.FormatInt(val, 10))
-		}
-		if rightValue.Kind() == constant.Float {
-			val, _ := constant.Float64Val(rightValue)
-			return constant.MakeString(leftString + util.FloatToString(val))
-		}
-		if rightValue.Kind() == constant.Bool {
-			val := constant.BoolVal(rightValue)
-			return constant.MakeString(leftString + strconv.FormatBool(val))
-		}
+		return strcatImplicitConversion(leftValue, rightValue, true)
 	}
-
 	if rightValue.Kind() == constant.String {
-		rightString := constant.StringVal(rightValue)
-		if leftValue.Kind() == constant.Int {
-			val, _ := constant.Int64Val(leftValue)
-			return constant.MakeString(strconv.FormatInt(val, 10) + rightString)
+		return strcatImplicitConversion(rightValue, leftValue, false)
+	}
+	panic("Could not perform string concatenation.")
+}
+
+func strcatImplicitConversion(stringValue constant.Value, otherValue constant.Value, ordered bool) constant.Value {
+
+	stringVal := constant.StringVal(stringValue)
+
+	switch otherValue.Kind() {
+	case constant.Int:
+		intVal, _ := constant.Int64Val(otherValue)
+		intValStr := strconv.FormatInt(intVal, 10)
+		if ordered {
+			return constant.MakeString(stringVal + intValStr)
+		} else {
+			return constant.MakeString(intValStr + stringVal)
 		}
-		if leftValue.Kind() == constant.Float {
-			val, _ := constant.Float64Val(leftValue)
-			return constant.MakeString(util.FloatToString(val) + rightString)
+	case constant.Float:
+		floatVal, _ := constant.Float64Val(otherValue)
+		floatValStr := util.FloatToString(floatVal)
+		if ordered {
+			return constant.MakeString(stringVal + floatValStr)
+		} else {
+			return constant.MakeString(floatValStr + stringVal)
 		}
-		if leftValue.Kind() == constant.Bool {
-			val := constant.BoolVal(leftValue)
-			return constant.MakeString(strconv.FormatBool(val) + rightString)
+	case constant.Bool:
+		boolVal := constant.BoolVal(otherValue)
+		boolValStr := strconv.FormatBool(boolVal)
+		if ordered {
+			return constant.MakeString(stringVal + boolValStr)
+		} else {
+			return constant.MakeString(boolValStr + stringVal)
 		}
 	}
 
-	panic("You can concatenate string with other strings, integers, floats or booleans.")
+	panic("You can concatenate string with other strings, integers, floats and booleans.")
 
 }
 

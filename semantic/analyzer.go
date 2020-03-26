@@ -37,7 +37,7 @@ func (analyzer *Analyzer) VisitBoolConst(node ast.BoolConstNode) interface{} {
 	return nil
 }
 
-func (analyzer *Analyzer) VisitControlFlowStmt(node ast.ControlFlowStmtNode) interface{} {
+func (analyzer *Analyzer) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
 	node.Condition.Accept(analyzer)
 
 	analyzer.currentScope = NewScope(analyzer.currentScope.id+1, analyzer.currentScope)
@@ -45,7 +45,6 @@ func (analyzer *Analyzer) VisitControlFlowStmt(node ast.ControlFlowStmtNode) int
 		stmt.Accept(analyzer)
 	}
 	analyzer.currentScope = analyzer.currentScope.parent
-	return nil
 }
 
 func (analyzer *Analyzer) VisitIdentifier(node ast.IdentifierNode) interface{} {
@@ -57,28 +56,24 @@ func (analyzer *Analyzer) VisitIntConst(node ast.IntConstNode) interface{} {
 	return nil
 }
 
-func (analyzer *Analyzer) VisitMainFunc(node ast.MainFuncNode) interface{} {
+func (analyzer *Analyzer) VisitMainFunc(node ast.MainFuncNode) {
 	analyzer.currentScope = NewScope(analyzer.currentScope.id+1, analyzer.currentScope)
 	for _, stmt := range node.Statements {
 		stmt.Accept(analyzer)
 	}
 	analyzer.currentScope = analyzer.currentScope.parent
-	return nil
 }
 
-func (analyzer *Analyzer) VisitProgram(node ast.ProgramNode) interface{} {
+func (analyzer *Analyzer) VisitProgram(node ast.ProgramNode) {
 	node.Body.Accept(analyzer)
-	return nil
 }
 
-func (analyzer *Analyzer) VisitProgramBody(node ast.ProgramBodyNode) interface{} {
+func (analyzer *Analyzer) VisitProgramBody(node ast.ProgramBodyNode) {
 	node.MainFunc.Accept(analyzer)
-	return nil
 }
 
-func (analyzer *Analyzer) VisitReadStmt(node ast.ReadStmtNode) interface{} {
+func (analyzer *Analyzer) VisitReadStmt(node ast.ReadStmtNode) {
 	analyzer.currentScope.expect(node.Identifier.Name)
-	return nil
 }
 
 func (analyzer *Analyzer) VisitRealConst(node ast.RealConstNode) interface{} {
@@ -94,23 +89,20 @@ func (analyzer *Analyzer) VisitUnaryExpr(node ast.UnaryExprNode) interface{} {
 	return nil
 }
 
-func (analyzer *Analyzer) VisitVarAssign(node ast.VarAssignNode) interface{} {
+func (analyzer *Analyzer) VisitVarAssign(node ast.VarAssignNode) {
 	analyzer.currentScope.expect(node.Identifier.Name)
 	node.Value.Accept(analyzer)
-	return nil
 }
 
-func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) interface{} {
+func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
 	analyzer.currentScope.expect(node.TypeName.Name)
 	name := node.VarName.Name
 	if analyzer.currentScope.declaredLocally(name) {
 		panic("Variable " + name + " is already declared.")
 	}
 	analyzer.currentScope.insert(symbol{name: name})
-	return nil
 }
 
-func (analyzer *Analyzer) VisitWriteStmt(node ast.WriteStmtNode) interface{} {
+func (analyzer *Analyzer) VisitWriteStmt(node ast.WriteStmtNode) {
 	node.Value.Accept(analyzer)
-	return nil
 }

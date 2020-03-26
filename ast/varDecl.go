@@ -9,6 +9,6 @@ func (node VarDeclNode) ToString(lvl int) string {
 	return ident(lvl, node.TypeName.ToString()+" "+node.VarName.ToString())
 }
 
-func (node VarDeclNode) Accept(v Visitor) interface{} {
-	return v.VisitVarDecl(node)
+func (node VarDeclNode) Accept(v Visitor) {
+	v.VisitVarDecl(node)
 }

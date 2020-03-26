@@ -9,17 +9,18 @@ import (
 type TokenType = token.Type
 
 type Node interface {
-	Accept(v Visitor) interface{}
 }
 
 type StatementNode interface {
 	Node
 	ToString(lvl int) string
+	Accept(v Visitor)
 }
 
 type ExpressionNode interface {
 	Node
 	ToString() string
+	Accept(v Visitor) interface{}
 }
 
 type Visitor interface {
