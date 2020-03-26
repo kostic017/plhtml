@@ -2,6 +2,7 @@ package ast
 
 type MainFuncNode struct {
     Statements []StatementNode
+
 }
 
 func (node MainFuncNode) ToString() string {

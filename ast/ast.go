@@ -3,7 +3,7 @@ package ast
 import (
     "strings"
 
-    "../token"
+    "plhtml/token"
 )
 
 type TokenType = token.Type

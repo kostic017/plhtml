@@ -1,5 +1,6 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <option name="AUTODETECT_INDENTS" value="false" />
     <option name="DO_NOT_FORMAT">
       <list>
         <fileSet type="namedScope" name="Exclude Tests" pattern="file[plhtml]:tests//*" />

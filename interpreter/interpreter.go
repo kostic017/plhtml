@@ -7,10 +7,10 @@ import (
 	"os"
 	"strconv"
 
-	"../ast"
-	"../logger"
-	"../token"
-	"../util"
+	"plhtml/ast"
+	"plhtml/logger"
+	"plhtml/token"
+	"plhtml/util"
 )
 
 type TokenType = token.Type
@@ -23,13 +23,13 @@ func SetLogLevel(level logger.LogLevel) {
 
 type Interpreter struct {
 	in        *bufio.Scanner
-	variables map[string]constant.Value
+	callStack *callStack
 }
 
 func New() *Interpreter {
 	interp := new(Interpreter)
 	interp.in = bufio.NewScanner(os.Stdin)
-	interp.variables = make(map[string]constant.Value)
+	interp.callStack = NewStack()
 	return interp
 }
 
@@ -46,8 +46,12 @@ func (interp *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) interfac
 		return strcat(leftValue, rightValue)
 	}
 
+	if leftValue.Kind() == constant.Int || rightValue.Kind() == constant.Int {
+		return opsWithInts(leftValue, node.Operator, rightValue)
+	}
+
 	if isNum(leftValue) && isNum(rightValue) {
-		return opsWithNums(leftValue, node.Operator, rightValue)
+		return opsWithFloats(leftValue, node.Operator, rightValue)
 	}
 
 	//if isBool(leftValue) && isBool(rightValue) {
@@ -82,8 +86,8 @@ func (interp *Interpreter) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
 }
 
 func (interp *Interpreter) VisitIdentifier(node ast.IdentifierNode) interface{} {
-	interp.checkVarDecl(node.Name)
-	value := interp.variables[node.Name].(constant.Value)
+	arcRecord := interp.callStack.peek()
+	value := arcRecord.variables[node.Name].(constant.Value)
 	myLogger.Debug("%s: %s", node.Name, value.String())
 	return value
 }
@@ -93,28 +97,33 @@ func (interp *Interpreter) VisitIntConst(node ast.IntConstNode) interface{} {
 }
 
 func (interp *Interpreter) VisitMainFunc(node ast.MainFuncNode) {
+	interp.callStack.push(newActRecord()) // function local variables
 	for _, stmt := range node.Statements {
 		stmt.Accept(interp)
 	}
+	interp.callStack.pop()
 }
 
 func (interp *Interpreter) VisitProgram(node ast.ProgramNode) {
+	fmt.Println(node.Title.Value)
 	node.Body.Accept(interp)
 }
 
 func (interp *Interpreter) VisitProgramBody(node ast.ProgramBodyNode) {
+	interp.callStack.push(newActRecord()) // for global variables
 	node.MainFunc.Accept(interp)
+	interp.callStack.pop()
 }
 
 func (interp *Interpreter) VisitReadStmt(node ast.ReadStmtNode) {
 	// TODO correct type
-	interp.checkVarDecl(node.Identifier.Name)
 	interp.in.Scan()
 
 	val, err := util.StrToInt64(interp.in.Text())
 	util.Check(err)
 
-	interp.variables[node.Identifier.Name] = constant.MakeInt64(val)
+	actRecord := interp.callStack.peek()
+	actRecord.variables[node.Identifier.Name] = constant.MakeInt64(val)
 }
 
 func (interp *Interpreter) VisitRealConst(node ast.RealConstNode) interface{} {
@@ -149,16 +158,17 @@ func (interp *Interpreter) VisitUnaryExpr(node ast.UnaryExprNode) interface{} {
 
 func (interp *Interpreter) VisitVarAssign(node ast.VarAssignNode) {
 	// TODO correct type
-	interp.checkVarDecl(node.Identifier.Name)
 	value := node.Value.Accept(interp).(constant.Value)
 	myLogger.Debug("%s = %s", node.Identifier.Name, value.String())
-	interp.variables[node.Identifier.Name] = value
+	actRecord := interp.callStack.peek()
+	actRecord.variables[node.Identifier.Name] = value
 }
 
 func (interp *Interpreter) VisitVarDecl(node ast.VarDeclNode) {
 	// TODO correct type and default value
 	myLogger.Debug("%s %s", node.Type.Name, node.Identifier.Name)
-	interp.variables[node.Identifier.Name] = constant.MakeInt64(0)
+	actRecord := interp.callStack.peek()
+	actRecord.variables[node.Identifier.Name] = constant.MakeInt64(0)
 }
 
 func (interp *Interpreter) VisitWriteStmt(node ast.WriteStmtNode) {
@@ -167,12 +177,6 @@ func (interp *Interpreter) VisitWriteStmt(node ast.WriteStmtNode) {
 		fmt.Print(constant.StringVal(exprValue))
 	} else {
 		panic("You can print strings only.")
-	}
-}
-
-func (interp *Interpreter) checkVarDecl(name string) {
-	if _, declared := interp.variables[name]; !declared {
-		panic("Variable " + name + " was not declared before it was used.")
 	}
 }
 
@@ -236,39 +240,41 @@ func strcatImplicitConversion(stringValue constant.Value, otherValue constant.Va
 
 }
 
-func opsWithNums(left constant.Value, operator TokenType, right constant.Value) constant.Value {
+func opsWithInts(left constant.Value, operator TokenType, right constant.Value) constant.Value {
 
-	if left.Kind() == constant.Int || right.Kind() == constant.Int {
+	leftVal, _ := constant.Int64Val(left)
+	rightVal, _ := constant.Int64Val(right)
 
-		leftVal, _ := constant.Int64Val(left)
-		rightVal, _ := constant.Int64Val(right)
-
-		switch operator {
-		case token.Plus:
-			return constant.MakeInt64(leftVal + rightVal)
-		case token.Minus:
-			return constant.MakeInt64(leftVal - rightVal)
-		case token.Asterisk:
-			return constant.MakeInt64(leftVal * rightVal)
-		case token.Slash:
-			return constant.MakeInt64(leftVal / rightVal)
-		case token.LtOp:
-			return constant.MakeBool(leftVal < rightVal)
-		case token.GtOp:
-			return constant.MakeBool(leftVal > rightVal)
-		case token.LeqOp:
-			return constant.MakeBool(leftVal <= rightVal)
-		case token.GeqOp:
-			return constant.MakeBool(leftVal >= rightVal)
-		case token.EqOp:
-			return constant.MakeBool(leftVal == rightVal)
-		case token.NeqOp:
-			return constant.MakeBool(leftVal != rightVal)
-		default:
-			panic("Operator " + operator.String() + " cannot be applied to two integers.")
-		}
-
+	switch operator {
+	case token.Plus:
+		return constant.MakeInt64(leftVal + rightVal)
+	case token.Minus:
+		return constant.MakeInt64(leftVal - rightVal)
+	case token.Multiply:
+		return constant.MakeInt64(leftVal * rightVal)
+	case token.Slash:
+		return constant.MakeInt64(leftVal / rightVal)
+	case token.Modulo:
+		return constant.MakeInt64(leftVal % rightVal)
+	case token.LtOp:
+		return constant.MakeBool(leftVal < rightVal)
+	case token.GtOp:
+		return constant.MakeBool(leftVal > rightVal)
+	case token.LeqOp:
+		return constant.MakeBool(leftVal <= rightVal)
+	case token.GeqOp:
+		return constant.MakeBool(leftVal >= rightVal)
+	case token.EqOp:
+		return constant.MakeBool(leftVal == rightVal)
+	case token.NeqOp:
+		return constant.MakeBool(leftVal != rightVal)
+	default:
+		panic("Operator " + operator.String() + " cannot be applied to two integers.")
 	}
+
+}
+
+func opsWithFloats(left constant.Value, operator TokenType, right constant.Value) constant.Value {
 
 	leftVal, _ := constant.Float64Val(left)
 	rightVal, _ := constant.Float64Val(right)
@@ -278,7 +284,7 @@ func opsWithNums(left constant.Value, operator TokenType, right constant.Value) 
 		return constant.MakeFloat64(leftVal + rightVal)
 	case token.Minus:
 		return constant.MakeFloat64(leftVal - rightVal)
-	case token.Asterisk:
+	case token.Multiply:
 		return constant.MakeFloat64(leftVal * rightVal)
 	case token.Slash:
 		return constant.MakeFloat64(leftVal / rightVal)
@@ -295,7 +301,7 @@ func opsWithNums(left constant.Value, operator TokenType, right constant.Value) 
 	case token.NeqOp:
 		return constant.MakeBool(leftVal != rightVal)
 	default:
-		panic("Operator " + operator.String() + " cannot be applied to two numbers.")
+		panic("Operator " + operator.String() + " cannot be applied to floats.")
 	}
 
 }
