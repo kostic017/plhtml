@@ -101,6 +101,7 @@ func (interp *Interpreter) VisitMainFunc(node ast.MainFuncNode) {
 }
 
 func (interp *Interpreter) VisitProgram(node ast.ProgramNode) {
+	fmt.Println(node.Title.Value)
 	node.Body.Accept(interp)
 }
 
