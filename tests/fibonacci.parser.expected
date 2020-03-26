@@ -8,6 +8,7 @@ Main:
     a = 0
     b = 1
     c = 0
+    i = 1
     Write: "n: "
     Read n
     While i LeqOp n
