@@ -3,10 +3,10 @@ package parser
 import (
     "fmt"
 
-    "../ast"
-    "../logger"
-    "../scanner"
-    "../token"
+    "plhtml/ast"
+    "plhtml/logger"
+    "plhtml/scanner"
+    "plhtml/token"
 )
 
 type Token = scanner.Token

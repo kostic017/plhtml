@@ -6,9 +6,9 @@ import (
     "strings"
     "unicode"
 
-    "../logger"
-    "../token"
-    "../util"
+    "plhtml/logger"
+    "plhtml/token"
+    "plhtml/util"
 )
 
 var myLogger = logger.New("SCANNER")

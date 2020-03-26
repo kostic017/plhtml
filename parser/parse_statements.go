@@ -1,8 +1,8 @@
 package parser
 
 import (
-    "../ast"
-    "../token"
+    "plhtml/ast"
+    "plhtml/token"
 )
 
 func (parser *Parser) parseStatements() []ast.StatementNode {

@@ -1,16 +1,16 @@
 package main
 
 import (
-    "./interpreter"
-    "./parser"
-    "./scanner"
-    "./semantic"
-    "./util"
+    "os"
+    "plhtml/interpreter"
+    "plhtml/parser"
+    "plhtml/scanner"
+    "plhtml/semantic"
+    "plhtml/util"
 )
 
 func main() {
-
-    source := util.ReadFile("tests/examples/fibonacci.html")
+    source := util.ReadFile(os.Args[1])
 
     myScanner := scanner.New()
     tokens := myScanner.Scan(source)
@@ -18,11 +18,9 @@ func main() {
     myParser := parser.New()
     prgNode := myParser.Parse(tokens)
 
-    //semantic.SetLogLevel(logger.Debug)
-    semanticAnalyzer := semantic.NewAnalyzer()
-    prgNode.Accept(semanticAnalyzer)
+    analyzer := semantic.NewAnalyzer()
+    prgNode.Accept(analyzer)
 
-    //interpreter.SetLogLevel(logger.Debug)
     interp := interpreter.New()
     prgNode.Accept(interp)
 }

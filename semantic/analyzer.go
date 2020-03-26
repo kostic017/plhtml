@@ -1,8 +1,8 @@
 package semantic
 
 import (
-    "../ast"
-    "../logger"
+    "plhtml/ast"
+    "plhtml/logger"
 )
 
 var myLogger = logger.New("ANALYZER")

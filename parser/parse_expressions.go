@@ -3,8 +3,8 @@ package parser
 import (
     "fmt"
 
-    "../ast"
-    "../token"
+    "plhtml/ast"
+    "plhtml/token"
 )
 
 func (parser *Parser) parseExpr() ast.ExpressionNode {

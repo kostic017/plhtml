@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"./parser"
-	"./scanner"
-	"./token"
-	"./util"
+	"plhtml/parser"
+	"plhtml/scanner"
+	"plhtml/token"
+	"plhtml/util"
 )
 
 func TestScanner(t *testing.T) {
