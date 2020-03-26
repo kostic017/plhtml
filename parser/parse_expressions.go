@@ -22,7 +22,7 @@ func (parser *Parser) parseExprL(l int) ast.ExpressionNode {
 	case 3:
 		operators = []TokenType{token.Plus, token.Minus}
 	case 4:
-		operators = []TokenType{token.Asterisk, token.Slash}
+		operators = []TokenType{token.Multiply, token.Slash, token.Modulo}
 	case 5:
 		return parser.parseFactor()
 	}

@@ -46,8 +46,12 @@ func (interp *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) interfac
 		return strcat(leftValue, rightValue)
 	}
 
+	if leftValue.Kind() == constant.Int || rightValue.Kind() == constant.Int {
+		return opsWithInts(leftValue, node.Operator, rightValue)
+	}
+
 	if isNum(leftValue) && isNum(rightValue) {
-		return opsWithNums(leftValue, node.Operator, rightValue)
+		return opsWithFloats(leftValue, node.Operator, rightValue)
 	}
 
 	//if isBool(leftValue) && isBool(rightValue) {
@@ -236,39 +240,41 @@ func strcatImplicitConversion(stringValue constant.Value, otherValue constant.Va
 
 }
 
-func opsWithNums(left constant.Value, operator TokenType, right constant.Value) constant.Value {
+func opsWithInts(left constant.Value, operator TokenType, right constant.Value) constant.Value {
 
-	if left.Kind() == constant.Int || right.Kind() == constant.Int {
+	leftVal, _ := constant.Int64Val(left)
+	rightVal, _ := constant.Int64Val(right)
 
-		leftVal, _ := constant.Int64Val(left)
-		rightVal, _ := constant.Int64Val(right)
-
-		switch operator {
-		case token.Plus:
-			return constant.MakeInt64(leftVal + rightVal)
-		case token.Minus:
-			return constant.MakeInt64(leftVal - rightVal)
-		case token.Asterisk:
-			return constant.MakeInt64(leftVal * rightVal)
-		case token.Slash:
-			return constant.MakeInt64(leftVal / rightVal)
-		case token.LtOp:
-			return constant.MakeBool(leftVal < rightVal)
-		case token.GtOp:
-			return constant.MakeBool(leftVal > rightVal)
-		case token.LeqOp:
-			return constant.MakeBool(leftVal <= rightVal)
-		case token.GeqOp:
-			return constant.MakeBool(leftVal >= rightVal)
-		case token.EqOp:
-			return constant.MakeBool(leftVal == rightVal)
-		case token.NeqOp:
-			return constant.MakeBool(leftVal != rightVal)
-		default:
-			panic("Operator " + operator.String() + " cannot be applied to two integers.")
-		}
-
+	switch operator {
+	case token.Plus:
+		return constant.MakeInt64(leftVal + rightVal)
+	case token.Minus:
+		return constant.MakeInt64(leftVal - rightVal)
+	case token.Multiply:
+		return constant.MakeInt64(leftVal * rightVal)
+	case token.Slash:
+		return constant.MakeInt64(leftVal / rightVal)
+	case token.Modulo:
+		return constant.MakeInt64(leftVal % rightVal)
+	case token.LtOp:
+		return constant.MakeBool(leftVal < rightVal)
+	case token.GtOp:
+		return constant.MakeBool(leftVal > rightVal)
+	case token.LeqOp:
+		return constant.MakeBool(leftVal <= rightVal)
+	case token.GeqOp:
+		return constant.MakeBool(leftVal >= rightVal)
+	case token.EqOp:
+		return constant.MakeBool(leftVal == rightVal)
+	case token.NeqOp:
+		return constant.MakeBool(leftVal != rightVal)
+	default:
+		panic("Operator " + operator.String() + " cannot be applied to two integers.")
 	}
+
+}
+
+func opsWithFloats(left constant.Value, operator TokenType, right constant.Value) constant.Value {
 
 	leftVal, _ := constant.Float64Val(left)
 	rightVal, _ := constant.Float64Val(right)
@@ -278,7 +284,7 @@ func opsWithNums(left constant.Value, operator TokenType, right constant.Value) 
 		return constant.MakeFloat64(leftVal + rightVal)
 	case token.Minus:
 		return constant.MakeFloat64(leftVal - rightVal)
-	case token.Asterisk:
+	case token.Multiply:
 		return constant.MakeFloat64(leftVal * rightVal)
 	case token.Slash:
 		return constant.MakeFloat64(leftVal / rightVal)
@@ -295,7 +301,7 @@ func opsWithNums(left constant.Value, operator TokenType, right constant.Value) 
 	case token.NeqOp:
 		return constant.MakeBool(leftVal != rightVal)
 	default:
-		panic("Operator " + operator.String() + " cannot be applied to two numbers.")
+		panic("Operator " + operator.String() + " cannot be applied to floats.")
 	}
 
 }
