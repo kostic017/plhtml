@@ -1,13 +1,13 @@
 package ast
 
 type IdentifierNode struct {
-	Name string
+    Name string
 }
 
 func (node IdentifierNode) ToString() string {
-	return node.Name
+    return node.Name
 }
 
 func (node IdentifierNode) Accept(v Visitor) interface{} {
-	return v.VisitIdentifier(node)
+    return v.VisitIdentifier(node)
 }

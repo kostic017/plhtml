@@ -1,17 +1,17 @@
 package ast
 
 import (
-	"fmt"
+    "fmt"
 )
 
 type BoolConstNode struct {
-	Value bool
+    Value bool
 }
 
 func (node BoolConstNode) ToString() string {
-	return fmt.Sprintf("%t", node.Value)
+    return fmt.Sprintf("%t", node.Value)
 }
 
 func (node BoolConstNode) Accept(v Visitor) interface{} {
-	return v.VisitBoolConst(node)
+    return v.VisitBoolConst(node)
 }
