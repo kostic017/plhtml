@@ -8,6 +8,6 @@ func (node StringConstNode) ToString() string {
     return "\"" + node.Value + "\""
 }
 
-func (node StringConstNode) Accept(v Visitor) {
-    v.VisitStringConst(node)
+func (node StringConstNode) Accept(v Visitor) interface{} {
+    return v.VisitStringConst(node)
 }

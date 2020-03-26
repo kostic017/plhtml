@@ -1,18 +1,18 @@
 "Fibonacci numbers"
 Main:
-    integer t
+    integer a
+    integer b
+    integer c
     integer i
     integer n
-    integer t1
-    integer t2
-    i = 1
-    t1 = 0
-    t2 = 1
+    a = 0
+    b = 1
+    c = 0
     Write: "n: "
     Read n
-    TokWhile i TokLeqOp n
-        Write: t1 + " "
-        t = t1 + t2
-        t2 = t1
-        t = t2
+    While i LeqOp n
+        c = a + b
+        Write: c + " "
+        a = b
+        b = c
         i = i + 1

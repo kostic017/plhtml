@@ -3,38 +3,39 @@ package ast
 import (
     "strings"
 
-    "../scanner"
+    "../token"
 )
 
-type TokenType = scanner.TokenType
+type TokenType = token.Type
 
 type Node interface {
-    Accept(v Visitor)
 }
 
 type StatementNode interface {
     Node
     ToString(lvl int) string
+    Accept(v Visitor)
 }
 
 type ExpressionNode interface {
     Node
     ToString() string
+    Accept(v Visitor) interface{}
 }
 
 type Visitor interface {
-    VisitBinaryOpExpr(node BinaryOpExprNode)
-    VisitBoolConst(node BoolConstNode)
+    VisitBinaryOpExpr(node BinaryOpExprNode) interface{}
+    VisitBoolConst(node BoolConstNode) interface{}
     VisitControlFlowStmt(node ControlFlowStmtNode)
-    VisitIdentifier(node IdentifierNode)
-    VisitIntConst(node IntConstNode)
+    VisitIdentifier(node IdentifierNode) interface{}
+    VisitIntConst(node IntConstNode) interface{}
     VisitMainFunc(node MainFuncNode)
     VisitProgram(node ProgramNode)
     VisitProgramBody(node ProgramBodyNode)
     VisitReadStmt(node ReadStmtNode)
-    VisitRealConst(node RealConstNode)
-    VisitStringConst(node StringConstNode)
-    VisitUnaryExpr(node UnaryExprNode)
+    VisitRealConst(node RealConstNode) interface{}
+    VisitStringConst(node StringConstNode) interface{}
+    VisitUnaryExpr(node UnaryExprNode) interface{}
     VisitVarAssign(node VarAssignNode)
     VisitVarDecl(node VarDeclNode)
     VisitWriteStmt(node WriteStmtNode)

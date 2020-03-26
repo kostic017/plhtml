@@ -7,9 +7,9 @@ type BinaryOpExprNode struct {
 }
 
 func (node BinaryOpExprNode) ToString() string {
-    return node.LeftExpr.ToString() + " " + string(node.Operator) + " " + node.RightExpr.ToString()
+    return node.LeftExpr.ToString() + " " + node.Operator.String() + " " + node.RightExpr.ToString()
 }
 
-func (node BinaryOpExprNode) Accept(v Visitor) {
-    v.VisitBinaryOpExpr(node)
+func (node BinaryOpExprNode) Accept(v Visitor) interface{} {
+    return v.VisitBinaryOpExpr(node)
 }

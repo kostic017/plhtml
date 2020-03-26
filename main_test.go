@@ -7,36 +7,37 @@ import (
     "strings"
     "testing"
 
-    "./ast"
     "./parser"
     "./scanner"
+    "./token"
     "./util"
 )
 
-func TestCompiler(t *testing.T) {
+func TestScanner(t *testing.T) {
+    tokens := scan("./tests/examples/fibonacci.html")
+    compare(t, "fibonacci.scanner", tokensToString(tokens))
+}
 
-    source := util.ReadFile("./tests/examples/fibonacci.html")
-
-    myScanner := scanner.New()
-    tokens := myScanner.Scan(source)
-    testScanner(t, tokens)
-
+func TestParser(t *testing.T) {
+    tokens := scan("./tests/examples/fibonacci.html")
     myParser := parser.New()
     prgNode := myParser.Parse(tokens)
-    testParser(t, prgNode)
-
+    compare(t, "fibonacci.parser", prgNode.ToString())
 }
 
-func testScanner(t *testing.T, tokens []scanner.Token) {
-    test(t, "fibonacci.scanner", tokensToString(tokens))
+func scan(file string) []scanner.Token {
+    source := util.ReadFile(file)
+    myScanner := scanner.New()
+    return myScanner.Scan(source)
 }
 
-func testParser(t *testing.T, prgNode ast.ProgramNode) {
-    test(t, "fibonacci.parser", prgNode.ToString())
-}
-
-func test(t *testing.T, testName string, actual string) {
+func compare(t *testing.T, testName string, actual string) {
     expected := util.ReadFile("./tests/" + testName + ".expected")
+
+    if strings.TrimSpace(expected) != strings.TrimSpace(actual) {
+        util.WriteFile("./tests/"+testName+".actual", actual)
+    }
+
     assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(actual), "These two should be the same.")
 }
 
@@ -45,23 +46,23 @@ func tokensToString(tokens []scanner.Token) string {
     result := ""
     for _, tok := range tokens {
 
-        if tok.Type == scanner.TokEOF {
+        if tok.Type == token.EOF {
             break
         }
 
         var value string
         switch tok.Type {
-        case scanner.TokIdentifier, scanner.TokStringConst:
+        case token.Identifier, token.StringConst:
             value = tok.StrVal
-        case scanner.TokIntConst:
+        case token.IntConst:
             value = strconv.Itoa(tok.IntVal)
-        case scanner.TokRealConst:
-            value = strconv.FormatFloat(tok.RealVal, 'E', -1, 64)
-        case scanner.TokBoolConst:
+        case token.RealConst:
+            value = util.FloatToString(tok.RealVal)
+        case token.BoolConst:
             value = strconv.FormatBool(tok.BoolVal)
         }
 
-        result += fmt.Sprintf("(%s,%d,%d,%s)\n", tok.Type, tok.Line, tok.Column, value)
+        result += fmt.Sprintf("(%s,%d,%d,%s)\n", tok.Type.String(), tok.Line, tok.Column, value)
 
     }
 

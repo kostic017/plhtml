@@ -6,9 +6,9 @@ type UnaryExprNode struct {
 }
 
 func (node UnaryExprNode) ToString() string {
-    return string(node.Operator) + node.Expr.ToString()
+    return node.Operator.String() + node.Expr.ToString()
 }
 
-func (node UnaryExprNode) Accept(v Visitor) {
-    v.VisitUnaryExpr(node)
+func (node UnaryExprNode) Accept(v Visitor) interface{} {
+    return v.VisitUnaryExpr(node)
 }

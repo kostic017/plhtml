@@ -10,6 +10,6 @@ func (node RealConstNode) ToString() string {
     return fmt.Sprintf("%f", node.Value)
 }
 
-func (node RealConstNode) Accept(v Visitor) {
-    v.VisitRealConst(node)
+func (node RealConstNode) Accept(v Visitor) interface{} {
+    return v.VisitRealConst(node)
 }
