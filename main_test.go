@@ -33,6 +33,11 @@ func scan(file string) []scanner.Token {
 
 func compare(t *testing.T, testName string, actual string) {
     expected := util.ReadFile("./tests/" + testName + ".expected")
+
+    if strings.TrimSpace(expected) != strings.TrimSpace(actual) {
+        util.WriteFile("./tests/"+testName+".actual", actual)
+    }
+
     assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(actual), "These two should be the same.")
 }
 
@@ -57,7 +62,7 @@ func tokensToString(tokens []scanner.Token) string {
             value = strconv.FormatBool(tok.BoolVal)
         }
 
-        result += fmt.Sprintf("(%s,%d,%d,%s)\n", token.TypeToStr[tok.Type], tok.Line, tok.Column, value)
+        result += fmt.Sprintf("(%s,%d,%d,%s)\n", tok.Type.String(), tok.Line, tok.Column, value)
 
     }
 

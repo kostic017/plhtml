@@ -50,7 +50,7 @@ func (parser *Parser) parseVarDecl() ast.VarDeclNode {
     varName := parser.parseIdentifier()
     parser.parseCloseTag(token.Var)
     myLogger.Debug("=END= Var Declaration")
-    return ast.VarDeclNode{TypeName: varType, VarName: varName}
+    return ast.VarDeclNode{Type: varType, Identifier: varName}
 }
 
 func (parser *Parser) parseVarAssign() ast.VarAssignNode {

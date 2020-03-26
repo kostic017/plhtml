@@ -95,8 +95,8 @@ func (analyzer *Analyzer) VisitVarAssign(node ast.VarAssignNode) {
 }
 
 func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
-    analyzer.currentScope.expect(node.TypeName.Name)
-    name := node.VarName.Name
+    analyzer.currentScope.expect(node.Type.Name)
+    name := node.Identifier.Name
     if analyzer.currentScope.declaredLocally(name) {
         panic("Variable " + name + " is already declared.")
     }

@@ -1,9 +1,5 @@
 package ast
 
-import (
-    "../token"
-)
-
 type BinaryOpExprNode struct {
     LeftExpr  ExpressionNode
     Operator  TokenType
@@ -11,7 +7,7 @@ type BinaryOpExprNode struct {
 }
 
 func (node BinaryOpExprNode) ToString() string {
-    return node.LeftExpr.ToString() + " " + token.TypeToStr[node.Operator] + " " + node.RightExpr.ToString()
+    return node.LeftExpr.ToString() + " " + node.Operator.String() + " " + node.RightExpr.ToString()
 }
 
 func (node BinaryOpExprNode) Accept(v Visitor) interface{} {

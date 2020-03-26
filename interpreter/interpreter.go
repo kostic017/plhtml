@@ -39,6 +39,7 @@ func New() *Interpreter {
 func (interp *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) interface{} {
     leftValue := node.LeftExpr.Accept(interp).(constant.Value)
     rightValue := node.RightExpr.Accept(interp).(constant.Value)
+    myLogger.Debug("%s %s %s", leftValue.String(), node.Operator.String(), rightValue.String())
 
     if node.Operator == token.Plus && (isStr(leftValue) || isStr(rightValue)) {
         return strcat(leftValue, rightValue)
@@ -52,14 +53,16 @@ func (interp *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) interfac
     //    return opsWithBools(leftValue, node.Operator, rightValue)
     //}
 
-    panic("Binary operator " + token.TypeToStr[node.Operator] + " is not supported for operands of given types.")
+    panic("Binary operator " + node.Operator.String() + " is not supported for operands of given types.")
 }
 
 func (interp *Interpreter) VisitBoolConst(node ast.BoolConstNode) interface{} {
+    myLogger.Debug(fmt.Sprintf("Bool %t", node.Value))
     return constant.MakeBool(node.Value)
 }
 
 func (interp *Interpreter) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
+    myLogger.Debug(node.Type.String())
     switch node.Type {
     case token.If:
         if constant.BoolVal(node.Condition.Accept(interp).(constant.Value)) {
@@ -79,7 +82,9 @@ func (interp *Interpreter) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
 
 func (interp *Interpreter) VisitIdentifier(node ast.IdentifierNode) interface{} {
     interp.checkVarDecl(node.Name)
-    return interp.variables[node.Name].(constant.Value)
+    value := interp.variables[node.Name].(constant.Value)
+    myLogger.Debug("%s: %s", node.Name, value.String())
+    return value
 }
 
 func (interp *Interpreter) VisitIntConst(node ast.IntConstNode) interface{} {
@@ -126,10 +131,10 @@ func (interp *Interpreter) VisitUnaryExpr(node ast.UnaryExprNode) interface{} {
     case token.Minus:
         if exprValue.Kind() == constant.Int {
             exprVal, _ := constant.Int64Val(exprValue)
-            return -exprVal
+            return constant.MakeInt64(-exprVal)
         } else if exprValue.Kind() == constant.Float {
             exprVal, _ := constant.Float64Val(exprValue)
-            return -exprVal
+            return constant.MakeFloat64(-exprVal)
         }
         break
     case token.Exclamation:
@@ -138,24 +143,27 @@ func (interp *Interpreter) VisitUnaryExpr(node ast.UnaryExprNode) interface{} {
         }
     }
 
-    panic("Unary operator " + token.TypeToStr[node.Operator] + " is not supported for given types.")
+    panic("Unary operator " + node.Operator.String() + " is not supported for given types.")
 }
 
 func (interp *Interpreter) VisitVarAssign(node ast.VarAssignNode) {
     // TODO correct type
     interp.checkVarDecl(node.Identifier.Name)
-    interp.variables[node.Identifier.Name] = node.Value.Accept(interp).(constant.Value)
+    value := node.Value.Accept(interp).(constant.Value)
+    myLogger.Debug("%s = %s", node.Identifier.Name, value.String())
+    interp.variables[node.Identifier.Name] = value
 }
 
 func (interp *Interpreter) VisitVarDecl(node ast.VarDeclNode) {
-    // TODO correct type
-    interp.variables[node.VarName.Name] = nil
+    // TODO correct type and default value
+    myLogger.Debug("%s %s", node.Type.Name, node.Identifier.Name)
+    interp.variables[node.Identifier.Name] = constant.MakeInt64(0)
 }
 
 func (interp *Interpreter) VisitWriteStmt(node ast.WriteStmtNode) {
     exprValue := node.Value.Accept(interp).(constant.Value)
     if exprValue.Kind() == constant.String {
-        fmt.Print(constant.StringVal(exprValue))
+        fmt.Println(constant.StringVal(exprValue))
     } else {
         panic("You can print strings only.")
     }
@@ -256,7 +264,7 @@ func opsWithNums(left constant.Value, operator TokenType, right constant.Value) 
         case token.NeqOp:
             return constant.MakeBool(leftVal != rightVal)
         default:
-            panic("Operator " + token.TypeToStr[operator] + " cannot be applied to two integers.")
+            panic("Operator " + operator.String() + " cannot be applied to two integers.")
         }
 
     }
@@ -286,7 +294,7 @@ func opsWithNums(left constant.Value, operator TokenType, right constant.Value) 
     case token.NeqOp:
         return constant.MakeBool(leftVal != rightVal)
     default:
-        panic("Operator " + token.TypeToStr[operator] + " cannot be applied to two numbers.")
+        panic("Operator " + operator.String() + " cannot be applied to two numbers.")
     }
 
 }

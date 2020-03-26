@@ -1,9 +1,5 @@
 package ast
 
-import (
-    "../token"
-)
-
 type ControlFlowStmtNode struct {
     Type       TokenType
     Condition  ExpressionNode
@@ -11,7 +7,7 @@ type ControlFlowStmtNode struct {
 }
 
 func (node ControlFlowStmtNode) ToString(lvl int) string {
-    str := ident(lvl, token.TypeToStr[node.Type]+" "+node.Condition.ToString())
+    str := ident(lvl, node.Type.String()+" "+node.Condition.ToString())
     for _, stmt := range node.Statements {
         str += "\n" + stmt.ToString(lvl+1)
     }
