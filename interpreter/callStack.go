@@ -1,42 +1,42 @@
 package interpreter
 
 type callStack struct {
-    top    *node
-    length int
+	top    *node
+	length int
 }
 
 type node struct {
-    value *actRecord
-    prev  *node
+	value *actRecord
+	prev  *node
 }
 
 func NewStack() *callStack {
-    return &callStack{nil, 0}
+	return &callStack{nil, 0}
 }
 
-func (this *callStack) len() int {
-    return this.length
+func (callStack *callStack) len() int {
+	return callStack.length
 }
 
-func (this *callStack) peek() *actRecord {
-    if this.length == 0 {
-        return nil
-    }
-    return this.top.value
+func (callStack *callStack) peek() *actRecord {
+	if callStack.length == 0 {
+		return nil
+	}
+	return callStack.top.value
 }
 
-func (this *callStack) pop() *actRecord {
-    if this.length == 0 {
-        return nil
-    }
-    n := this.top
-    this.top = n.prev
-    this.length--
-    return n.value
+func (callStack *callStack) pop() *actRecord {
+	if callStack.length == 0 {
+		return nil
+	}
+	n := callStack.top
+	callStack.top = n.prev
+	callStack.length--
+	return n.value
 }
 
-func (this *callStack) push(value *actRecord) {
-    n := &node{value, this.top}
-    this.top = n
-    this.length++
+func (callStack *callStack) push(value *actRecord) {
+	n := &node{value, callStack.top}
+	callStack.top = n
+	callStack.length++
 }

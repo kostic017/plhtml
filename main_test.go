@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"strings"
@@ -62,7 +61,11 @@ func tokensToString(tokens []scanner.Token) string {
 			value = strconv.FormatBool(tok.BoolVal)
 		}
 
-		result += fmt.Sprintf("%s|%d|%d|%s|\n", tok.Type.String(), tok.Line, tok.Column, value)
+		if value != "" {
+			value = "|" + value + "|"
+		}
+
+		result += tok.Type.String() + value + "\n"
 
 	}
 
