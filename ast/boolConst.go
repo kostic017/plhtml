@@ -2,6 +2,7 @@ package ast
 
 import (
     "fmt"
+    "go/constant"
 )
 
 type BoolConstNode struct {
@@ -12,6 +13,10 @@ func (node BoolConstNode) ToString() string {
     return fmt.Sprintf("%t", node.Value)
 }
 
-func (node BoolConstNode) Accept(v Visitor) interface{} {
-    return v.VisitBoolConst(node)
+func (node BoolConstNode) AcceptAnalyzer(analyzer IAnalyzer) {
+    analyzer.VisitBoolConst(node)
+}
+
+func (node BoolConstNode) AcceptInterpreter(interp IInterpreter) constant.Value {
+    return interp.VisitBoolConst(node)
 }

@@ -14,6 +14,10 @@ func (node ControlFlowStmtNode) ToString(lvl int) string {
     return str
 }
 
-func (node ControlFlowStmtNode) Accept(v Visitor) {
-    v.VisitControlFlowStmt(node)
+func (node ControlFlowStmtNode) AcceptAnalyzer(analyzer IAnalyzer) {
+    analyzer.VisitControlFlowStmt(node)
+}
+
+func (node ControlFlowStmtNode) AcceptInterpreter(interp IInterpreter) {
+    interp.VisitControlFlowStmt(node)
 }

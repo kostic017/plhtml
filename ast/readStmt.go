@@ -8,6 +8,10 @@ func (node ReadStmtNode) ToString(lvl int) string {
     return ident(lvl, "Read "+node.Identifier.ToString())
 }
 
-func (node ReadStmtNode) Accept(v Visitor) {
-    v.VisitReadStmt(node)
+func (node ReadStmtNode) AcceptAnalyzer(analyzer IAnalyzer) {
+    analyzer.VisitReadStmt(node)
+}
+
+func (node ReadStmtNode) AcceptInterpreter(interp IInterpreter) {
+    interp.VisitReadStmt(node)
 }

@@ -1,6 +1,7 @@
 package ast
 
 import (
+    "go/constant"
     "strings"
 
     "plhtml/token"
@@ -14,28 +15,48 @@ type Node interface {
 type StatementNode interface {
     Node
     ToString(lvl int) string
-    Accept(v Visitor)
+    AcceptAnalyzer(analyzer IAnalyzer)
+    AcceptInterpreter(interp IInterpreter)
 }
 
 type ExpressionNode interface {
     Node
     ToString() string
-    Accept(v Visitor) interface{}
+    AcceptAnalyzer(analyzer IAnalyzer)
+    AcceptInterpreter(interp IInterpreter) constant.Value
 }
 
-type Visitor interface {
-    VisitBinaryOpExpr(node BinaryOpExprNode) interface{}
-    VisitBoolConst(node BoolConstNode) interface{}
+type IAnalyzer interface {
+    VisitBinaryOpExpr(node BinaryOpExprNode)
+    VisitBoolConst(node BoolConstNode)
     VisitControlFlowStmt(node ControlFlowStmtNode)
-    VisitIdentifier(node IdentifierNode) interface{}
-    VisitIntConst(node IntConstNode) interface{}
+    VisitIdentifier(node IdentifierNode)
+    VisitIntConst(node IntConstNode)
     VisitMainFunc(node MainFuncNode)
     VisitProgram(node ProgramNode)
     VisitProgramBody(node ProgramBodyNode)
     VisitReadStmt(node ReadStmtNode)
-    VisitRealConst(node RealConstNode) interface{}
-    VisitStringConst(node StringConstNode) interface{}
-    VisitUnaryExpr(node UnaryExprNode) interface{}
+    VisitRealConst(node RealConstNode)
+    VisitStringConst(node StringConstNode)
+    VisitUnaryExpr(node UnaryExprNode)
+    VisitVarAssign(node VarAssignNode)
+    VisitVarDecl(node VarDeclNode)
+    VisitWriteStmt(node WriteStmtNode)
+}
+
+type IInterpreter interface {
+    VisitBinaryOpExpr(node BinaryOpExprNode) constant.Value
+    VisitBoolConst(node BoolConstNode) constant.Value
+    VisitControlFlowStmt(node ControlFlowStmtNode)
+    VisitIdentifier(node IdentifierNode) constant.Value
+    VisitIntConst(node IntConstNode) constant.Value
+    VisitMainFunc(node MainFuncNode)
+    VisitProgram(node ProgramNode)
+    VisitProgramBody(node ProgramBodyNode)
+    VisitReadStmt(node ReadStmtNode)
+    VisitRealConst(node RealConstNode) constant.Value
+    VisitStringConst(node StringConstNode) constant.Value
+    VisitUnaryExpr(node UnaryExprNode) constant.Value
     VisitVarAssign(node VarAssignNode)
     VisitVarDecl(node VarDeclNode)
     VisitWriteStmt(node WriteStmtNode)

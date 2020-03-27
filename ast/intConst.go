@@ -1,6 +1,9 @@
 package ast
 
-import "fmt"
+import (
+    "fmt"
+    "go/constant"
+)
 
 type IntConstNode struct {
     Value int
@@ -10,6 +13,10 @@ func (node IntConstNode) ToString() string {
     return fmt.Sprintf("%d", node.Value)
 }
 
-func (node IntConstNode) Accept(v Visitor) interface{} {
-    return v.VisitIntConst(node)
+func (node IntConstNode) AcceptAnalyzer(analyzer IAnalyzer) {
+    analyzer.VisitIntConst(node)
+}
+
+func (node IntConstNode) AcceptInterpreter(interp IInterpreter) constant.Value {
+    return interp.VisitIntConst(node)
 }

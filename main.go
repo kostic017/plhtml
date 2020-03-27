@@ -19,8 +19,8 @@ func main() {
     prgNode := myParser.Parse(tokens)
 
     analyzer := semantic.NewAnalyzer()
-    prgNode.Accept(analyzer)
+    prgNode.AcceptAnalyzer(analyzer)
 
     interp := interpreter.New()
-    prgNode.Accept(interp)
+    prgNode.AcceptInterpreter(interp)
 }

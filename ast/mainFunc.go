@@ -2,7 +2,6 @@ package ast
 
 type MainFuncNode struct {
     Statements []StatementNode
-
 }
 
 func (node MainFuncNode) ToString() string {
@@ -13,6 +12,10 @@ func (node MainFuncNode) ToString() string {
     return str
 }
 
-func (node MainFuncNode) Accept(v Visitor) {
-    v.VisitMainFunc(node)
+func (node MainFuncNode) AcceptAnalyzer(analyzer IAnalyzer) {
+    analyzer.VisitMainFunc(node)
+}
+
+func (node MainFuncNode) AcceptInterpreter(interp IInterpreter) {
+    interp.VisitMainFunc(node)
 }

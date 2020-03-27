@@ -27,71 +27,64 @@ func NewAnalyzer() *Analyzer {
     return analyzer
 }
 
-func (analyzer *Analyzer) VisitBinaryOpExpr(node ast.BinaryOpExprNode) interface{} {
-    node.LeftExpr.Accept(analyzer)
-    node.RightExpr.Accept(analyzer)
-    return nil
+func (analyzer *Analyzer) VisitBinaryOpExpr(node ast.BinaryOpExprNode) {
+    node.LeftExpr.AcceptAnalyzer(analyzer)
+    node.RightExpr.AcceptAnalyzer(analyzer)
 }
 
-func (analyzer *Analyzer) VisitBoolConst(node ast.BoolConstNode) interface{} {
-    return nil
+func (analyzer *Analyzer) VisitBoolConst(node ast.BoolConstNode) {
 }
 
 func (analyzer *Analyzer) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
-    node.Condition.Accept(analyzer)
+    node.Condition.AcceptAnalyzer(analyzer)
 
     analyzer.currentScope = NewScope(analyzer.currentScope.id+1, analyzer.currentScope)
     for _, stmt := range node.Statements {
-        stmt.Accept(analyzer)
+        stmt.AcceptAnalyzer(analyzer)
     }
     analyzer.currentScope = analyzer.currentScope.parent
 }
 
-func (analyzer *Analyzer) VisitIdentifier(node ast.IdentifierNode) interface{} {
+func (analyzer *Analyzer) VisitIdentifier(node ast.IdentifierNode) {
     analyzer.currentScope.expect(node.Name)
-    return nil
 }
 
-func (analyzer *Analyzer) VisitIntConst(node ast.IntConstNode) interface{} {
-    return nil
+func (analyzer *Analyzer) VisitIntConst(node ast.IntConstNode) {
 }
 
 func (analyzer *Analyzer) VisitMainFunc(node ast.MainFuncNode) {
     analyzer.currentScope = NewScope(analyzer.currentScope.id+1, analyzer.currentScope)
     for _, stmt := range node.Statements {
-        stmt.Accept(analyzer)
+        stmt.AcceptAnalyzer(analyzer)
     }
     analyzer.currentScope = analyzer.currentScope.parent
 }
 
 func (analyzer *Analyzer) VisitProgram(node ast.ProgramNode) {
-    node.Body.Accept(analyzer)
+    node.Body.AcceptAnalyzer(analyzer)
 }
 
 func (analyzer *Analyzer) VisitProgramBody(node ast.ProgramBodyNode) {
-    node.MainFunc.Accept(analyzer)
+    node.MainFunc.AcceptAnalyzer(analyzer)
 }
 
 func (analyzer *Analyzer) VisitReadStmt(node ast.ReadStmtNode) {
     analyzer.currentScope.expect(node.Identifier.Name)
 }
 
-func (analyzer *Analyzer) VisitRealConst(node ast.RealConstNode) interface{} {
-    return nil
+func (analyzer *Analyzer) VisitRealConst(node ast.RealConstNode) {
 }
 
-func (analyzer *Analyzer) VisitStringConst(node ast.StringConstNode) interface{} {
-    return nil
+func (analyzer *Analyzer) VisitStringConst(node ast.StringConstNode) {
 }
 
-func (analyzer *Analyzer) VisitUnaryExpr(node ast.UnaryExprNode) interface{} {
-    node.Expr.Accept(analyzer)
-    return nil
+func (analyzer *Analyzer) VisitUnaryExpr(node ast.UnaryExprNode) {
+    node.Expr.AcceptAnalyzer(analyzer)
 }
 
 func (analyzer *Analyzer) VisitVarAssign(node ast.VarAssignNode) {
     analyzer.currentScope.expect(node.Identifier.Name)
-    node.Value.Accept(analyzer)
+    node.Value.AcceptAnalyzer(analyzer)
 }
 
 func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
@@ -104,5 +97,5 @@ func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
 }
 
 func (analyzer *Analyzer) VisitWriteStmt(node ast.WriteStmtNode) {
-    node.Value.Accept(analyzer)
+    node.Value.AcceptAnalyzer(analyzer)
 }
