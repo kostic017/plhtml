@@ -1,10 +1,10 @@
-Konačno ljudi koji "programiraju" u HTML-u, te sebe nazivaju "programerima" mogu to i da budu.
+Konačno osobe koje sebe nazivaju "programerima" i "programiraju" u HTML-u mogu to i da budu.
 
-Sav kod napisan u programskom jeziku HTML (ili proceduralnom jeziku HTML, skraćeno PL/HTML po uzoru na PL/SQL)
-predstavlja sintaksički i semantički validan HTML kod, što je bio glavni cilj prilikom dizajniranja jezika. Sintaksička
-ispravnost programa je proveravana korišećnjem [W3C validatora](https://validator.w3.org/#validate-by-input). Programi
-su semantički validni u smislu da su nazivi naredbi birani među nazivima HTML elemenata tako da naziv ili opis elementa
-ukazuje na značenje naredbe (`var`, `input`, `output`, isl).
+Sav kod napisan u programskom jeziku HTML (skraćeno PL/HTML) predstavlja sintaksički i semantički validan HTML kod,
+što je bio glavni cilj prilikom dizajniranja jezika. Sintaksička ispravnost programa je proveravana korišećnjem
+[W3C validatora](https://validator.w3.org/#validate-by-input). Programi su semantički validni u smislu da su nazivi
+naredbi birani među nazivima HTML elemenata tako da naziv ili opis elementa ukazuje na značenje naredbe
+(`var`, `input`, `output`, isl).
 
 Sledeći program ispisuje prvih `n` Fibonačijevih brojeva.
 
