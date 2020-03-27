@@ -47,16 +47,16 @@ func (interp *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) interfac
 	}
 
 	if leftValue.Kind() == constant.Int || rightValue.Kind() == constant.Int {
-		return opsWithInts(leftValue, node.Operator, rightValue)
+		return opsWithIntegers(leftValue, node.Operator, rightValue)
 	}
 
 	if isNum(leftValue) && isNum(rightValue) {
 		return opsWithFloats(leftValue, node.Operator, rightValue)
 	}
 
-	//if isBool(leftValue) && isBool(rightValue) {
-	//    return opsWithBools(leftValue, node.Operator, rightValue)
-	//}
+	if isBool(leftValue) && isBool(rightValue) {
+		return opsWithBooleans(leftValue, node.Operator, rightValue)
+	}
 
 	panic("Binary operator " + node.Operator.String() + " is not supported for operands of given types.")
 }
@@ -149,7 +149,7 @@ func (interp *Interpreter) VisitUnaryExpr(node ast.UnaryExprNode) interface{} {
 		break
 	case token.Exclamation:
 		if exprValue.Kind() == constant.Bool {
-			return !constant.BoolVal(exprValue)
+			return constant.MakeBool(!constant.BoolVal(exprValue))
 		}
 	}
 
@@ -157,7 +157,6 @@ func (interp *Interpreter) VisitUnaryExpr(node ast.UnaryExprNode) interface{} {
 }
 
 func (interp *Interpreter) VisitVarAssign(node ast.VarAssignNode) {
-	// TODO correct type
 	value := node.Value.Accept(interp).(constant.Value)
 	myLogger.Debug("%s = %s", node.Identifier.Name, value.String())
 	actRecord := interp.callStack.peek()
@@ -240,7 +239,7 @@ func strcatImplicitConversion(stringValue constant.Value, otherValue constant.Va
 
 }
 
-func opsWithInts(left constant.Value, operator TokenType, right constant.Value) constant.Value {
+func opsWithIntegers(left constant.Value, operator TokenType, right constant.Value) constant.Value {
 
 	leftVal, _ := constant.Int64Val(left)
 	rightVal, _ := constant.Int64Val(right)
@@ -301,7 +300,23 @@ func opsWithFloats(left constant.Value, operator TokenType, right constant.Value
 	case token.NeqOp:
 		return constant.MakeBool(leftVal != rightVal)
 	default:
-		panic("Operator " + operator.String() + " cannot be applied to floats.")
+		panic("Operator " + operator.String() + " cannot be applied to real numbers.")
+	}
+
+}
+
+func opsWithBooleans(left constant.Value, operator TokenType, right constant.Value) constant.Value {
+
+	leftVal := constant.BoolVal(left)
+	rightVal := constant.BoolVal(right)
+
+	switch operator {
+	case token.EqOp:
+		return constant.MakeBool(leftVal == rightVal)
+	case token.NeqOp:
+		return constant.MakeBool(leftVal != rightVal)
+	default:
+		panic("Operator " + operator.String() + " cannot be applied to booleans.")
 	}
 
 }

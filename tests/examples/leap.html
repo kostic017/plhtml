@@ -8,7 +8,9 @@
         <main>
 
             <var class="integer">year</var>
-            <var class="integer">answer</var>
+            <var class="boolean">answer</var>
+
+            <data value="false">answer</data>
 
             <output>`year: `</output>
             <input name="year">
@@ -16,20 +18,20 @@
             <div data-if="year % 4 &equals; 0">
 
                 <div data-if="year % 100 &ne; 0">
-                    <data value="1">answer</data>
+                    <data value="true">answer</data>
                 </div>
 
                 <div data-if="year % 400 &equals; 0">
-                    <data value="1">answer</data>
+                    <data value="true">answer</data>
                 </div>
 
             </div>
 
-            <div data-if="answer &equals; 1">
+            <div data-if="answer">
                 <output>year + ` is leap year`</output>
             </div>
 
-            <div data-if="answer &equals; 0">
+            <div data-if="!answer">
                 <output>year + ` is not leap year`</output>
             </div>
 
