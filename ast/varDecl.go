@@ -1,8 +1,13 @@
 package ast
 
 type VarDeclNode struct {
+    Line       int
     Type       IdentifierNode
     Identifier IdentifierNode
+}
+
+func (node VarDeclNode) GetLine() int {
+    return node.Line
 }
 
 func (node VarDeclNode) ToString(lvl int) string {

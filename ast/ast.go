@@ -3,13 +3,10 @@ package ast
 import (
     "go/constant"
     "strings"
-
-    "plhtml/token"
 )
 
-type TokenType = token.Type
-
 type Node interface {
+    GetLine() int
 }
 
 type StatementNode interface {

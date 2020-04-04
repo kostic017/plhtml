@@ -1,7 +1,12 @@
 package ast
 
 type WriteStmtNode struct {
+    Line  int
     Value ExpressionNode
+}
+
+func (node WriteStmtNode) GetLine() int {
+    return node.Line
 }
 
 func (node WriteStmtNode) ToString(lvl int) string {

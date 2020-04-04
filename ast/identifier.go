@@ -3,7 +3,12 @@ package ast
 import "go/constant"
 
 type IdentifierNode struct {
+    Line int
     Name string
+}
+
+func (node IdentifierNode) GetLine() int {
+    return node.Line
 }
 
 func (node IdentifierNode) ToString() string {

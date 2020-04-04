@@ -1,10 +1,18 @@
 package ast
 
-import "go/constant"
+import (
+    "go/constant"
+    "plhtml/token"
+)
 
 type UnaryExprNode struct {
-    Operator TokenType
+    Line     int
+    Operator token.Type
     Expr     ExpressionNode
+}
+
+func (node UnaryExprNode) GetLine() int {
+    return node.Line
 }
 
 func (node UnaryExprNode) ToString() string {

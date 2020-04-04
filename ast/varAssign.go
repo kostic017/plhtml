@@ -1,8 +1,13 @@
 package ast
 
 type VarAssignNode struct {
+    Line       int
     Identifier IdentifierNode
     Value      ExpressionNode
+}
+
+func (node VarAssignNode) GetLine() int {
+    return node.Line
 }
 
 func (node VarAssignNode) ToString(lvl int) string {

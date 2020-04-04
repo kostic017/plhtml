@@ -3,7 +3,12 @@ package ast
 import "go/constant"
 
 type StringConstNode struct {
+    Line  int
     Value string
+}
+
+func (node StringConstNode) GetLine() int {
+    return node.Line
 }
 
 func (node StringConstNode) ToString() string {

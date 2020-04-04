@@ -1,8 +1,13 @@
 package ast
 
 type ProgramNode struct {
+    Line  int
     Title StringConstNode
     Body  ProgramBodyNode
+}
+
+func (node ProgramNode) GetLine() int {
+    return node.Line
 }
 
 func (node ProgramNode) ToString() string {

@@ -29,7 +29,7 @@ func (parser *Parser) parseExprL(l int) ast.ExpressionNode {
 
     expr := parser.parseExprL(l + 1)
     for parser.eatOpt(operators...) {
-        expr = ast.BinaryOpExprNode{LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL(l + 1)}
+        expr = ast.BinaryOpExprNode{Line: expr.GetLine(), LeftExpr: expr, Operator: parser.next().Type, RightExpr: parser.parseExprL(l + 1)}
     }
     return expr
 }
@@ -60,35 +60,35 @@ func (parser *Parser) parseIdentifier() ast.IdentifierNode {
     myLogger.Debug("=BEG= Identifier")
     parser.eat(token.Identifier)
     myLogger.Debug("=END= Identifier")
-    return ast.IdentifierNode{Name: parser.current().StrVal}
+    return ast.IdentifierNode{Line: parser.current().Line, Name: parser.current().StrVal}
 }
 
 func (parser *Parser) parseIntConst() ast.IntConstNode {
     myLogger.Debug("=BEG= Integer Constant")
     parser.eat(token.IntConst)
     myLogger.Debug("=END= Integer Constant")
-    return ast.IntConstNode{Value: parser.current().IntVal}
+    return ast.IntConstNode{Line: parser.current().Line, Value: parser.current().IntVal}
 }
 
 func (parser *Parser) parseRealConst() ast.RealConstNode {
     myLogger.Debug("=BEG= Real Constant")
     parser.eat(token.RealConst)
     myLogger.Debug("=END= Real Constant")
-    return ast.RealConstNode{Value: parser.current().RealVal}
+    return ast.RealConstNode{Line: parser.current().Line, Value: parser.current().RealVal}
 }
 
 func (parser *Parser) parseBoolConst() ast.BoolConstNode {
     myLogger.Debug("=BEG= Boolean Constant")
     parser.eat(token.BoolConst)
     myLogger.Debug("=END= Boolean Constant")
-    return ast.BoolConstNode{Value: parser.current().BoolVal}
+    return ast.BoolConstNode{Line: parser.current().Line, Value: parser.current().BoolVal}
 }
 
 func (parser *Parser) parseStringConst() ast.StringConstNode {
     myLogger.Debug("=BEG= String Constant")
     parser.eat(token.StringConst)
     myLogger.Debug("=END= String Constant")
-    return ast.StringConstNode{Value: parser.current().StrVal}
+    return ast.StringConstNode{Line: parser.current().Line, Value: parser.current().StrVal}
 }
 
 func (parser *Parser) parseParenExpr() ast.ExpressionNode {
@@ -105,5 +105,5 @@ func (parser *Parser) parseUnaryExpr() ast.UnaryExprNode {
     op := parser.eat(token.Plus, token.Minus, token.Excl)
     expr := parser.parseFactor()
     myLogger.Debug("=END= Unary")
-    return ast.UnaryExprNode{Operator: op, Expr: expr}
+    return ast.UnaryExprNode{Line: expr.GetLine(), Operator: op, Expr: expr}
 }

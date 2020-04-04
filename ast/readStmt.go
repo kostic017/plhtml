@@ -1,7 +1,12 @@
 package ast
 
 type ReadStmtNode struct {
+    Line       int
     Identifier IdentifierNode
+}
+
+func (node ReadStmtNode) GetLine() int {
+    return node.Line
 }
 
 func (node ReadStmtNode) ToString(lvl int) string {

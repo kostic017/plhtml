@@ -1,6 +1,7 @@
 package semantic
 
 import (
+    "fmt"
     "go/constant"
     "plhtml/ast"
     "plhtml/logger"
@@ -56,7 +57,7 @@ func (analyzer *Analyzer) VisitBinaryOpExpr(node ast.BinaryOpExprNode) constant.
         }
     }
 
-    panic("Operator " + node.Operator.String() + " is not supported for operands of given types.")
+    panic(fmt.Sprintf("Error on line %d: operator %s is not supported for operands of given types", node.GetLine(), node.Operator.String()))
 }
 
 func (analyzer *Analyzer) VisitBoolConst(node ast.BoolConstNode) constant.Kind {
@@ -67,7 +68,7 @@ func (analyzer *Analyzer) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
 
     condType := node.Condition.AcceptAnalyzer(analyzer)
     if condType != constant.Bool {
-        panic("Non-bool used as condition.")
+        panic(fmt.Sprintf("Error on line %d: non-bool used as condition", node.GetLine()))
     }
 
     analyzer.currentScope = NewScope(analyzer.currentScope.id+1, analyzer.currentScope)
@@ -81,8 +82,19 @@ func (analyzer *Analyzer) VisitControlFlowStmt(node ast.ControlFlowStmtNode) {
 }
 
 func (analyzer *Analyzer) VisitIdentifier(node ast.IdentifierNode) constant.Kind {
-    sym := analyzer.currentScope.expect(node.Name)
-    return kindOfPrimitiveType(sym.typeName)
+    sym, ok := analyzer.currentScope.lookup(node.Name)
+
+    if !ok {
+        panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Name))
+    }
+
+    kind := kindOfPrimitiveType(sym.typeName)
+
+    if kind == constant.Unknown {
+        panic(fmt.Sprintf("Error on line %d: only primitive types are supported", node.GetLine()))
+    }
+
+    return kind
 }
 
 func (analyzer *Analyzer) VisitIntConst(node ast.IntConstNode) constant.Kind {
@@ -106,7 +118,9 @@ func (analyzer *Analyzer) VisitProgramBody(node ast.ProgramBodyNode) {
 }
 
 func (analyzer *Analyzer) VisitReadStmt(node ast.ReadStmtNode) {
-    analyzer.currentScope.expect(node.Identifier.Name)
+    if _, ok := analyzer.currentScope.lookup(node.Identifier.Name); !ok {
+        panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Identifier.Name))
+    }
 }
 
 func (analyzer *Analyzer) VisitRealConst(node ast.RealConstNode) constant.Kind {
@@ -131,23 +145,35 @@ func (analyzer *Analyzer) VisitUnaryExpr(node ast.UnaryExprNode) constant.Kind {
         }
     }
 
-    panic("Unary operator " + node.Operator.String() + " is not supported for expression of given type.")
+    panic(fmt.Sprintf("Error on line %d: operator %s is not supported for expression of given type", node.GetLine(), node.Operator.String()))
 }
 
 func (analyzer *Analyzer) VisitVarAssign(node ast.VarAssignNode) {
-    sym := analyzer.currentScope.expect(node.Identifier.Name)
-    symType := kindOfPrimitiveType(sym.typeName)
-    valType := node.Value.AcceptAnalyzer(analyzer)
-    ok := (symType == valType) || (isNumType(symType) && isNumType(valType))
+    sym, ok := analyzer.currentScope.lookup(node.Identifier.Name)
     if !ok {
-        panic("Incompatible types for assigment")
+        panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Identifier.Name))
+    }
+
+    symType := kindOfPrimitiveType(sym.typeName)
+
+    if symType == constant.Unknown {
+        panic(fmt.Sprintf("Error on line %d: only primitive types are supported", node.GetLine()))
+    }
+
+    valType := node.Value.AcceptAnalyzer(analyzer)
+    ok = (symType == valType) || (isNumType(symType) && isNumType(valType))
+
+    if !ok {
+        panic(fmt.Sprintf("Error on line %d: incompatible types for assigment", node.GetLine()))
     }
 }
 
 func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
-    analyzer.currentScope.expect(node.Type.Name)
+    if _, ok := analyzer.currentScope.lookup(node.Type.Name); !ok {
+        panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Identifier.Name))
+    }
     if analyzer.currentScope.declaredLocally(node.Identifier.Name) {
-        panic("Variable " + node.Identifier.Name + " is already declared.")
+        panic(fmt.Sprintf("Error on line: %d: variable %s is already declared", node.GetLine(), node.Identifier.Name))
     }
     analyzer.currentScope.insert(symbol{name: node.Identifier.Name, typeName: node.Type.Name})
 }
@@ -155,7 +181,7 @@ func (analyzer *Analyzer) VisitVarDecl(node ast.VarDeclNode) {
 func (analyzer *Analyzer) VisitWriteStmt(node ast.WriteStmtNode) {
     valueType := node.Value.AcceptAnalyzer(analyzer)
     if valueType != constant.String {
-        panic("Cannot output non-string.")
+        panic(fmt.Sprintf("Error on line %d: cannot output non-string", node.GetLine()))
     }
 }
 
@@ -174,5 +200,5 @@ func kindOfPrimitiveType(typeName string) constant.Kind {
     case typeString:
         return constant.String
     }
-    panic(typeName + " is not primitive type.")
+    return constant.Unknown
 }

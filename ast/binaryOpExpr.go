@@ -1,11 +1,19 @@
 package ast
 
-import "go/constant"
+import (
+    "go/constant"
+    "plhtml/token"
+)
 
 type BinaryOpExprNode struct {
+    Line      int
     LeftExpr  ExpressionNode
-    Operator  TokenType
+    Operator  token.Type
     RightExpr ExpressionNode
+}
+
+func (node BinaryOpExprNode) GetLine() int {
+    return node.Line
 }
 
 func (node BinaryOpExprNode) ToString() string {

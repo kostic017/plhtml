@@ -2,6 +2,7 @@ package interpreter
 
 import (
     "bufio"
+    "errors"
     "fmt"
     "go/constant"
     "os"
@@ -39,22 +40,38 @@ func (interp *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) constant
     myLogger.Debug("%s %s %s", leftValue.String(), node.Operator.String(), rightValue.String())
 
     if node.Operator == token.Plus && (isStr(leftValue) || isStr(rightValue)) { // TODO compare by equality
-        return strcat(leftValue, rightValue)
+        value, err := strcat(leftValue, rightValue)
+        if err != nil {
+            panic(fmt.Sprintf("Error on line %d: %s", node.GetLine(), err))
+        }
+        return value
     }
 
     if leftValue.Kind() == constant.Int || rightValue.Kind() == constant.Int {
-        return opsWithIntegers(leftValue, node.Operator, rightValue)
+        value, err := opsWithIntegers(leftValue, node.Operator, rightValue)
+        if err != nil {
+            panic(fmt.Sprintf("Error on line %d: %s", node.GetLine(), err))
+        }
+        return value
     }
 
     if isNum(leftValue) && isNum(rightValue) {
-        return opsWithFloats(leftValue, node.Operator, rightValue)
+        value, err := opsWithFloats(leftValue, node.Operator, rightValue)
+        if err != nil {
+            panic(fmt.Sprintf("Error on line %d: %s", node.GetLine(), err))
+        }
+        return value
     }
 
     if isBool(leftValue) && isBool(rightValue) {
-        return opsWithBooleans(leftValue, node.Operator, rightValue)
+        value, err := opsWithBooleans(leftValue, node.Operator, rightValue)
+        if err != nil {
+            panic(fmt.Sprintf("Error on line %d: %s", node.GetLine(), err))
+        }
+        return value
     }
 
-    panic("Binary operator " + node.Operator.String() + " is not supported for operands of given types.")
+    panic(fmt.Sprintf("Error on line %d: operator %s is not supported for operands of given types", node.GetLine(), node.Operator.String()))
 }
 
 func (interp *Interpreter) VisitBoolConst(node ast.BoolConstNode) constant.Value {
@@ -149,7 +166,7 @@ func (interp *Interpreter) VisitUnaryExpr(node ast.UnaryExprNode) constant.Value
         }
     }
 
-    panic("Unary operator " + node.Operator.String() + " is not supported for given types.")
+    panic(fmt.Sprintf("Error on line %d: operator %s is not supported for expression of given type", node.GetLine(), node.Operator.String()))
 }
 
 func (interp *Interpreter) VisitVarAssign(node ast.VarAssignNode) {
@@ -168,11 +185,7 @@ func (interp *Interpreter) VisitVarDecl(node ast.VarDeclNode) {
 
 func (interp *Interpreter) VisitWriteStmt(node ast.WriteStmtNode) {
     exprValue := node.Value.AcceptInterpreter(interp).(constant.Value)
-    if exprValue.Kind() == constant.String {
-        fmt.Print(constant.StringVal(exprValue))
-    } else {
-        panic("You can print strings only.")
-    }
+    fmt.Print(constant.StringVal(exprValue))
 }
 
 func isNum(val constant.Value) bool {
@@ -187,9 +200,9 @@ func isBool(val constant.Value) bool {
     return val.Kind() == constant.Bool
 }
 
-func strcat(leftValue constant.Value, rightValue constant.Value) constant.Value {
+func strcat(leftValue constant.Value, rightValue constant.Value) (constant.Value, error) {
     if leftValue.Kind() == constant.String && rightValue.Kind() == constant.String {
-        return constant.MakeString(constant.StringVal(leftValue) + constant.StringVal(rightValue))
+        return constant.MakeString(constant.StringVal(leftValue) + constant.StringVal(rightValue)), nil
     }
     if leftValue.Kind() == constant.String {
         return strcatImplicitConversion(leftValue, rightValue, true)
@@ -197,10 +210,10 @@ func strcat(leftValue constant.Value, rightValue constant.Value) constant.Value 
     if rightValue.Kind() == constant.String {
         return strcatImplicitConversion(rightValue, leftValue, false)
     }
-    panic("Could not perform string concatenation.")
+    return nil, errors.New("incompatible types")
 }
 
-func strcatImplicitConversion(stringValue constant.Value, otherValue constant.Value, ordered bool) constant.Value {
+func strcatImplicitConversion(stringValue constant.Value, otherValue constant.Value, ordered bool) (constant.Value, error) {
 
     stringVal := constant.StringVal(stringValue)
 
@@ -209,110 +222,110 @@ func strcatImplicitConversion(stringValue constant.Value, otherValue constant.Va
         intVal, _ := constant.Int64Val(otherValue)
         intValStr := strconv.FormatInt(intVal, 10)
         if ordered {
-            return constant.MakeString(stringVal + intValStr)
+            return constant.MakeString(stringVal + intValStr), nil
         } else {
-            return constant.MakeString(intValStr + stringVal)
+            return constant.MakeString(intValStr + stringVal), nil
         }
     case constant.Float:
         floatVal, _ := constant.Float64Val(otherValue)
         floatValStr := util.FloatToString(floatVal)
         if ordered {
-            return constant.MakeString(stringVal + floatValStr)
+            return constant.MakeString(stringVal + floatValStr), nil
         } else {
-            return constant.MakeString(floatValStr + stringVal)
+            return constant.MakeString(floatValStr + stringVal), nil
         }
     case constant.Bool:
         boolVal := constant.BoolVal(otherValue)
         boolValStr := strconv.FormatBool(boolVal)
         if ordered {
-            return constant.MakeString(stringVal + boolValStr)
+            return constant.MakeString(stringVal + boolValStr), nil
         } else {
-            return constant.MakeString(boolValStr + stringVal)
+            return constant.MakeString(boolValStr + stringVal), nil
         }
     }
 
-    panic("You can concatenate string with other strings, integers, floats and booleans.")
+    return nil, errors.New("you can concatenate string with other strings, integers, floats and booleans")
 
 }
 
-func opsWithIntegers(left constant.Value, operator TokenType, right constant.Value) constant.Value {
+func opsWithIntegers(left constant.Value, operator TokenType, right constant.Value) (constant.Value, error) {
 
     leftVal, _ := constant.Int64Val(left)
     rightVal, _ := constant.Int64Val(right)
 
     switch operator {
     case token.Plus:
-        return constant.MakeInt64(leftVal + rightVal)
+        return constant.MakeInt64(leftVal + rightVal), nil
     case token.Minus:
-        return constant.MakeInt64(leftVal - rightVal)
+        return constant.MakeInt64(leftVal - rightVal), nil
     case token.Multiply:
-        return constant.MakeInt64(leftVal * rightVal)
+        return constant.MakeInt64(leftVal * rightVal), nil
     case token.Slash:
-        return constant.MakeInt64(leftVal / rightVal)
+        return constant.MakeInt64(leftVal / rightVal), nil
     case token.Modulo:
-        return constant.MakeInt64(leftVal % rightVal)
+        return constant.MakeInt64(leftVal % rightVal), nil
     case token.LtOp:
-        return constant.MakeBool(leftVal < rightVal)
+        return constant.MakeBool(leftVal < rightVal), nil
     case token.GtOp:
-        return constant.MakeBool(leftVal > rightVal)
+        return constant.MakeBool(leftVal > rightVal), nil
     case token.LeqOp:
-        return constant.MakeBool(leftVal <= rightVal)
+        return constant.MakeBool(leftVal <= rightVal), nil
     case token.GeqOp:
-        return constant.MakeBool(leftVal >= rightVal)
+        return constant.MakeBool(leftVal >= rightVal), nil
     case token.EqOp:
-        return constant.MakeBool(leftVal == rightVal)
+        return constant.MakeBool(leftVal == rightVal), nil
     case token.NeqOp:
-        return constant.MakeBool(leftVal != rightVal)
+        return constant.MakeBool(leftVal != rightVal), nil
     default:
-        panic("Operator " + operator.String() + " cannot be applied to two integers.")
+        return nil, errors.New("operator " + operator.String() + " cannot be applied to two integers")
     }
 
 }
 
-func opsWithFloats(left constant.Value, operator TokenType, right constant.Value) constant.Value {
+func opsWithFloats(left constant.Value, operator TokenType, right constant.Value) (constant.Value, error) {
 
     leftVal, _ := constant.Float64Val(left)
     rightVal, _ := constant.Float64Val(right)
 
     switch operator {
     case token.Plus:
-        return constant.MakeFloat64(leftVal + rightVal)
+        return constant.MakeFloat64(leftVal + rightVal), nil
     case token.Minus:
-        return constant.MakeFloat64(leftVal - rightVal)
+        return constant.MakeFloat64(leftVal - rightVal), nil
     case token.Multiply:
-        return constant.MakeFloat64(leftVal * rightVal)
+        return constant.MakeFloat64(leftVal * rightVal), nil
     case token.Slash:
-        return constant.MakeFloat64(leftVal / rightVal)
+        return constant.MakeFloat64(leftVal / rightVal), nil
     case token.LtOp:
-        return constant.MakeBool(leftVal < rightVal)
+        return constant.MakeBool(leftVal < rightVal), nil
     case token.GtOp:
-        return constant.MakeBool(leftVal > rightVal)
+        return constant.MakeBool(leftVal > rightVal), nil
     case token.LeqOp:
-        return constant.MakeBool(leftVal <= rightVal)
+        return constant.MakeBool(leftVal <= rightVal), nil
     case token.GeqOp:
-        return constant.MakeBool(leftVal >= rightVal)
+        return constant.MakeBool(leftVal >= rightVal), nil
     case token.EqOp:
-        return constant.MakeBool(leftVal == rightVal)
+        return constant.MakeBool(leftVal == rightVal), nil
     case token.NeqOp:
-        return constant.MakeBool(leftVal != rightVal)
+        return constant.MakeBool(leftVal != rightVal), nil
     default:
-        panic("Operator " + operator.String() + " cannot be applied to real numbers.")
+        return nil, errors.New("operator " + operator.String() + " cannot be applied to real numbers")
     }
 
 }
 
-func opsWithBooleans(left constant.Value, operator TokenType, right constant.Value) constant.Value {
+func opsWithBooleans(left constant.Value, operator TokenType, right constant.Value) (constant.Value, error) {
 
     leftVal := constant.BoolVal(left)
     rightVal := constant.BoolVal(right)
 
     switch operator {
     case token.EqOp:
-        return constant.MakeBool(leftVal == rightVal)
+        return constant.MakeBool(leftVal == rightVal), nil
     case token.NeqOp:
-        return constant.MakeBool(leftVal != rightVal)
+        return constant.MakeBool(leftVal != rightVal), nil
     default:
-        panic("Operator " + operator.String() + " cannot be applied to booleans.")
+        return nil, errors.New("operator " + operator.String() + " cannot be applied to booleans")
     }
 
 }

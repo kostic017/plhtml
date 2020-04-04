@@ -1,7 +1,12 @@
 package ast
 
 type MainFuncNode struct {
+    Line       int
     Statements []StatementNode
+}
+
+func (node MainFuncNode) GetLine() int {
+    return node.Line
 }
 
 func (node MainFuncNode) ToString() string {

@@ -1,9 +1,16 @@
 package ast
 
+import "plhtml/token"
+
 type ControlFlowStmtNode struct {
-    Type       TokenType
+    Line       int
+    Type       token.Type
     Condition  ExpressionNode
     Statements []StatementNode
+}
+
+func (node ControlFlowStmtNode) GetLine() int {
+    return node.Line
 }
 
 func (node ControlFlowStmtNode) ToString(lvl int) string {

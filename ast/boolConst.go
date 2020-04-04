@@ -6,7 +6,12 @@ import (
 )
 
 type BoolConstNode struct {
+    Line  int
     Value bool
+}
+
+func (node BoolConstNode) GetLine() int {
+    return node.Line
 }
 
 func (node BoolConstNode) ToString() string {

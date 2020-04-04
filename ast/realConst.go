@@ -6,7 +6,12 @@ import (
 )
 
 type RealConstNode struct {
+    Line  int
     Value float64
+}
+
+func (node RealConstNode) GetLine() int {
+    return node.Line
 }
 
 func (node RealConstNode) ToString() string {

@@ -6,7 +6,12 @@ import (
 )
 
 type IntConstNode struct {
+    Line  int
     Value int
+}
+
+func (node IntConstNode) GetLine() int {
+    return node.Line
 }
 
 func (node IntConstNode) ToString() string {

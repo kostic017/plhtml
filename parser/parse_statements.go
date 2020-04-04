@@ -39,7 +39,8 @@ func (parser *Parser) parseStatement() ast.StatementNode {
 }
 
 func (parser *Parser) parseVarDecl() ast.VarDeclNode {
-    myLogger.Debug("=BEG= Var Declaration")
+    line := parser.current().Line
+    myLogger.Debug("=BEG= Var Declaration %d", line)
     parser.eat(token.Var)
     parser.eat(token.Class)
     parser.eat(token.Equal)
@@ -50,11 +51,12 @@ func (parser *Parser) parseVarDecl() ast.VarDeclNode {
     varName := parser.parseIdentifier()
     parser.parseCloseTag(token.Var)
     myLogger.Debug("=END= Var Declaration")
-    return ast.VarDeclNode{Type: varType, Identifier: varName}
+    return ast.VarDeclNode{Line: line, Type: varType, Identifier: varName}
 }
 
 func (parser *Parser) parseVarAssign() ast.VarAssignNode {
-    myLogger.Debug("=BEG= Var Assignment")
+    line := parser.current().Line
+    myLogger.Debug("=BEG= Var Assignment %d", line)
     parser.eat(token.Data)
     parser.eat(token.Value)
     parser.eat(token.Equal)
@@ -65,21 +67,23 @@ func (parser *Parser) parseVarAssign() ast.VarAssignNode {
     identifier := parser.parseIdentifier()
     parser.parseCloseTag(token.Data)
     myLogger.Debug("=END= Var Assignment")
-    return ast.VarAssignNode{Identifier: identifier, Value: value}
+    return ast.VarAssignNode{Line: line, Identifier: identifier, Value: value}
 }
 
 func (parser *Parser) parseWriteStmt() ast.WriteStmtNode {
-    myLogger.Debug("=BEG= Write")
+    line := parser.current().Line
+    myLogger.Debug("=BEG= Write %d", line)
     parser.eat(token.Output)
     parser.eat(token.GreaterThan)
     value := parser.parseExpr()
     parser.parseCloseTag(token.Output)
     myLogger.Debug("=END= Write")
-    return ast.WriteStmtNode{Value: value}
+    return ast.WriteStmtNode{Line: line, Value: value}
 }
 
 func (parser *Parser) parseReadStmt() ast.ReadStmtNode {
-    myLogger.Debug("=BEG= Read")
+    line := parser.current().Line
+    myLogger.Debug("=BEG= Read %d", line)
     parser.eat(token.Input)
     parser.eat(token.Name)
     parser.eat(token.Equal)
@@ -88,11 +92,12 @@ func (parser *Parser) parseReadStmt() ast.ReadStmtNode {
     parser.eat(token.DQuote)
     parser.eat(token.GreaterThan)
     myLogger.Debug("=END= Read")
-    return ast.ReadStmtNode{Identifier: identifier}
+    return ast.ReadStmtNode{Line: line, Identifier: identifier}
 }
 
 func (parser *Parser) parseControlFlowStmt() ast.ControlFlowStmtNode {
-    myLogger.Debug("=BEG= Control Flow")
+    line := parser.current().Line
+    myLogger.Debug("=BEG= Control Flow %d", line)
     parser.eat(token.Div)
     parser.eat(token.Data)
     parser.eat(token.Minus)
@@ -105,5 +110,5 @@ func (parser *Parser) parseControlFlowStmt() ast.ControlFlowStmtNode {
     stmts := parser.parseStatements()
     parser.parseCloseTag(token.Div)
     myLogger.Debug("=END= Control Flow")
-    return ast.ControlFlowStmtNode{Type: stmtType, Condition: condition, Statements: stmts}
+    return ast.ControlFlowStmtNode{Line: line, Type: stmtType, Condition: condition, Statements: stmts}
 }
