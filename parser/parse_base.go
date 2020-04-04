@@ -16,7 +16,7 @@ func (parser Parser) parseProgram() ast.ProgramNode {
 func (parser *Parser) parseDoctype() {
     myLogger.Debug("=BEG= Doctype")
     parser.eat(token.LessThan)
-    parser.eat(token.Exclamation)
+    parser.eat(token.Excl)
     parser.eat(token.Doctype)
     parser.eat(token.HTML)
     parser.eat(token.GreaterThan)

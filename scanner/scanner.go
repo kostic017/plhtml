@@ -124,7 +124,7 @@ func (scanner *Scanner) nextToken() Token {
             charType = token.RParen
             break
         case '!':
-            charType = token.Exclamation
+            charType = token.Excl
             break
         case '"':
             charType = token.DQuote

@@ -62,21 +62,24 @@ karaktera `c` određuje koja vrsta tokena je sledeća:
   
 U rečima "čita se dalje sve dok" uočavamo pravilo maximal munch.
 
-Parser je implementiran metodom rekurzivnog spusta, pregled gramatike je dat u fajlu [grammar.txt](grammar.txt).
+Parser je implementiran metodom rekurzivnog spusta. Pregled gramatike je dat u fajlu [grammar.txt](grammar.txt).
 
-Nakon što izbildujete izvršni fajl sa `go build`, interpretacija se pokreće kroz komandnu liniju
+U toku semantičke analize se proverava:
+  - korektnost tipova
+  - da li su promenljive deklarisane pre korišćenja
+  - da li se ne deklariše više promeljivih sa istim nazivom u istom opsegu
+
+# Ograničenja
+Interpretiranje je implementirano nekim delom, ali u dovoljnoj meri da se programi u */tests/examples* folderu izvršavaju
+uspešno. Tokom interpretacije ignorišu se opsezi, a i tipovi, tako da feature-i kao što su inicijalizacija nulom i
+učitavanje iz konzole funkcioniše samo za cele brojeve.
+
+# Korišćenje
+Nakon što izbildujete izvršni fajl sa `go build`, interpretacija se pokreće kroz komandnu liniju.
 
 ```bat
 plhtml <putanja_do_fajla.html>
 ```
-
-# Ograničenja
-Semantička analiza je implementirana nekim delom, proverava se da li su sve promenljive deklarisane pre korišćenja i da
-li se ne deklariše više promeljivih sa istim nazivom u istom opsegu, pri čemu je korišćen [špageti stek](https://www.geeksforgeeks.org/g-fact-87/).
-Tipovi se trenutno ignorišu, tako da feature-i kao što su inicijalizacija nulom i učitavanje iz konzole funkcioniše samo za cele brojeve.
-
-Interpretiranje je takođe implementirano nekim delom, ali u dovoljnoj meri da se programi u */tests/examples* folderu
-izvršavaju uspešno. Tokom interpretacije ignorišu se i opsezi.
 
 # Reference
   - [Let’s Build A Simple Interpreter](https://ruslanspivak.com/lsbasi-part1/)

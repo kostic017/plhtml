@@ -49,7 +49,7 @@ func (parser *Parser) parseFactor() ast.ExpressionNode {
         return parser.parseIdentifier()
     case token.LParen:
         return parser.parseParenExpr()
-    case token.Plus, token.Minus, token.Exclamation:
+    case token.Plus, token.Minus, token.Excl:
         return parser.parseUnaryExpr()
     default:
         panic(fmt.Sprintf("Invalid factor '%s' at %d:%d.", string(nextToken.Type), nextToken.Line, nextToken.Column))
@@ -102,7 +102,7 @@ func (parser *Parser) parseParenExpr() ast.ExpressionNode {
 
 func (parser *Parser) parseUnaryExpr() ast.UnaryExprNode {
     myLogger.Debug("=BEG= Unary")
-    op := parser.eat(token.Plus, token.Minus, token.Exclamation)
+    op := parser.eat(token.Plus, token.Minus, token.Excl)
     expr := parser.parseFactor()
     myLogger.Debug("=END= Unary")
     return ast.UnaryExprNode{Operator: op, Expr: expr}

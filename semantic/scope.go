@@ -1,8 +1,16 @@
 package semantic
 
 type symbol struct {
-    name string
+    name     string
+    typeName string
 }
+
+const (
+    typeInteger = "integer"
+    typeReal = "real"
+    typeBoolean = "boolean"
+    typeString = "string"
+)
 
 type Scope struct {
     id      int
@@ -46,8 +54,9 @@ func (scope *Scope) lookup(name string) (symbol, bool) {
     return symbol{}, false
 }
 
-func (scope *Scope) expect(name string) {
-    if _, ok := scope.lookup(name); !ok {
-        panic("Identifier " + name + " undefined.")
+func (scope *Scope) expect(name string) symbol {
+    if sym, ok := scope.lookup(name); ok {
+        return sym
     }
+    panic("Identifier " + name + " undefined.")
 }

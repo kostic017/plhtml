@@ -45,7 +45,7 @@ const (
     Modulo
     LParen
     RParen
-    Exclamation
+    Excl
     DQuote
     Equal
     LessThan
@@ -92,7 +92,7 @@ func (tokenType Type) String() string {
         Modulo:      "%",
         LParen:      "(",
         RParen:      ")",
-        Exclamation: "!",
+        Excl:        "!",
         DQuote:      "\"",
         Equal:       "=",
         LessThan:    "<",

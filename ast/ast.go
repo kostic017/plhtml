@@ -22,23 +22,23 @@ type StatementNode interface {
 type ExpressionNode interface {
     Node
     ToString() string
-    AcceptAnalyzer(analyzer IAnalyzer)
+    AcceptAnalyzer(analyzer IAnalyzer) constant.Kind
     AcceptInterpreter(interp IInterpreter) constant.Value
 }
 
 type IAnalyzer interface {
-    VisitBinaryOpExpr(node BinaryOpExprNode)
-    VisitBoolConst(node BoolConstNode)
+    VisitBinaryOpExpr(node BinaryOpExprNode) constant.Kind
+    VisitBoolConst(node BoolConstNode) constant.Kind
     VisitControlFlowStmt(node ControlFlowStmtNode)
-    VisitIdentifier(node IdentifierNode)
-    VisitIntConst(node IntConstNode)
+    VisitIdentifier(node IdentifierNode) constant.Kind
+    VisitIntConst(node IntConstNode) constant.Kind
     VisitMainFunc(node MainFuncNode)
     VisitProgram(node ProgramNode)
     VisitProgramBody(node ProgramBodyNode)
     VisitReadStmt(node ReadStmtNode)
-    VisitRealConst(node RealConstNode)
-    VisitStringConst(node StringConstNode)
-    VisitUnaryExpr(node UnaryExprNode)
+    VisitRealConst(node RealConstNode) constant.Kind
+    VisitStringConst(node StringConstNode) constant.Kind
+    VisitUnaryExpr(node UnaryExprNode) constant.Kind
     VisitVarAssign(node VarAssignNode)
     VisitVarDecl(node VarDeclNode)
     VisitWriteStmt(node WriteStmtNode)

@@ -38,7 +38,7 @@ func (interp *Interpreter) VisitBinaryOpExpr(node ast.BinaryOpExprNode) constant
     rightValue := node.RightExpr.AcceptInterpreter(interp).(constant.Value)
     myLogger.Debug("%s %s %s", leftValue.String(), node.Operator.String(), rightValue.String())
 
-    if node.Operator == token.Plus && (isStr(leftValue) || isStr(rightValue)) {
+    if node.Operator == token.Plus && (isStr(leftValue) || isStr(rightValue)) { // TODO compare by equality
         return strcat(leftValue, rightValue)
     }
 
@@ -143,7 +143,7 @@ func (interp *Interpreter) VisitUnaryExpr(node ast.UnaryExprNode) constant.Value
             return constant.MakeFloat64(-exprVal)
         }
         break
-    case token.Exclamation:
+    case token.Excl:
         if exprValue.Kind() == constant.Bool {
             return constant.MakeBool(!constant.BoolVal(exprValue))
         }
