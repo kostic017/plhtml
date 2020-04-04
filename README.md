@@ -1,4 +1,4 @@
-Konačno osobe koje sebe nazivaju "programerima" i "programiraju" u HTML-u mogu to i da budu.
+Konačno osobe koje "programiraju" u HTML-u i sebe nazivaju "programerima" mogu i da budu programeri.
 
 Sav kod napisan u programskom jeziku HTML (skraćeno PL/HTML) predstavlja sintaksički i semantički validan HTML kod,
 što je bio glavni cilj prilikom dizajniranja jezika. Sintaksička ispravnost programa je proveravana korišećnjem
@@ -47,11 +47,10 @@ Sledeći program ispisuje prvih `n` Fibonačijevih brojeva.
 </html>
 ```
 
-# Implementacija
-Za implementaciju je korišćen Go programski jezik bez third-party alata, odnosno skener i parser generatora kao što su
-flex i bison. Skener nije implementiran uz pomoć regularnih izraza, već je korišćen algoritam opisan na stranici
-[Implementing Lexers and Parsers](http://www.cse.chalmers.se/edu/year/2015/course/DAT150/lectures/proglang-04.html)
-(na sličan način je implementiran i [skener za Go](https://github.com/golang/go/blob/master/src/go/scanner/scanner.go)).
+Za implementaciju je korišćen Go programski jezik bez third-party alata (skener i parser generatora).
+
+Skener nije implementiran uz pomoć regularnih izraza/konačnih automata, već je korišćen algoritam opisan na stranici
+[Implementing Lexers and Parsers](http://www.cse.chalmers.se/edu/year/2015/course/DAT150/lectures/proglang-04.html).
 Osnovna ideja je da skener čita kod karakter po karakter i da se nakon svakog formiranog tokena na osnovu prvog sledećeg
 karaktera `c` određuje koja vrsta tokena je sledeća:
 
@@ -59,7 +58,7 @@ karaktera `c` određuje koja vrsta tokena je sledeća:
   - ako je `c` slovo, čita se dalje sve dok su slova ili cifre, pa se formira identifikator
   - ako je `c` navodnik, čita se dalje sve dok se ne naiđe na prvi sledeći navodnik, pa se formira string
   - ako je `c` razmak, ignoriše se i čita se sledeći karakter
-  
+
 U rečima "čita se dalje sve dok" uočavamo pravilo maximal munch.
 
 Parser je implementiran metodom rekurzivnog spusta. Pregled gramatike je dat u fajlu [grammar.txt](grammar.txt).
@@ -71,15 +70,25 @@ U toku semantičke analize se proverava:
 
 # Ograničenja
 Interpretiranje je implementirano nekim delom, ali u dovoljnoj meri da se programi u */tests/examples* folderu izvršavaju
-uspešno. Tokom interpretacije ignorišu se opsezi, a i tipovi, tako da feature-i kao što su inicijalizacija nulom i
-učitavanje iz konzole funkcioniše samo za cele brojeve.
+uspešno. Tokom interpretacije ignorišu se opsezi i tipovi. Samim tim feature-i kao što su inicijalizacija nulom i
+učitavanje iz konzole funkcionišu samo za cele brojeve.
 
 # Korišćenje
-Nakon što izbildujete izvršni fajl sa `go build`, interpretacija se pokreće kroz komandnu liniju.
+  1. Preuzmite [Go kompajler](https://golang.org/dl/).
+  2. Izbildujte izvršni fajl sa `go build`.
+  3. Pokrenite interpretaciju kroz komandnu liniju.
 
 ```bat
 plhtml <putanja_do_fajla.html>
 ```
 
 # Reference
+Kombinovao sam materijale sa različitih izvora, od kojih bi izdvojio:
+  - [CS143 Compilers](https://web.stanford.edu/class/archive/cs/cs143/cs143.1128/)
+  - [Implementing Lexers and Parsers](http://www.cse.chalmers.se/edu/year/2015/course/DAT150/lectures/proglang-04.html)
+  - [A Simple Recursive Descent Parser](http://math.hws.edu/javanotes/c9/s5.html)
   - [Let’s Build A Simple Interpreter](https://ruslanspivak.com/lsbasi-part1/)
+
+Gledao sam i kako su implementirani kompajleri za neke poznate jezike:
+  - [Go](https://github.com/golang/go/blob/master/src/go)
+  - [TypeScript](https://github.com/microsoft/TypeScript/tree/master/src/compiler)
