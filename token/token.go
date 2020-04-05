@@ -50,7 +50,6 @@ const (
     Equal
     LessThan
     GreaterThan
-    Period
 )
 
 func (tokenType Type) String() string {
@@ -97,7 +96,6 @@ func (tokenType Type) String() string {
         Equal:       "=",
         LessThan:    "<",
         GreaterThan: ">",
-        Period:      ".",
     }[tokenType]
 }
 

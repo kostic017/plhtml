@@ -138,9 +138,6 @@ func (scanner *Scanner) nextToken() Token {
         case '>':
             charType = token.GreaterThan
             break
-        case '.':
-            charType = token.Period
-            break
         }
 
         if charType != token.Illegal {
