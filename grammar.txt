@@ -1,18 +1,18 @@
-prog = '<' '!' TokDoctype TokHtml '>' '<' TokHTML TokLang '=' '"' TokIdentifier '"' '>' prog_header prog_body '<' '/' TokHTML '>';
-prog_header = '<' TokHead '>' prog_title '<' '/' TokHEAD '>';
-prog_title  = '<' TokTitle '>' TokStringConst '<' '/' TokTitle '>';
-prog_body   = '<' TokBody '>' func_main '<' '/' TokBody '>';
-func_main   = '<' TokMain '>' stmts '<' '/' TokMain '>';
+prog = '<' '!' Doctype Html '>' '<' HTML Lang '=' '"' Identifier '"' '>' prog_header prog_body '<' '/' HTML '>';
+prog_header = '<' Head '>' prog_title '<' '/' HEAD '>';
+prog_title  = '<' Title '>' StringConst '<' '/' Title '>';
+prog_body   = '<' Body '>' func_main '<' '/' Body '>';
+func_main   = '<' Main '>' stmts '<' '/' Main '>';
 
 stmt = stmt_ctrl
-     | '<' TokVar TokClass '=' '"' TokIdentifier '"' '>' TokIdentifier '<' '/' TokVar '>'
-     | '<' TokData TokValue '=' '"' expr '"' '>' TokIdentifier '<' '/' TokData '>'
-     | '<' TokOutput '>' expr '<' '/' TokOutput '>'
-     | '<' TokInput TokName '=' '"' TokIdentifier '"' '>'
+     | '<' Var Class '=' '"' Identifier '"' '>' Identifier '<' '/' Var '>'
+     | '<' Data Value '=' '"' expr '"' '>' Identifier '<' '/' Data '>'
+     | '<' Output '>' expr '<' '/' Output '>'
+     | '<' Input Name '=' '"' Identifier '"' '>'
      ;
 
-stmt_ctrl = '<' TokDiv TokData '-' TokIf '=' '"' expr '"' '>' stmts '<' '/' TokDiv '>'
-          | '<' TokDiv TokData '-' TokWhile '=' '"' expr '"' '>' stmts '<' '/' TokDiv '>'
+stmt_ctrl = '<' Div Data '-' If '=' '"' expr '"' '>' stmts '<' '/' Div '>'
+          | '<' Div Data '-' While '=' '"' expr '"' '>' stmts '<' '/' Div '>'
           ;
 
 ; stmts = stmt*
@@ -23,13 +23,14 @@ expr = expr_l1
 ; expr_l1 = expr_l2 (binop1 expr_l2)*
 ; expr_l2 = expr_l3 (binop2 expr_l3)*
 ; expr_l3 = expr_l4 (binop3 expr_l4)*
-; expr_l4 = factor (binop4 factor)*
+; expr_l4 = expr_l5 (binop4 expr_l5)*
+; expr_l5 = factor (binop5 factor)*
 
-factor = TokIntConst
-       | TokRealConst
-       | TokBoolConst
-       | TokStringConst
-       | TokIdentifier
+factor = IntConst
+       | RealConst
+       | BoolConst
+       | StringConst
+       | Identifier
        | '(' expr ')'
        | unrop factor
        ;
@@ -39,21 +40,25 @@ unrop = '+'
       | '!'
       ;
 
-bionp1 = TokEqOp
-       | TokNeqOp
+binop1 = AndOp
+       | OrOp
        ;
 
-binop2 = TokLtOp
-       | TokGtOp
-       | TokLeqOp
-       | TokGeqOp
+bionp2 = EqOp
+       | NeqOp
        ;
 
-binop3 = '+'
+binop3 = LtOp
+       | GtOp
+       | LeqOp
+       | GeqOp
+       ;
+
+binop4 = '+'
        | '-'
        ;
 
-binop4 = '*'
+binop5 = '*'
        | '/'
        | '%'
        ;

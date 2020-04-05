@@ -52,7 +52,7 @@ Sledeći program ispisuje prvih `n` Fibonačijevih brojeva.
   * Ključne reči: `doctype`, `lang`, `html`, `head`, `title`,`body`, `main`, `var`, `class`, `output`, `input`, `name`, `data`, `value`, `div`, `if`, `while`.
   * Ugrađeni tipovi: `integer`, `real`, `boolean`, `string`.
   * Aritmetički operatori: `+`, `-`, `*`, `/`, `%`, `(`, `)`
-  * Logički operatori: `!`
+  * Logički operatori: `&and;`, `&or;`, `!`
   * Operatori poređenja: `&lt;`, `&gt;`, `&leq;`, `&geq;`, `&equals;`, `&ne;`
 
 # Implementacija
