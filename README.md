@@ -47,6 +47,15 @@ Sledeći program ispisuje prvih `n` Fibonačijevih brojeva.
 </html>
 ```
 
+# Specifikacija
+
+  * Ključne reči: `doctype`, `lang`, `html`, `head`, `title`,`body`, `main`, `var`, `class`, `output`, `input`, `name`, `data`, `value`, `div`, `if`, `while`.
+  * Ugrađeni tipovi: `integer`, `real`, `boolean`, `string`.
+  * Aritmetički operatori: `+`, `-`, `*`, `/`, `%`, `(`, `)`
+  * Logički operatori: `!`
+  * Operatori poređenja: `&lt;`, `&gt;`, `&leq;`, `&geq;`, `&equals;`, `&ne;`
+
+# Implementacija
 Za implementaciju je korišćen Go programski jezik bez third-party alata (skener i parser generatora).
 
 Skener nije implementiran uz pomoć regularnih izraza/konačnih automata, već je korišćen algoritam opisan na stranici
