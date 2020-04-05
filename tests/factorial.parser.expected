@@ -1,0 +1,13 @@
+"Factorial"
+Main:
+    integer n
+    integer i
+    integer fact
+    i = 1
+    fact = 1
+    Write: "n: "
+    Read n
+    While i LeqOp n
+        fact = fact * i
+        i = i + 1
+    Write: "Factorial of " + n + " is " + fact

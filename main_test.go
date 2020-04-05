@@ -12,16 +12,28 @@ import (
     "plhtml/util"
 )
 
-func TestScanner(t *testing.T) {
+func TestScannerFibonacci(t *testing.T) {
     tokens := scan("./tests/examples/fibonacci.html")
     compare(t, "fibonacci.scanner", tokensToString(tokens))
 }
 
-func TestParser(t *testing.T) {
+func TestScannerFactorial(t *testing.T) {
+    tokens := scan("./tests/examples/factorial.html")
+    compare(t, "factorial.scanner", tokensToString(tokens))
+}
+
+func TestParserFibonacci(t *testing.T) {
     tokens := scan("./tests/examples/fibonacci.html")
     myParser := parser.New()
     prgNode := myParser.Parse(tokens)
     compare(t, "fibonacci.parser", prgNode.ToString())
+}
+
+func TestParserFactorial(t *testing.T) {
+    tokens := scan("./tests/examples/factorial.html")
+    myParser := parser.New()
+    prgNode := myParser.Parse(tokens)
+    compare(t, "factorial.parser", prgNode.ToString())
 }
 
 func scan(file string) []scanner.Token {
