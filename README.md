@@ -54,6 +54,7 @@ Sledeći program ispisuje prvih `n` Fibonačijevih brojeva.
   * Aritmetički operatori: `+`, `-`, `*`, `/`, `%`, `(`, `)`
   * Logički operatori: `&and;`, `&or;`, `!`
   * Operatori poređenja: `&lt;`, `&gt;`, `&leq;`, `&geq;`, `&equals;`, `&ne;`
+  * Specijalni karakteri: `\\`, `\t`, `\n`
 
 # Implementacija
 Za implementaciju je korišćen Go programski jezik bez third-party alata (skener i parser generatora).
