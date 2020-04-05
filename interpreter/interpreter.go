@@ -27,9 +27,9 @@ type Interpreter struct {
 	callStack *callStack
 }
 
-func New() *Interpreter {
+func New(file *os.File) *Interpreter {
 	interp := new(Interpreter)
-	interp.in = bufio.NewScanner(os.Stdin)
+	interp.in = bufio.NewScanner(file)
 	interp.callStack = NewStack()
 	return interp
 }

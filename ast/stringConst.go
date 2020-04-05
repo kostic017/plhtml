@@ -1,6 +1,9 @@
 package ast
 
-import "go/constant"
+import (
+    "go/constant"
+    "plhtml/util"
+)
 
 type StringConstNode struct {
     Line  int
@@ -12,7 +15,7 @@ func (node StringConstNode) GetLine() int {
 }
 
 func (node StringConstNode) ToString() string {
-    return "\"" + node.Value + "\""
+    return "\"" + util.Unescape(node.Value) + "\""
 }
 
 func (node StringConstNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {

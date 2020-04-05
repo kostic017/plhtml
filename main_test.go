@@ -1,7 +1,7 @@
 package main
 
 import (
-    "github.com/stretchr/testify/assert"
+    "fmt"
     "strconv"
     "strings"
     "testing"
@@ -12,28 +12,27 @@ import (
     "plhtml/util"
 )
 
-func TestScannerFibonacci(t *testing.T) {
-    tokens := scan("./tests/examples/fibonacci.html")
-    compare(t, "fibonacci.scanner", tokensToString(tokens))
+var tests = [...]string{
+    "factorial",
+    "fibonacci",
+    "leap",
+    "prime",
 }
 
-func TestScannerFactorial(t *testing.T) {
-    tokens := scan("./tests/examples/factorial.html")
-    compare(t, "factorial.scanner", tokensToString(tokens))
+func TestScanner(t *testing.T) {
+    for _, test := range tests {
+        tokens := scan("./tests/" + test + ".html")
+        compare(t, "scanner/" + test, tokensToString(tokens))
+    }
 }
 
-func TestParserFibonacci(t *testing.T) {
-    tokens := scan("./tests/examples/fibonacci.html")
-    myParser := parser.New()
-    prgNode := myParser.Parse(tokens)
-    compare(t, "fibonacci.parser", prgNode.ToString())
-}
-
-func TestParserFactorial(t *testing.T) {
-    tokens := scan("./tests/examples/factorial.html")
-    myParser := parser.New()
-    prgNode := myParser.Parse(tokens)
-    compare(t, "factorial.parser", prgNode.ToString())
+func TestParser(t *testing.T) {
+    for _, test := range tests {
+        tokens := scan("./tests/" + test + ".html")
+        myParser := parser.New()
+        prgNode := myParser.Parse(tokens)
+        compare(t, "parser/" + test, prgNode.ToString())
+    }
 }
 
 func scan(file string) []scanner.Token {
@@ -42,14 +41,16 @@ func scan(file string) []scanner.Token {
     return myScanner.Scan(source)
 }
 
-func compare(t *testing.T, testName string, actual string) {
-    expected := util.ReadFile("./tests/" + testName + ".expected")
+func compare(t *testing.T, testPath string, actual string) {
+    expected := util.ReadFile("./tests/" + testPath + ".expected.txt")
 
     if strings.TrimSpace(expected) != strings.TrimSpace(actual) {
-        util.WriteFile("./tests/"+testName+".actual", actual)
+        util.WriteFile("./tests/"+testPath+".actual.txt", actual)
+        fmt.Println("FAIL: " + testPath)
+        t.Fail()
+    } else {
+        fmt.Println("PASS: " + testPath)
     }
-
-    assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(actual), "These two should be the same.")
 }
 
 func tokensToString(tokens []scanner.Token) string {
@@ -64,7 +65,7 @@ func tokensToString(tokens []scanner.Token) string {
         var value string
         switch tok.Type {
         case token.Identifier, token.StringConst:
-            value = tok.StrVal
+            value = util.Unescape(tok.StrVal)
         case token.IntConst:
             value = strconv.Itoa(tok.IntVal)
         case token.RealConst:

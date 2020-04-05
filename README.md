@@ -79,7 +79,7 @@ U toku semantičke analize se proverava:
   - da li se ne deklariše više promeljivih sa istim nazivom u istom opsegu
 
 # Ograničenja
-Interpretiranje je implementirano nekim delom, ali u dovoljnoj meri da se programi u */tests/examples* folderu izvršavaju
+Interpretiranje je implementirano nekim delom, ali u dovoljnoj meri da se programi u */tests* folderu izvršavaju
 uspešno. Tokom interpretacije ignorišu se opsezi i tipovi. Samim tim feature-i kao što su inicijalizacija nulom i
 učitavanje iz konzole funkcionišu samo za cele brojeve.
 
@@ -89,7 +89,7 @@ učitavanje iz konzole funkcionišu samo za cele brojeve.
   3. Pokrenite interpretaciju kroz komandnu liniju.
 
 ```bat
-plhtml <putanja_do_fajla.html>
+plhtml <path_to_source> [<path_to_input>]
 ```
 
 # Reference
