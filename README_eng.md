@@ -1,9 +1,9 @@
 Finally people that "program" in HTML and call themselves "programmers" can be programmers for real.
 
-All code written in programming language HTML (PL/HTML for short) is syntactically and semantically valid HTML code,
-which was main goal during language design. For syntactical validation I was using [W3C validator][1]. What is meant
-by semantic validity is that names of all statements were handpicked from the list of HTML elements in such a way that
-name or description of an element describes the meaning of the statement (`var`, `input`, `output`, etc).
+All code written in programming language HTML (PL/HTML for short) is syntactically valid HTML code
+(validated using [W3C validator][1]), which was one of the main goals during language design.
+Also names of all statements were handpicked from the list of HTML elements in such a way that name or
+description of an element describes the meaning of the statement (`var`, `input`, `output`, etc).
 
 [1]: https://validator.w3.org/#validate-by-input
 
@@ -62,7 +62,7 @@ types are ignored. Because of that, features like zero initialization and readin
 # How to Use
   1. Install [Go compiler](https://golang.org/dl/).
   2. Build executable with `go build`.
-  3. Run interpretator through command line.
+  3. Run interpreter through command line.
 
 ```bat
 plhtml <path_to_source> [<path_to_input>]
