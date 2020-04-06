@@ -153,19 +153,6 @@ Data
 Value
 =
 "
-IntConst|0|
-"
->
-Identifier|c|
-<
-/
-Data
->
-<
-Data
-Value
-=
-"
 IntConst|1|
 "
 >
@@ -203,6 +190,16 @@ Identifier|n|
 "
 >
 <
+Output
+>
+Identifier|a|
++
+StringConst| |
+<
+/
+Output
+>
+<
 Data
 Value
 =
@@ -216,16 +213,6 @@ Identifier|c|
 <
 /
 Data
->
-<
-Output
->
-Identifier|c|
-+
-StringConst| |
-<
-/
-Output
 >
 <
 Data

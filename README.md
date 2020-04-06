@@ -27,15 +27,14 @@ Sledeći program ispisuje prvih `n` Fibonačijevih brojeva.
 
             <data value="0">a</data>
             <data value="1">b</data>
-            <data value="0">c</data>
             <data value="1">i</data>
 
             <output>`n: `</output>
             <input name="n">
 
             <div data-while="i &leq; n">
+                <output>a + ` `</output>
                 <data value="a + b">c</data>
-                <output>c + ` `</output>
                 <data value="b">a</data>
                 <data value="c">b</data>
                 <data value="i + 1">i</data>
