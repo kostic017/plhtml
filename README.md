@@ -93,7 +93,7 @@ plhtml <path_to_source> [<path_to_input>]
 ```
 
 # Reference
-Kombinovao sam materijale sa različitih izvora, od kojih bi izdvojio:
+Kombinovao sam materijale sa različitih izvora, poput:
   - [CS143 Compilers](https://web.stanford.edu/class/archive/cs/cs143/cs143.1128/)
   - [Implementing Lexers and Parsers](http://www.cse.chalmers.se/edu/year/2015/course/DAT150/lectures/proglang-04.html)
   - [A Simple Recursive Descent Parser](http://math.hws.edu/javanotes/c9/s5.html)
