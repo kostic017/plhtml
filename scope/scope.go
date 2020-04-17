@@ -1,8 +1,10 @@
 package scope
 
 import (
+    "fmt"
     "go/constant"
     "plhtml/logger"
+    "strings"
 )
 
 var myLogger = logger.New("SCOPE")
@@ -18,6 +20,7 @@ type Scope struct {
 }
 
 type Symbol struct {
+    Line  int
     Name  string
     Type  string
     Value constant.Value
@@ -51,34 +54,53 @@ func New(id int, parent *Scope) *Scope {
 }
 
 func (scope *Scope) Insert(sym *Symbol) {
-    myLogger.Debug("Inserting %s into scope %d.", sym.Name, scope.Id)
-    scope.symbols[sym.Name] = sym
+    varId := fmt.Sprintf("%s$%d", sym.Name, sym.Line)
+    myLogger.Debug("Inserting %s into scope %d.", varId, scope.Id)
+    scope.symbols[varId] = sym
 }
 
 func (scope *Scope) DeclaredLocally(name string) bool {
     myLogger.Debug("Checking if %s is declared in scope %d.", name, scope.Id)
-    _, ok := scope.symbols[name]
-    return ok
-}
-
-func (scope *Scope) Lookup(name string) (*Symbol, bool) {
-    for currentScope := scope; currentScope != nil; currentScope = currentScope.Parent {
-        myLogger.Debug("Looking for %s in scope %d.", name, currentScope.Id)
-        if sym, ok := currentScope.symbols[name]; ok {
-            myLogger.Debug("Found %s in scope %d.", name, currentScope.Id)
-            return sym, true
+    for _, sym := range scope.symbols {
+        if name == sym.Name {
+            return true
         }
     }
+    return false
+}
+
+func (scope *Scope) Lookup(name string) (*Symbol, string, bool) {
+    for currentScope := scope; currentScope != nil; currentScope = currentScope.Parent {
+        myLogger.Debug("Looking for %s in scope %d.", name, currentScope.Id)
+
+        if strings.Contains(name, "$") {
+            if sym, ok := currentScope.symbols[name]; ok {
+                myLogger.Debug("Found %s in scope %d.", name, currentScope.Id)
+                return sym, name, true
+            }
+        } else {
+            for _, sym := range currentScope.symbols {
+                if name == sym.Name {
+                    if currentScope.Parent != nil {
+                        name = fmt.Sprintf("%s$%d", sym.Name, sym.Line)
+                    }
+                    myLogger.Debug("Found %s in scope %d.", name, currentScope.Id)
+                    return sym, name, true
+                }
+            }
+        }
+
+    }
     myLogger.Debug("Symbol %s not declared.", name)
-    return nil, false
+    return nil, "", false
 }
 
 func (scope *Scope) GetValue(name string) constant.Value {
-    sym, _ := scope.Lookup(name)
+    sym, _, _ := scope.Lookup(name)
     return sym.Value
 }
 
 func (scope *Scope) SetValue(name string, value constant.Value) {
-    sym, _ := scope.Lookup(name)
+    sym, _, _ := scope.Lookup(name)
     sym.Value = value
 }

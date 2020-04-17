@@ -82,11 +82,11 @@ func (analyzer *Analyzer) VisitControlFlowStmt(node *ast.ControlFlowStmtNode) {
 
 func (analyzer *Analyzer) VisitIdentifier(node *ast.IdentifierNode) constant.Kind {
     node.Scope = analyzer.currentScope
-    sym, ok := analyzer.currentScope.Lookup(node.Name)
-
+    sym, varId, ok := analyzer.currentScope.Lookup(node.Name)
     if !ok {
         panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Name))
     }
+    node.Name = varId
 
     kind := kindOfPrimitiveType(sym.Type)
 
@@ -119,9 +119,11 @@ func (analyzer *Analyzer) VisitProgramBody(node *ast.ProgramBodyNode) {
 
 func (analyzer *Analyzer) VisitReadStmt(node *ast.ReadStmtNode) {
     node.Scope = analyzer.currentScope
-    if _, ok := analyzer.currentScope.Lookup(node.Identifier.Name); !ok {
+    _, varId, ok := analyzer.currentScope.Lookup(node.Identifier.Name)
+    if !ok {
         panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Identifier.Name))
     }
+    node.Identifier.Name = varId
 }
 
 func (analyzer *Analyzer) VisitRealConst(node *ast.RealConstNode) constant.Kind {
@@ -151,10 +153,11 @@ func (analyzer *Analyzer) VisitUnaryExpr(node *ast.UnaryExprNode) constant.Kind 
 
 func (analyzer *Analyzer) VisitVarAssign(node *ast.VarAssignNode) {
     node.Scope = analyzer.currentScope
-    sym, ok := analyzer.currentScope.Lookup(node.Identifier.Name)
+    sym, varId, ok := analyzer.currentScope.Lookup(node.Identifier.Name)
     if !ok {
         panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Identifier.Name))
     }
+    node.Identifier.Name = varId
 
     symType := kindOfPrimitiveType(sym.Type)
 
@@ -172,13 +175,13 @@ func (analyzer *Analyzer) VisitVarAssign(node *ast.VarAssignNode) {
 
 func (analyzer *Analyzer) VisitVarDecl(node *ast.VarDeclNode) {
     node.Scope = analyzer.currentScope
-    if _, ok := analyzer.currentScope.Lookup(node.Type.Name); !ok {
+    if _, _, ok := analyzer.currentScope.Lookup(node.Type.Name); !ok {
         panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Identifier.Name))
     }
     if analyzer.currentScope.DeclaredLocally(node.Identifier.Name) {
-        panic(fmt.Sprintf("Error on line: %d: variable %s is already declared", node.GetLine(), node.Identifier.Name))
+        panic(fmt.Sprintf("Error on line: %d: variable %s is already declared in this scope", node.GetLine(), node.Identifier.Name))
     }
-    analyzer.currentScope.Insert(&scope.Symbol{Name: node.Identifier.Name, Type: node.Type.Name})
+    analyzer.currentScope.Insert(&scope.Symbol{Name: node.Identifier.Name, Type: node.Type.Name, Line: node.GetLine()})
 }
 
 func (analyzer *Analyzer) VisitWriteStmt(node *ast.WriteStmtNode) {

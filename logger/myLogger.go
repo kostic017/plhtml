@@ -9,22 +9,22 @@ import (
 type LogLevel int
 
 const (
-    // Off to turn off logging
-    Off LogLevel = iota
-    // Fine for fine-grained information
-    Fine LogLevel = iota
-    // Debug for diagnostic information
-    Debug LogLevel = iota
-    // Info for normal application behavior
-    Info LogLevel = iota
-    // Warn for potentially harmful situations
-    Warn LogLevel = iota
-    // Error for not so severe errors
-    Error LogLevel = iota
-    // Fatal for very severe errors
-    Fatal LogLevel = iota
     // All levels
     All LogLevel = iota
+    // Fine for fine-grained information
+    Fine
+    // Debug for diagnostic information
+    Debug
+    // Info for normal application behavior
+    Info
+    // Warn for potentially harmful situations
+    Warn
+    // Error for not so severe errors
+    Error
+    // Fatal for very severe errors
+    Fatal
+    // Off to turn off logging
+    Off
 )
 
 // MyLogger wraps log.Logger and adds support for logging levels

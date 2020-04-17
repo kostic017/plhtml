@@ -113,7 +113,7 @@ func (interp *Interpreter) VisitReadStmt(node *ast.ReadStmtNode) {
     interp.in.Scan()
 
     var value constant.Value
-    sym, _ := node.Scope.Lookup(node.Identifier.Name)
+    sym, _, _ := node.Scope.Lookup(node.Identifier.Name)
 
     switch sym.Type {
     case scope.TypeInteger:
@@ -183,7 +183,7 @@ func (interp *Interpreter) VisitVarDecl(node *ast.VarDeclNode) {
     myLogger.Debug("%s %s", node.Type.Name, node.Identifier.Name)
 
     var value constant.Value
-    sym, _ := node.Scope.Lookup(node.Identifier.Name)
+    sym, _, _ := node.Scope.Lookup(node.Identifier.Name)
 
     switch sym.Type {
     case scope.TypeInteger:
