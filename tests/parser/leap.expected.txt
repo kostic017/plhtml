@@ -4,7 +4,6 @@ Main:
     While quit NeqOp 1
         integer year
         boolean answer
-        answer = false
         Write: "year: "
         Read year
         If year % 4 EqOp 0

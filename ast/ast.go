@@ -24,39 +24,39 @@ type ExpressionNode interface {
 }
 
 type IAnalyzer interface {
-    VisitBinaryOpExpr(node BinaryOpExprNode) constant.Kind
-    VisitBoolConst(node BoolConstNode) constant.Kind
-    VisitControlFlowStmt(node ControlFlowStmtNode)
-    VisitIdentifier(node IdentifierNode) constant.Kind
-    VisitIntConst(node IntConstNode) constant.Kind
-    VisitMainFunc(node MainFuncNode)
-    VisitProgram(node ProgramNode)
-    VisitProgramBody(node ProgramBodyNode)
-    VisitReadStmt(node ReadStmtNode)
-    VisitRealConst(node RealConstNode) constant.Kind
-    VisitStringConst(node StringConstNode) constant.Kind
-    VisitUnaryExpr(node UnaryExprNode) constant.Kind
-    VisitVarAssign(node VarAssignNode)
-    VisitVarDecl(node VarDeclNode)
-    VisitWriteStmt(node WriteStmtNode)
+    VisitBinaryOpExpr(node *BinaryOpExprNode) constant.Kind
+    VisitBoolConst(node *BoolConstNode) constant.Kind
+    VisitControlFlowStmt(node *ControlFlowStmtNode)
+    VisitIdentifier(node *IdentifierNode) constant.Kind
+    VisitIntConst(node *IntConstNode) constant.Kind
+    VisitMainFunc(node *MainFuncNode)
+    VisitProgram(node *ProgramNode)
+    VisitProgramBody(node *ProgramBodyNode)
+    VisitReadStmt(node *ReadStmtNode)
+    VisitRealConst(node *RealConstNode) constant.Kind
+    VisitStringConst(node *StringConstNode) constant.Kind
+    VisitUnaryExpr(node *UnaryExprNode) constant.Kind
+    VisitVarAssign(node *VarAssignNode)
+    VisitVarDecl(node *VarDeclNode)
+    VisitWriteStmt(node *WriteStmtNode)
 }
 
 type IInterpreter interface {
-    VisitBinaryOpExpr(node BinaryOpExprNode) constant.Value
-    VisitBoolConst(node BoolConstNode) constant.Value
-    VisitControlFlowStmt(node ControlFlowStmtNode)
-    VisitIdentifier(node IdentifierNode) constant.Value
-    VisitIntConst(node IntConstNode) constant.Value
-    VisitMainFunc(node MainFuncNode)
-    VisitProgram(node ProgramNode)
-    VisitProgramBody(node ProgramBodyNode)
-    VisitReadStmt(node ReadStmtNode)
-    VisitRealConst(node RealConstNode) constant.Value
-    VisitStringConst(node StringConstNode) constant.Value
-    VisitUnaryExpr(node UnaryExprNode) constant.Value
-    VisitVarAssign(node VarAssignNode)
-    VisitVarDecl(node VarDeclNode)
-    VisitWriteStmt(node WriteStmtNode)
+    VisitBinaryOpExpr(node *BinaryOpExprNode) constant.Value
+    VisitBoolConst(node *BoolConstNode) constant.Value
+    VisitControlFlowStmt(node *ControlFlowStmtNode)
+    VisitIdentifier(node *IdentifierNode) constant.Value
+    VisitIntConst(node *IntConstNode) constant.Value
+    VisitMainFunc(node *MainFuncNode)
+    VisitProgram(node *ProgramNode)
+    VisitProgramBody(node *ProgramBodyNode)
+    VisitReadStmt(node *ReadStmtNode)
+    VisitRealConst(node *RealConstNode) constant.Value
+    VisitStringConst(node *StringConstNode) constant.Value
+    VisitUnaryExpr(node *UnaryExprNode) constant.Value
+    VisitVarAssign(node *VarAssignNode)
+    VisitVarDecl(node *VarDeclNode)
+    VisitWriteStmt(node *WriteStmtNode)
 }
 
 func ident(lvl int, str string) string {

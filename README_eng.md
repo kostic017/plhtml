@@ -55,10 +55,6 @@ Following program displays first `n` Fibonacci numbers.
   * Comparison operators: `&lt;`, `&gt;`, `&leq;`, `&geq;`, `&equals;`, `&ne;`
   * Special characters: `\\`, `\t`, `\n`
 
-# Limitations
-Interpreter is not completely finished, but it's enough to run all of the programs in */tests* directory. Scopes and
-types are ignored. Because of that, features like zero initialization and reading from input works only for integers.
-
 # How to Use
   1. Install [Go compiler](https://golang.org/dl/).
   2. Build executable with `go build`.

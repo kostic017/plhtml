@@ -22,7 +22,7 @@ var tests = [...]string{
 func TestScanner(t *testing.T) {
     for _, test := range tests {
         tokens := scan("./tests/" + test + ".html")
-        compare(t, "scanner/" + test, tokensToString(tokens))
+        compare(t, "scanner/"+test, tokensToString(tokens))
     }
 }
 
@@ -31,7 +31,7 @@ func TestParser(t *testing.T) {
         tokens := scan("./tests/" + test + ".html")
         myParser := parser.New()
         prgNode := myParser.Parse(tokens)
-        compare(t, "parser/" + test, prgNode.ToString())
+        compare(t, "parser/"+test, prgNode.ToString())
     }
 }
 

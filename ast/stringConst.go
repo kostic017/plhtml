@@ -18,10 +18,10 @@ func (node StringConstNode) ToString() string {
     return "\"" + util.Unescape(node.Value) + "\""
 }
 
-func (node StringConstNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
+func (node *StringConstNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
     return analyzer.VisitStringConst(node)
 }
 
-func (node StringConstNode) AcceptInterpreter(v IInterpreter) constant.Value {
+func (node *StringConstNode) AcceptInterpreter(v IInterpreter) constant.Value {
     return v.VisitStringConst(node)
 }

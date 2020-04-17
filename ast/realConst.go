@@ -18,10 +18,10 @@ func (node RealConstNode) ToString() string {
     return fmt.Sprintf("%f", node.Value)
 }
 
-func (node RealConstNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
+func (node *RealConstNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
     return analyzer.VisitRealConst(node)
 }
 
-func (node RealConstNode) AcceptInterpreter(interp IInterpreter) constant.Value {
+func (node *RealConstNode) AcceptInterpreter(interp IInterpreter) constant.Value {
     return interp.VisitRealConst(node)
 }

@@ -22,15 +22,20 @@ func (parser *Parser) parseStatement() ast.StatementNode {
 
     switch parser.peek().Type {
     case token.Var:
-        return parser.parseVarDecl()
+        node := parser.parseVarDecl()
+        return &node
     case token.Data:
-        return parser.parseVarAssign()
+        node := parser.parseVarAssign()
+        return &node
     case token.Output:
-        return parser.parseWriteStmt()
+        node := parser.parseWriteStmt()
+        return &node
     case token.Input:
-        return parser.parseReadStmt()
+        node := parser.parseReadStmt()
+        return &node
     case token.Div:
-        return parser.parseControlFlowStmt()
+        node := parser.parseControlFlowStmt()
+        return &node
     }
 
     myLogger.Debug("'%s' not a statement", string(parser.peek().Type))

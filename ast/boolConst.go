@@ -18,10 +18,10 @@ func (node BoolConstNode) ToString() string {
     return fmt.Sprintf("%t", node.Value)
 }
 
-func (node BoolConstNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
+func (node *BoolConstNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
     return analyzer.VisitBoolConst(node)
 }
 
-func (node BoolConstNode) AcceptInterpreter(interp IInterpreter) constant.Value {
+func (node *BoolConstNode) AcceptInterpreter(interp IInterpreter) constant.Value {
     return interp.VisitBoolConst(node)
 }

@@ -84,19 +84,6 @@ Identifier|answer|
 Var
 >
 <
-Data
-Value
-=
-"
-BoolConst|false|
-"
->
-Identifier|answer|
-<
-/
-Data
->
-<
 Output
 >
 StringConst|year: |

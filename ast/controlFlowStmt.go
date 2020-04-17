@@ -21,10 +21,10 @@ func (node ControlFlowStmtNode) ToString(lvl int) string {
     return str
 }
 
-func (node ControlFlowStmtNode) AcceptAnalyzer(analyzer IAnalyzer) {
+func (node *ControlFlowStmtNode) AcceptAnalyzer(analyzer IAnalyzer) {
     analyzer.VisitControlFlowStmt(node)
 }
 
-func (node ControlFlowStmtNode) AcceptInterpreter(interp IInterpreter) {
+func (node *ControlFlowStmtNode) AcceptInterpreter(interp IInterpreter) {
     interp.VisitControlFlowStmt(node)
 }

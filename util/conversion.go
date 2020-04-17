@@ -9,3 +9,11 @@ func FloatToString(number float64) string {
 func StrToInt64(str string) (int64, error) {
     return strconv.ParseInt(str, 10, 64)
 }
+
+func StrToFloat64(str string) (float64, error) {
+    return strconv.ParseFloat(str, 64)
+}
+
+func StrToBool(str string) (bool, error) {
+    return strconv.ParseBool(str)
+}

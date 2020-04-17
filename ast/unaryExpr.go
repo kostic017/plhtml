@@ -19,10 +19,10 @@ func (node UnaryExprNode) ToString() string {
     return node.Operator.String() + node.Expr.ToString()
 }
 
-func (node UnaryExprNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
+func (node *UnaryExprNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
     return analyzer.VisitUnaryExpr(node)
 }
 
-func (node UnaryExprNode) AcceptInterpreter(interp IInterpreter) constant.Value {
+func (node *UnaryExprNode) AcceptInterpreter(interp IInterpreter) constant.Value {
     return interp.VisitUnaryExpr(node)
 }

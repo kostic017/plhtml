@@ -17,10 +17,10 @@ func (node MainFuncNode) ToString() string {
     return str
 }
 
-func (node MainFuncNode) AcceptAnalyzer(analyzer IAnalyzer) {
+func (node *MainFuncNode) AcceptAnalyzer(analyzer IAnalyzer) {
     analyzer.VisitMainFunc(node)
 }
 
-func (node MainFuncNode) AcceptInterpreter(interp IInterpreter) {
+func (node *MainFuncNode) AcceptInterpreter(interp IInterpreter) {
     interp.VisitMainFunc(node)
 }

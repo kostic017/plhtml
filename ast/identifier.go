@@ -1,10 +1,14 @@
 package ast
 
-import "go/constant"
+import (
+    "go/constant"
+    "plhtml/scope"
+)
 
 type IdentifierNode struct {
-    Line int
-    Name string
+    Line  int
+    Name  string
+    Scope *scope.Scope
 }
 
 func (node IdentifierNode) GetLine() int {
@@ -15,10 +19,10 @@ func (node IdentifierNode) ToString() string {
     return node.Name
 }
 
-func (node IdentifierNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
+func (node *IdentifierNode) AcceptAnalyzer(analyzer IAnalyzer) constant.Kind {
     return analyzer.VisitIdentifier(node)
 }
 
-func (node IdentifierNode) AcceptInterpreter(interp IInterpreter) constant.Value {
+func (node *IdentifierNode) AcceptInterpreter(interp IInterpreter) constant.Value {
     return interp.VisitIdentifier(node)
 }

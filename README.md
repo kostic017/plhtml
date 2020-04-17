@@ -78,11 +78,6 @@ U toku semantičke analize se proverava:
   - da li su promenljive deklarisane pre korišćenja
   - da li se ne deklariše više promeljivih sa istim nazivom u istom opsegu
 
-# Ograničenja
-Interpretiranje je implementirano nekim delom, ali u dovoljnoj meri da se programi u */tests* folderu izvršavaju
-uspešno. Tokom interpretacije ignorišu se opsezi i tipovi. Samim tim feature-i kao što su inicijalizacija nulom i
-učitavanje iz konzole funkcionišu samo za cele brojeve.
-
 # Korišćenje
   1. Preuzmite [Go kompajler](https://golang.org/dl/).
   2. Izbildujte izvršni fajl sa `go build`.
