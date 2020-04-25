@@ -47,6 +47,8 @@ Following program displays first `n` Fibonacci numbers.
 </html>
 ```
 
+Other examples can be found in the *tests/* folder.
+
 # Specification
   * Keywords: `doctype`, `lang`, `html`, `head`, `title`,`body`, `main`, `var`, `class`, `output`, `input`, `name`, `data`, `value`, `div`, `if`, `while`
   * Builtin types: `integer`, `real`, `boolean`, `string`
