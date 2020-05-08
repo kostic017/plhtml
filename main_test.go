@@ -15,8 +15,10 @@ import (
 var tests = [...]string{
     "factorial",
     "fibonacci",
+    "hello",
     "leap",
     "prime",
+    "scopes",
 }
 
 func TestScanner(t *testing.T) {
