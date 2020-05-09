@@ -86,8 +86,8 @@ func (analyzer *Analyzer) VisitIdentifier(node *ast.IdentifierNode) constant.Kin
     if !ok {
         panic(fmt.Sprintf("Error on line %d: identifier %s undefined", node.GetLine(), node.Name))
     }
-    node.Name = varId
 
+    node.Name = varId
     kind := kindOfPrimitiveType(sym.Type)
 
     if kind == constant.Unknown {

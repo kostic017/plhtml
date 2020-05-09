@@ -96,11 +96,18 @@ func (scope *Scope) Lookup(name string) (*Symbol, string, bool) {
 }
 
 func (scope *Scope) GetValue(name string) constant.Value {
+    myLogger.Debug("Getting value of %s", name)
     sym, _, _ := scope.Lookup(name)
     return sym.Value
 }
 
 func (scope *Scope) SetValue(name string, value constant.Value) {
+    myLogger.Debug("Setting value for %s", name)
     sym, _, _ := scope.Lookup(name)
     sym.Value = value
+}
+
+func (symbol *Symbol) SetValue(value constant.Value) {
+    myLogger.Debug("Setting value for %s", symbol.Name)
+    symbol.Value = value
 }

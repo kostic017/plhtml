@@ -17,7 +17,7 @@ import (
 
 type TokenType = token.Type
 
-var myLogger = logger.New("INTERPRETER")
+var myLogger = logger.New("INTER")
 
 func SetLogLevel(level logger.LogLevel) {
     myLogger.SetLevel(level)
@@ -181,24 +181,19 @@ func (interp *Interpreter) VisitVarAssign(node *ast.VarAssignNode) {
 
 func (interp *Interpreter) VisitVarDecl(node *ast.VarDeclNode) {
     myLogger.Debug("%s %s", node.Type.Name, node.Identifier.Name)
-
-    var value constant.Value
-    sym, _, _ := node.Scope.Lookup(node.Identifier.Name)
-
-    switch sym.Type {
+    symbol, _, _ := node.Scope.Lookup(node.Identifier.Name)
+    switch symbol.Type {
     case scope.TypeInteger:
-        value = constant.MakeInt64(0)
+        symbol.SetValue(constant.MakeInt64(0))
     case scope.TypeReal:
-        value = constant.MakeFloat64(0)
+        symbol.SetValue(constant.MakeFloat64(0))
     case scope.TypeBoolean:
-        value = constant.MakeBool(false)
+        symbol.SetValue(constant.MakeBool(false))
     case scope.TypeString:
-        value = constant.MakeString("")
+        symbol.SetValue(constant.MakeString(""))
     default:
         panic(fmt.Sprintf("Error at line %d: Assignment is only supported for primitive types.", node.Line))
     }
-
-    node.Scope.SetValue(node.Identifier.Name, value)
 }
 
 func (interp *Interpreter) VisitWriteStmt(node *ast.WriteStmtNode) {

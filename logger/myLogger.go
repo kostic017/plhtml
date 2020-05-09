@@ -4,6 +4,8 @@ import (
     "fmt"
     "log"
     "os"
+    "path/filepath"
+    "runtime"
 )
 
 type LogLevel int
@@ -37,7 +39,7 @@ type MyLogger struct {
 func New(name string) *MyLogger {
     logger := new(MyLogger)
     logger.level = Info
-    logger.stdLogger = log.New(os.Stdout, name, 0)
+    logger.stdLogger = log.New(os.Stdout, name + " ", 0)
     return logger
 }
 
@@ -47,7 +49,12 @@ func (logger *MyLogger) SetLevel(level LogLevel) {
 }
 
 func (logger MyLogger) log(prefix string, format string, args ...interface{}) {
-    logger.stdLogger.Print(fmt.Sprintf(" %-5s %s", prefix, fmt.Sprintf(format, args...)))
+    message := fmt.Sprintf(format, args...)
+    if _, file, line, ok := runtime.Caller(2); ok {
+        logger.stdLogger.Print(fmt.Sprintf("%-5s %s:%d %s", prefix, filepath.Base(file), line, message))
+    } else {
+        logger.stdLogger.Print(fmt.Sprintf("%-5s %s", prefix, message))
+    }
 }
 
 // Fine for fine-grained information
