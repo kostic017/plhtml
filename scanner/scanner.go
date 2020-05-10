@@ -37,6 +37,11 @@ type Token struct {
     StrVal  string
 }
 
+type tokenStartPair struct {
+    line   int
+    column int
+}
+
 func New() *Scanner {
     scanner := new(Scanner)
     scanner.tabSize = 4
@@ -80,79 +85,63 @@ func (scanner *Scanner) nextToken() Token {
             continue
         }
 
-        tokenStartLine := scanner.line
-        tokenStartColumn := scanner.column
+        tokenStart := tokenStartPair{
+            line:   scanner.line,
+            column: scanner.column,
+        }
 
         if ch == '`' {
-            return scanner.lexString(ch, tokenStartLine, tokenStartColumn)
+            return scanner.lexString(ch, tokenStart)
         }
 
         // after lexString because <!-- could be part of string literal
-        if ch == '<' && scanner.lexComment(tokenStartLine, tokenStartColumn) {
+        if ch == '<' && scanner.lexComment(tokenStart) {
             continue
         }
 
         if unicode.IsDigit(ch) {
-            return scanner.lexNumber(ch, tokenStartLine, tokenStartColumn)
+            return scanner.lexNumber(ch, tokenStart)
         }
 
         if ch == '&' || unicode.IsLetter(ch) {
-            return scanner.lexWord(ch, tokenStartLine, tokenStartColumn)
+            return scanner.lexWord(ch, tokenStart)
         }
-
-        charType := token.Illegal
 
         switch ch {
         case '+':
-            charType = token.Plus
-            break
+            return newTok(token.Plus, tokenStart)
         case '-':
-            charType = token.Minus
-            break
+            return newTok(token.Minus, tokenStart)
         case '*':
-            charType = token.Multiply
-            break
+            return newTok(token.Multiply, tokenStart)
         case '/':
-            charType = token.Slash
-            break
+            return newTok(token.Slash, tokenStart)
         case '%':
-            charType = token.Modulo
-            break
+            return newTok(token.Modulo, tokenStart)
         case '(':
-            charType = token.LParen
-            break
+            return newTok(token.LParen, tokenStart)
         case ')':
-            charType = token.RParen
-            break
+            return newTok(token.RParen, tokenStart)
         case '!':
-            charType = token.Excl
-            break
+            return newTok(token.Excl, tokenStart)
         case '"':
-            charType = token.DQuote
-            break
+            return newTok(token.DQuote, tokenStart)
         case '=':
-            charType = token.Equal
-            break
+            return newTok(token.Equal, tokenStart)
         case '<':
-            charType = token.LessThan
-            break
+            return newTok(token.LessThan, tokenStart)
         case '>':
-            charType = token.GreaterThan
-            break
+            return newTok(token.GreaterThan, tokenStart)
+        default:
+            panic(fmt.Sprintf("Illegal character %c at %d:%d.", ch, tokenStart))
         }
-
-        if charType != token.Illegal {
-            return newTok(charType, tokenStartLine, tokenStartColumn)
-        }
-
-        panic(fmt.Sprintf("Illegal character %c at %d:%d.", ch, tokenStartLine, tokenStartColumn))
 
     }
 
     return Token{Type: token.EOF}
 }
 
-func (scanner *Scanner) lexString(ch rune, startLine int, startColumn int) Token {
+func (scanner *Scanner) lexString(ch rune, tokenStart tokenStartPair) Token {
     var ok bool
     str := string(ch)
 
@@ -180,11 +169,11 @@ func (scanner *Scanner) lexString(ch rune, startLine int, startColumn int) Token
             }
 
         } else {
-            panic(fmt.Sprintf("Unterminated string at %d:%d.", startLine, startColumn))
+            panic(fmt.Sprintf("Unterminated string at %d:%d.", tokenStart.line, tokenStart.column))
         }
     }
 
-    tok := newTok(token.StringConst, startLine, startColumn)
+    tok := newTok(token.StringConst, tokenStart)
     tok.StrVal = str[1:]
     return tok
 }
@@ -206,7 +195,7 @@ func (scanner *Scanner) lexEscape() (string, error) {
     return "", errors.New("invalid escape sequence")
 }
 
-func (scanner *Scanner) lexComment(line int, column int) bool {
+func (scanner *Scanner) lexComment(tokenStart tokenStartPair) bool {
     // <!--.*-->
 
     ch1, ok1 := scanner.lookahead(0)
@@ -217,7 +206,7 @@ func (scanner *Scanner) lexComment(line int, column int) bool {
         for {
             ch, ok := scanner.nextChar()
             if !ok {
-                panic(fmt.Sprintf("End of file inside comment at %d:%d.", line, column))
+                panic(fmt.Sprintf("End of file inside comment at %d:%d.", tokenStart.line, tokenStart.column))
             }
             if ch == '-' {
                 ch1, ok1 := scanner.lookahead(0)
@@ -234,7 +223,7 @@ func (scanner *Scanner) lexComment(line int, column int) bool {
     return false
 }
 
-func (scanner *Scanner) lexNumber(ch rune, line int, column int) Token {
+func (scanner *Scanner) lexNumber(ch rune, tokenStart tokenStartPair) Token {
     var ok bool
     isReal := false
     number := "" + string(ch)
@@ -257,19 +246,19 @@ func (scanner *Scanner) lexNumber(ch rune, line int, column int) Token {
     if isReal {
         realVal, err := util.StrToFloat64(number)
         util.Check(err)
-        tok := newTok(token.RealConst, line, column)
+        tok := newTok(token.RealConst, tokenStart)
         tok.RealVal = realVal
         return tok
     }
 
     intVal, err := strconv.Atoi(number)
     util.Check(err)
-    tok := newTok(token.IntConst, line, column)
+    tok := newTok(token.IntConst, tokenStart)
     tok.IntVal = intVal
     return tok
 }
 
-func (scanner *Scanner) lexWord(ch rune, line int, column int) Token {
+func (scanner *Scanner) lexWord(ch rune, tokenStart tokenStartPair) Token {
     // &[a-zA-Z];            operators
     // [a-zA-Z][a-zA-Z0-9]*  identifiers/keywords
 
@@ -290,28 +279,28 @@ func (scanner *Scanner) lexWord(ch rune, line int, column int) Token {
 
     }
 
-    if tok, ok := scanner.lexBoolOperator(word, line, column); ok {
+    if tok, ok := scanner.lexBoolOperator(word, tokenStart); ok {
         return tok
     }
 
     word = strings.ToLower(word)
 
     if word == "true" || word == "false" {
-        tok := newTok(token.BoolConst, line, column)
+        tok := newTok(token.BoolConst, tokenStart)
         tok.BoolVal = word == "true"
         return tok
     }
 
     if tok, ok := token.KeywordLexemes[word]; ok {
-        return newTok(tok, line, column)
+        return newTok(tok, tokenStart)
     }
 
-    tok := newTok(token.Identifier, line, column)
+    tok := newTok(token.Identifier, tokenStart)
     tok.StrVal = word
     return tok
 }
 
-func (scanner *Scanner) lexBoolOperator(word string, line int, column int) (Token, bool) {
+func (scanner *Scanner) lexBoolOperator(word string, tokenStart tokenStartPair) (Token, bool) {
 
     firstChar := word[0]
     lastChar := word[len(word)-1:]
@@ -321,19 +310,19 @@ func (scanner *Scanner) lexBoolOperator(word string, line int, column int) (Toke
     }
 
     if lastChar != ";" {
-        panic(fmt.Sprintf("Unterminated operator %s at %d:%d.", word, line, column))
+        panic(fmt.Sprintf("Unterminated operator %s at %d:%d.", word, tokenStart.line, tokenStart.column))
     }
 
     if tok, ok := token.BoolOpLexemes[word]; ok {
-        return newTok(tok, line, column), true
+        return newTok(tok, tokenStart), true
     }
 
-    panic(fmt.Sprintf("Operator %s is not valid at %d:%d.", word, line, column))
+    panic(fmt.Sprintf("Operator %s is not valid at %d:%d.", word, tokenStart.line, tokenStart.column))
 
 }
 
-func newTok(tokType token.Type, line int, column int) Token {
-    return Token{Type: tokType, Line: line, Column: column}
+func newTok(tokType token.Type, tokenStart tokenStartPair) Token {
+    return Token{Type: tokType, Line: tokenStart.line, Column: tokenStart.column}
 }
 
 func (scanner *Scanner) lookahead(i int) (rune, bool) {
