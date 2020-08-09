@@ -133,7 +133,7 @@ func (scanner *Scanner) nextToken() Token {
         case '>':
             return newTok(token.GreaterThan, tokenStart)
         default:
-            panic(fmt.Sprintf("Illegal character %c at %d:%d.", ch, tokenStart))
+            panic(fmt.Sprintf("Illegal character %c at %d:%d.", ch, tokenStart.line, tokenStart.column))
         }
 
     }
@@ -230,11 +230,10 @@ func (scanner *Scanner) lexNumber(ch rune, tokenStart tokenStartPair) Token {
 
     for ch, ok = scanner.nextChar(); ok; ch, ok = scanner.nextChar() {
 
-        if ch == '.' {
-            isReal = true
-        }
-
-        if ch == '.' || unicode.IsNumber(ch) {
+        if ch == '.' && !isReal {
+			number += "."
+			isReal = true
+		} else if unicode.IsNumber(ch) {
             number += string(ch)
         } else {
             scanner.goBack()
